@@ -1,0 +1,14 @@
+name: "JRBP Community Analysis"
+output_dir: "docs"
+navbar:
+  title: "Test"
+  left:
+  - text: "Home"
+    href: index.html
+  - text: "Community Analysis"
+    href: community_analysis.html
+output:
+  html_document:
+    theme: cerulean
+    toc: true
+    toc_float: true
