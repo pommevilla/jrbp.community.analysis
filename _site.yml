@@ -1,7 +1,7 @@
 name: "JRBP Community Analysis"
 output_dir: "docs"
 navbar:
-  title: "Test"
+  title: ""
   left:
   - text: "Home"
     href: index.html

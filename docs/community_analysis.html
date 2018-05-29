@@ -271,7 +271,7 @@ div.tocify {
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="index.html">Test</a>
+      <a class="navbar-brand" href="index.html"></a>
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
@@ -1358,7 +1358,7 @@ plot(trimmed_bird_positive_communities, gr_trimmed_bird_positive,
 <p><img src="community_analysis_files/figure-html/unnamed-chunk-7-2.png" width="672" /></p>
 <pre class="r"><code>adjacent_vertices(gr_trimmed_bird_positive, &quot;OTU_6&quot;)</code></pre>
 <pre><code>## $OTU_6
-## + 2/401 vertices, named, from 0e8dc87:
+## + 2/401 vertices, named, from e37db37:
 ## [1] OTU_5931 OTU_442</code></pre>
 <pre class="r"><code>degree(gr_trimmed_bird_positive, &quot;OTU_6&quot;)</code></pre>
 <pre><code>## OTU_6 
@@ -1381,9 +1381,9 @@ plot(trimmed_bird_negative_communities, gr_trimmed_bird_negative,
 )</code></pre>
 <p><img src="community_analysis_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
 <pre class="r"><code>gr_trimmed_bird_negative</code></pre>
-<pre><code>## IGRAPH 4fa592f UN-- 2 1 -- 
+<pre><code>## IGRAPH 17764af UN-- 2 1 -- 
 ## + attr: name (v/c), rho (e/x)
-## + edge from 4fa592f (vertex names):
+## + edge from 17764af (vertex names):
 ## [1] OTU_4898--OTU_9</code></pre>
 <pre class="r"><code>taxa[OTU %in% c(&quot;OTU_4898&quot;, &quot;OTU_9&quot;)]</code></pre>
 <pre><code>##      OTU   domain     phylum   class      order            family
