@@ -11,29 +11,29 @@ library(data.table, warn.conflicts = FALSE)
 library(igraph, warn.conflicts = FALSE)
 ```
 
-`taxa` is the look-up table for the OTUs.  `cooccurance_data` contains pairwise Spearman correlation ranks for pairs of OTUs.
+`taxa` is the look-up table for the OTUs.  `cooccurrence_data` contains pairwise Spearman correlation ranks for pairs of OTUs.
 
 ```{r read_data}
-taxa <- data.table(read.delim("./data/classified_otus.txt"));colnames(taxa)<-c("OTU",colnames(taxa[,-1]))
+taxa <- data.table(read.delim("./data/classified_otus"));colnames(taxa)<-c("OTU",colnames(taxa[,-1]))
 
 head(taxa)
 
-cooccurance_data <- data.table(read.table("./data/sig.HB_cooccurance", 
+cooccurrence_data <- data.table(read.table("./data/jrbp_cooccurrence", 
                                     col.names = c("treatment", "OTU_1", "OTU_2", "rho", "p")))
 
-head(cooccurance_data)
+head(cooccurrence_data)
 ```
 
 We process `coocurrence_data` by removing OTU's non-significant $\rho$ values by filtering out those with a $p$-value less than $0.05$ and then filtering out cyanobacteria and choloroplast data, as well as all observations from bird samples:
 
 ```{r complete_data, echo = FALSE}
-cooccurance_data <- cooccurance_data[p <= 0.05]
-cooccurance_data <- cooccurance_data[, -5]      # Remove p-values from table
+cooccurrence_data <- cooccurrence_data[p <= 0.05]
+cooccurrence_data <- cooccurrence_data[, -5]      # Remove p-values from table
 remove <- taxa[which(taxa[[4]] %in% c("Cyanobacteria","Chloroplast")),]$OTU
 taxa <- taxa[-c(remove),]
-complete_data <- cooccurance_data[-c(which(apply(cooccurance_data, 1, function(x) any(remove %in% x)))),]
-bird_data <- cooccurance_data[treatment == "Bird", ]
-complete_data <- cooccurance_data[treatment != "Bird", ]
+complete_data <- cooccurrence_data[-c(which(apply(cooccurrence_data, 1, function(x) any(remove %in% x)))),]
+bird_data <- cooccurrence_data[treatment == "Bird", ]
+complete_data <- cooccurrence_data[treatment != "Bird", ]
 ```
 
 We then remove all edges that are $\textit{not}$ connected to the indicated OTUs of interest:
@@ -494,7 +494,7 @@ library(ape, warn.conflicts = FALSE)
 ```
 
 ```{r pda.2}
-rough_tree <- read.tree("./data/complete_otus_rough.tree")
+rough_tree <- read.tree("./data/jrbp_phylo_tree")
 ```
 
 Generate patristic distances from `OTU_6` to use as in the paper "Phylogenetic relatedness predicts priority effects in nectar yeast communities"
