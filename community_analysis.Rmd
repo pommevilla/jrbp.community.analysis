@@ -332,9 +332,9 @@ head(complete_negative_weights)
 complete_exposed_positive <- complete_positive_weights[treatment == "Exposed"]
 complete_exposed_positive <- complete_exposed_positive[, -1]
 gr_complete_exposed_positive <- graph.data.frame(complete_exposed_positive, directed = FALSE)
-commplete_exposed_positive_communities <- cluster_fast_greedy(gr_complete_exposed_positive, 
+complete_exposed_positive_communities <- cluster_fast_greedy(gr_complete_exposed_positive, 
                                                            weights = E(gr_complete_exposed_positive)$rho)
-plot(commplete_exposed_positive_communities, gr_complete_exposed_positive, 
+plot(complete_exposed_positive_communities, gr_complete_exposed_positive, 
      layout = layout.fruchterman.reingold(gr_complete_exposed_positive),
      rescaled = TRUE,
      vertex.size = 2, 
@@ -349,9 +349,9 @@ complete_exposed_negative <- complete_negative_weights[treatment == "Exposed"]
 complete_exposed_negative <- complete_exposed_negative[, -1]
 complete_exposed_negative[[3]] <- abs(complete_exposed_negative[[3]])
 gr_complete_exposed_negative <- graph.data.frame(complete_exposed_negative, directed = FALSE)
-commplete_exposed_negative_communities <- cluster_fast_greedy(gr_complete_exposed_negative, 
+complete_exposed_negative_communities <- cluster_fast_greedy(gr_complete_exposed_negative, 
                                                            weights = E(gr_complete_exposed_negative)$rho)
-plot(commplete_exposed_negative_communities, gr_complete_exposed_negative, 
+plot(complete_exposed_negative_communities, gr_complete_exposed_negative, 
      layout = layout.fruchterman.reingold(gr_complete_exposed_negative),
      rescaled = TRUE,
      vertex.size = 2, 
@@ -366,9 +366,9 @@ plot(commplete_exposed_negative_communities, gr_complete_exposed_negative,
 complete_caged_positive <- complete_positive_weights[treatment == "Caged"]
 complete_caged_positive <- complete_caged_positive[, -1]
 gr_complete_caged_positive <- graph.data.frame(complete_caged_positive, directed = FALSE)
-commplete_caged_positive_communities <- cluster_fast_greedy(gr_complete_caged_positive, 
+complete_caged_positive_communities <- cluster_fast_greedy(gr_complete_caged_positive, 
                                                            weights = E(gr_complete_caged_positive)$rho)
-plot(commplete_caged_positive_communities, gr_complete_caged_positive, 
+plot(complete_caged_positive_communities, gr_complete_caged_positive, 
      layout = layout.fruchterman.reingold(gr_complete_caged_positive),
      rescaled = TRUE,
      vertex.size = 2, 

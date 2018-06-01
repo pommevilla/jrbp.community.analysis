@@ -929,9 +929,9 @@ head(complete_negative_weights)</code></pre>
 <pre class="r"><code>complete_exposed_positive &lt;- complete_positive_weights[treatment == &quot;Exposed&quot;]
 complete_exposed_positive &lt;- complete_exposed_positive[, -1]
 gr_complete_exposed_positive &lt;- graph.data.frame(complete_exposed_positive, directed = FALSE)
-commplete_exposed_positive_communities &lt;- cluster_fast_greedy(gr_complete_exposed_positive, 
+complete_exposed_positive_communities &lt;- cluster_fast_greedy(gr_complete_exposed_positive, 
                                                            weights = E(gr_complete_exposed_positive)$rho)
-plot(commplete_exposed_positive_communities, gr_complete_exposed_positive, 
+plot(complete_exposed_positive_communities, gr_complete_exposed_positive, 
      layout = layout.fruchterman.reingold(gr_complete_exposed_positive),
      rescaled = TRUE,
      vertex.size = 2, 
@@ -945,9 +945,9 @@ plot(commplete_exposed_positive_communities, gr_complete_exposed_positive,
 complete_exposed_negative &lt;- complete_exposed_negative[, -1]
 complete_exposed_negative[[3]] &lt;- abs(complete_exposed_negative[[3]])
 gr_complete_exposed_negative &lt;- graph.data.frame(complete_exposed_negative, directed = FALSE)
-commplete_exposed_negative_communities &lt;- cluster_fast_greedy(gr_complete_exposed_negative, 
+complete_exposed_negative_communities &lt;- cluster_fast_greedy(gr_complete_exposed_negative, 
                                                            weights = E(gr_complete_exposed_negative)$rho)
-plot(commplete_exposed_negative_communities, gr_complete_exposed_negative, 
+plot(complete_exposed_negative_communities, gr_complete_exposed_negative, 
      layout = layout.fruchterman.reingold(gr_complete_exposed_negative),
      rescaled = TRUE,
      vertex.size = 2, 
@@ -963,9 +963,9 @@ plot(commplete_exposed_negative_communities, gr_complete_exposed_negative,
 <pre class="r"><code>complete_caged_positive &lt;- complete_positive_weights[treatment == &quot;Caged&quot;]
 complete_caged_positive &lt;- complete_caged_positive[, -1]
 gr_complete_caged_positive &lt;- graph.data.frame(complete_caged_positive, directed = FALSE)
-commplete_caged_positive_communities &lt;- cluster_fast_greedy(gr_complete_caged_positive, 
+complete_caged_positive_communities &lt;- cluster_fast_greedy(gr_complete_caged_positive, 
                                                            weights = E(gr_complete_caged_positive)$rho)
-plot(commplete_caged_positive_communities, gr_complete_caged_positive, 
+plot(complete_caged_positive_communities, gr_complete_caged_positive, 
      layout = layout.fruchterman.reingold(gr_complete_caged_positive),
      rescaled = TRUE,
      vertex.size = 2, 
@@ -1368,7 +1368,7 @@ plot(trimmed_bird_positive_communities, gr_trimmed_bird_positive,
 <p><img src="community_analysis_files/figure-html/unnamed-chunk-7-2.png" width="672" /></p>
 <pre class="r"><code>adjacent_vertices(gr_trimmed_bird_positive, &quot;OTU_6&quot;)</code></pre>
 <pre><code>## $OTU_6
-## + 2/401 vertices, named, from 958f56e:
+## + 2/401 vertices, named, from 17ad88f:
 ## [1] OTU_5931 OTU_442</code></pre>
 <pre class="r"><code>degree(gr_trimmed_bird_positive, &quot;OTU_6&quot;)</code></pre>
 <pre><code>## OTU_6 
@@ -1391,9 +1391,9 @@ plot(trimmed_bird_negative_communities, gr_trimmed_bird_negative,
 )</code></pre>
 <p><img src="community_analysis_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
 <pre class="r"><code>gr_trimmed_bird_negative</code></pre>
-<pre><code>## IGRAPH ada589d UN-- 2 1 -- 
+<pre><code>## IGRAPH f57b121 UN-- 2 1 -- 
 ## + attr: name (v/c), rho (e/x)
-## + edge from ada589d (vertex names):
+## + edge from f57b121 (vertex names):
 ## [1] OTU_4898--OTU_9</code></pre>
 <pre class="r"><code>taxa[OTU %in% c(&quot;OTU_4898&quot;, &quot;OTU_9&quot;)]</code></pre>
 <pre><code>##      OTU   domain     phylum   class      order            family
