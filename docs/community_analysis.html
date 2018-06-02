@@ -311,7 +311,7 @@ $(document).ready(function() {
 <pre class="r"><code>library(data.table, warn.conflicts = FALSE)
 library(igraph, warn.conflicts = FALSE)</code></pre>
 <p><code>taxa</code> is the look-up table for the OTUs. <code>cooccurrence_data</code> contains pairwise Spearman correlation ranks for pairs of OTUs.</p>
-<pre class="r"><code>taxa &lt;- data.table(read.delim(&quot;./data/classified_otus&quot;));colnames(taxa)&lt;-c(&quot;OTU&quot;,colnames(taxa[,-1]))
+<pre class="r"><code>taxa &lt;- data.table(read.delim(&quot;./data/bacteria/bacteria_classified_otus&quot;));colnames(taxa)&lt;-c(&quot;OTU&quot;,colnames(taxa[,-1]))
 
 head(taxa)</code></pre>
 <pre><code>##      OTU   domain                    phylum                 class
@@ -328,7 +328,7 @@ head(taxa)</code></pre>
 ## 4:          Pseudomonadales         Moraxellaceae         Acinetobacter
 ## 5:          Burkholderiales      Burkholderiaceae          Burkholderia
 ## 6:          Pseudomonadales      Pseudomonadaceae           Pseudomonas</code></pre>
-<pre class="r"><code>cooccurrence_data &lt;- data.table(read.table(&quot;./data/jrbp_cooccurrence&quot;, 
+<pre class="r"><code>cooccurrence_data &lt;- data.table(read.table(&quot;./data/bacteria/bacteria_cooccurrence&quot;, 
                                     col.names = c(&quot;treatment&quot;, &quot;OTU_1&quot;, &quot;OTU_2&quot;, &quot;rho&quot;, &quot;p&quot;)))
 
 head(cooccurrence_data)</code></pre>
@@ -1323,7 +1323,7 @@ plot(complete_all_negative_communities, gr_complete_all_negative,
 <div id="patristic-distance-analysis" class="section level2">
 <h2>Patristic Distance Analysis</h2>
 <pre class="r"><code>library(ape, warn.conflicts = FALSE)</code></pre>
-<pre class="r"><code>rough_tree &lt;- read.tree(&quot;./data/jrbp_phylo_tree&quot;)</code></pre>
+<pre class="r"><code>rough_tree &lt;- read.tree(&quot;./data/bacteria/bacteria_phylo_tree&quot;)</code></pre>
 <p>Generate patristic distances from <code>OTU_6</code> to use as in the paper “Phylogenetic relatedness predicts priority effects in nectar yeast communities”</p>
 <pre class="r"><code>pd_matrix &lt;- cophenetic.phylo(rough_tree)
 rownames(pd_matrix) &lt;- sub(&quot;^[^_]*_&quot;, &quot;&quot;, rownames(pd_matrix)) 
@@ -1368,7 +1368,7 @@ plot(trimmed_bird_positive_communities, gr_trimmed_bird_positive,
 <p><img src="community_analysis_files/figure-html/unnamed-chunk-7-2.png" width="672" /></p>
 <pre class="r"><code>adjacent_vertices(gr_trimmed_bird_positive, &quot;OTU_6&quot;)</code></pre>
 <pre><code>## $OTU_6
-## + 2/401 vertices, named, from 17ad88f:
+## + 2/401 vertices, named, from b548291:
 ## [1] OTU_5931 OTU_442</code></pre>
 <pre class="r"><code>degree(gr_trimmed_bird_positive, &quot;OTU_6&quot;)</code></pre>
 <pre><code>## OTU_6 
@@ -1391,9 +1391,9 @@ plot(trimmed_bird_negative_communities, gr_trimmed_bird_negative,
 )</code></pre>
 <p><img src="community_analysis_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
 <pre class="r"><code>gr_trimmed_bird_negative</code></pre>
-<pre><code>## IGRAPH f57b121 UN-- 2 1 -- 
+<pre><code>## IGRAPH 5913db5 UN-- 2 1 -- 
 ## + attr: name (v/c), rho (e/x)
-## + edge from f57b121 (vertex names):
+## + edge from 5913db5 (vertex names):
 ## [1] OTU_4898--OTU_9</code></pre>
 <pre class="r"><code>taxa[OTU %in% c(&quot;OTU_4898&quot;, &quot;OTU_9&quot;)]</code></pre>
 <pre><code>##      OTU   domain     phylum   class      order            family

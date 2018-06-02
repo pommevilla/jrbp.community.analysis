@@ -24,11 +24,11 @@ library(igraph, warn.conflicts = FALSE)
 `taxa` is the look-up table for the OTUs.  `cooccurrence_data` contains pairwise Spearman correlation ranks for pairs of OTUs.
 
 ```{r read_data}
-taxa <- data.table(read.delim("./data/classified_otus"));colnames(taxa)<-c("OTU",colnames(taxa[,-1]))
+taxa <- data.table(read.delim("./data/bacteria/bacteria_classified_otus"));colnames(taxa)<-c("OTU",colnames(taxa[,-1]))
 
 head(taxa)
 
-cooccurrence_data <- data.table(read.table("./data/jrbp_cooccurrence", 
+cooccurrence_data <- data.table(read.table("./data/bacteria/bacteria_cooccurrence", 
                                     col.names = c("treatment", "OTU_1", "OTU_2", "rho", "p")))
 
 head(cooccurrence_data)
@@ -504,7 +504,7 @@ library(ape, warn.conflicts = FALSE)
 ```
 
 ```{r pda.2}
-rough_tree <- read.tree("./data/jrbp_phylo_tree")
+rough_tree <- read.tree("./data/bacteria/bacteria_phylo_tree")
 ```
 
 Generate patristic distances from `OTU_6` to use as in the paper "Phylogenetic relatedness predicts priority effects in nectar yeast communities"
