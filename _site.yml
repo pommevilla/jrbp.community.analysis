@@ -6,7 +6,7 @@ navbar:
   - text: "Home"
     href: index.html
   - text: "Community Analysis"
-    href: community_analysis.html
+    href: bacteria_community_analysis.html
 output:
   html_document:
     theme: cerulean
