@@ -1,0 +1,35 @@
+---
+title: "Bacteria and yeast"
+---
+<script>
+$(document).ready(function() {
+  $items = $('div#TOC li');
+  $items.each(function(idx) {
+    num_ul = $(this).parentsUntil('#TOC').length;
+    $(this).css({'text-indent': num_ul * 10, 'padding-left': 0});
+  });
+
+});
+</script>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, message = FALSE, warning = FALSE}
+library(data.table, warn.conflicts = FALSE)
+library(igraph, warn.conflicts = FALSE)
+```
+
+`taxa` is the look-up table for the OTUs.  `cooccurrence_data` contains pairwise Spearman correlation ranks for pairs of OTUs.
+
+```{r read_data}
+taxa <- data.table(read.delim("./data/bacteria-yeast/bacteria_yeast_classified_otus"));colnames(taxa)<-c("OTU",colnames(taxa[,-1]))
+
+head(taxa)
+
+cooccurrence_data <- data.table(read.table("./data/bacteria-yeast/bacteria_yeast_cooccurrence", 
+                                    col.names = c("treatment", "OTU_1", "OTU_2", "rho", "p")))
+
+head(cooccurrence_data)
+```

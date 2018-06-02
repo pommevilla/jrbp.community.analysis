@@ -5,8 +5,11 @@ navbar:
   left:
   - text: "Home"
     href: index.html
-  - text: "Community Analysis"
+  - text: "Bacteria Only"
     href: bacteria_community_analysis.html
+  - text: "Bacteria and Yeast"
+    href: bacteria_yeast_community_analysis.html
+    
 output:
   html_document:
     theme: cerulean

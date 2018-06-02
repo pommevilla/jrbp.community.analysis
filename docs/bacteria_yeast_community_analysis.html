@@ -11,7 +11,7 @@
 
 
 
-<title></title>
+<title>Bacteria and yeast</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -296,22 +296,59 @@ div.tocify {
 
 
 
+<h1 class="title toc-ignore">Bacteria and yeast</h1>
 
 </div>
 
 
-<div id="jrbp-community-analysis" class="section level1">
-<h1>JRBP Community Analysis</h1>
-<p>Network analysis based on work done in the paper <em>Dispersal enhances beta diversity in nectar microbes</em> by Rachel L. Vannette and Tadashi Fukami (paper <a href="https://doi.org/10.1111/ele.12787">here</a>).</p>
-<div id="about" class="section level2">
-<h2>About</h2>
-<p><em>Under construction</em></p>
-</div>
-<div id="contact" class="section level2">
-<h2>Contact</h2>
-<p>Send questions, comments, and feedback to pev at iastate dot edu.</p>
-</div>
-</div>
+<script>
+$(document).ready(function() {
+  $items = $('div#TOC li');
+  $items.each(function(idx) {
+    num_ul = $(this).parentsUntil('#TOC').length;
+    $(this).css({'text-indent': num_ul * 10, 'padding-left': 0});
+  });
+
+});
+</script>
+<pre class="r"><code>library(data.table, warn.conflicts = FALSE)
+library(igraph, warn.conflicts = FALSE)</code></pre>
+<p><code>taxa</code> is the look-up table for the OTUs. <code>cooccurrence_data</code> contains pairwise Spearman correlation ranks for pairs of OTUs.</p>
+<pre class="r"><code>taxa &lt;- data.table(read.delim(&quot;./data/bacteria-yeast/bacteria_yeast_classified_otus&quot;));colnames(taxa)&lt;-c(&quot;OTU&quot;,colnames(taxa[,-1]))
+
+head(taxa)</code></pre>
+<pre><code>##          OTU    OTUS   domain                phylum
+## 1: 1000|1030 OTU_660 Bacteria         Bacteroidetes
+## 2: 1000|1182 OTU_624 Bacteria        Proteobacteria
+## 3: 1000|1192 OTU_671 Bacteria       Verrucomicrobia
+## 4: 1000|1289 OTU_670 Bacteria            Firmicutes
+## 5: 1000|1308 OTU_638 Bacteria unclassified_Bacteria
+## 6: 1000|1316 OTU_635 Bacteria        Proteobacteria
+##                           class                        order
+## 1:               Flavobacteriia             Flavobacteriales
+## 2:          Gammaproteobacteria              Pseudomonadales
+## 3: unclassified_Verrucomicrobia unclassified_Verrucomicrobia
+## 4:                   Clostridia                Clostridiales
+## 5:        unclassified_Bacteria        unclassified_Bacteria
+## 6:          Deltaproteobacteria            Bdellovibrionales
+##                          family                        genus
+## 1:            Flavobacteriaceae               Flavobacterium
+## 2:             Pseudomonadaceae                  Pseudomonas
+## 3: unclassified_Verrucomicrobia unclassified_Verrucomicrobia
+## 4:              Ruminococcaceae               Clostridium IV
+## 5:        unclassified_Bacteria        unclassified_Bacteria
+## 6:           Bdellovibrionaceae                 Bdellovibrio</code></pre>
+<pre class="r"><code>cooccurrence_data &lt;- data.table(read.table(&quot;./data/bacteria-yeast/bacteria_yeast_cooccurrence&quot;, 
+                                    col.names = c(&quot;treatment&quot;, &quot;OTU_1&quot;, &quot;OTU_2&quot;, &quot;rho&quot;, &quot;p&quot;)))
+
+head(cooccurrence_data)</code></pre>
+<pre><code>##    treatment   OTU_1     OTU_2        rho          p
+## 1:    Bagged Y_OTU_0 Y_OTU_103 -0.0440976 0.74016600
+## 2:    Bagged Y_OTU_0 Y_OTU_116  0.3674800 0.00419394
+## 3:    Bagged Y_OTU_0 Y_OTU_117 -0.0440976 0.74016600
+## 4:    Bagged Y_OTU_0 Y_OTU_119  0.2359590 0.07199360
+## 5:    Bagged Y_OTU_0 Y_OTU_121 -0.0440976 0.74016600
+## 6:    Bagged Y_OTU_0 Y_OTU_122  0.4115780 0.00120127</code></pre>
 
 
 

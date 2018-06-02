@@ -11,7 +11,7 @@
 
 
 
-<title>Bacteria Only</title>
+<title>Bacteria only</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -279,7 +279,10 @@ div.tocify {
   <a href="index.html">Home</a>
 </li>
 <li>
-  <a href="community_analysis.html">Community Analysis</a>
+  <a href="bacteria_community_analysis.html">Bacteria Only</a>
+</li>
+<li>
+  <a href="bacteria_yeast_community_analysis.html">Bacteria and Yeast</a>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -293,7 +296,7 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Bacteria Only</h1>
+<h1 class="title toc-ignore">Bacteria only</h1>
 
 </div>
 
@@ -1356,7 +1359,7 @@ plot(trimmed_bird_positive_communities, gr_trimmed_bird_positive,
      vertex.size = 2, 
      vertex.label.cex = 0.25
 )</code></pre>
-<p><img src="bacteria_community_analysis_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p><img src="bacteria_community_analysis_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
 <pre class="r"><code>plot(trimmed_bird_positive_communities, gr_trimmed_bird_positive, 
      layout = layout.fruchterman.reingold(gr_trimmed_bird_positive),
      rescaled = TRUE,
@@ -1365,10 +1368,10 @@ plot(trimmed_bird_positive_communities, gr_trimmed_bird_positive,
      vertex.label = ifelse(V(gr_trimmed_bird_positive)$name == &quot;OTU_6&quot;, 
                            V(gr_trimmed_bird_positive)$name, &quot;&quot;)
 )</code></pre>
-<p><img src="bacteria_community_analysis_files/figure-html/unnamed-chunk-7-2.png" width="672" /></p>
+<p><img src="bacteria_community_analysis_files/figure-html/unnamed-chunk-15-2.png" width="672" /></p>
 <pre class="r"><code>adjacent_vertices(gr_trimmed_bird_positive, &quot;OTU_6&quot;)</code></pre>
 <pre><code>## $OTU_6
-## + 2/401 vertices, named, from c169a5a:
+## + 2/401 vertices, named, from c7a29d3:
 ## [1] OTU_5931 OTU_442</code></pre>
 <pre class="r"><code>degree(gr_trimmed_bird_positive, &quot;OTU_6&quot;)</code></pre>
 <pre><code>## OTU_6 
@@ -1389,11 +1392,11 @@ plot(trimmed_bird_negative_communities, gr_trimmed_bird_negative,
      vertex.size = 2, 
      vertex.label.cex = 0.25
 )</code></pre>
-<p><img src="bacteria_community_analysis_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p><img src="bacteria_community_analysis_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
 <pre class="r"><code>gr_trimmed_bird_negative</code></pre>
-<pre><code>## IGRAPH 0150cd1 UN-- 2 1 -- 
+<pre><code>## IGRAPH 6070bf7 UN-- 2 1 -- 
 ## + attr: name (v/c), rho (e/x)
-## + edge from 0150cd1 (vertex names):
+## + edge from 6070bf7 (vertex names):
 ## [1] OTU_4898--OTU_9</code></pre>
 <pre class="r"><code>taxa[OTU %in% c(&quot;OTU_4898&quot;, &quot;OTU_9&quot;)]</code></pre>
 <pre><code>##      OTU   domain     phylum   class      order            family
@@ -1418,7 +1421,7 @@ plot(bird_positive_communities, gr_bird_positive,
      vertex.size = 2, 
      vertex.label.cex = 0.25
 )</code></pre>
-<p><img src="bacteria_community_analysis_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p><img src="bacteria_community_analysis_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
 </div>
 <div id="negative-weights-9" class="section level3">
 <h3>Negative Weights</h3>
@@ -1435,7 +1438,7 @@ plot(bird_negative_communities, gr_bird_negative,
      vertex.size = 2, 
      vertex.label.cex = 0.25
 )</code></pre>
-<p><img src="bacteria_community_analysis_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p><img src="bacteria_community_analysis_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
 </div>
 </div>
 </div>
