@@ -21,15 +21,48 @@ library(data.table, warn.conflicts = FALSE)
 library(igraph, warn.conflicts = FALSE)
 ```
 
-`taxa` is the look-up table for the OTUs.  `cooccurrence_data` contains pairwise Spearman correlation ranks for pairs of OTUs.
+`taxa` is the look-up table for the bacterial and yeast OTUs.  As before, we remove any cyanobacteria and chloropast observations.  
+```{r read_data.1}
+taxa <- data.table(read.delim("./data/bacteria-yeast/bacteria_yeast_classified_otus"))
+taxa <- taxa[, -1]
+colnames(taxa)<-c("OTU",colnames(taxa[,-1]))
+nrow(taxa)
+remove <- taxa[which(taxa[[4]] %in% c("Cyanobacteria","Chloroplast")),]$OTU
+taxa <- taxa[-c(remove),]
+nrow(taxa)
+```
 
-```{r read_data}
-taxa <- data.table(read.delim("./data/bacteria-yeast/bacteria_yeast_classified_otus"));colnames(taxa)<-c("OTU",colnames(taxa[,-1]))
+`cooccurrence_data` contains coccurrence data for bacteria and yeast.  The bacteria-bacteria interactions should still be the same as in the bacteria only analysis.  Again, we remove any chloroplast or cyanabacteria relation data (operations done in this order for running time concerns).
 
-head(taxa)
+```{r read_data.2}
 
 cooccurrence_data <- data.table(read.table("./data/bacteria-yeast/bacteria_yeast_cooccurrence", 
                                     col.names = c("treatment", "OTU_1", "OTU_2", "rho", "p")))
 
-head(cooccurrence_data)
+cooccurrence_data <- cooccurrence_data[p <= 0.05, -5]
+
+nrow(cooccurrence_data)
+
+complete_data <- cooccurrence_data[-c(which(apply(cooccurrence_data, 1, function(x) any(remove %in% x)))),]
+
+nrow(complete_data)
+
 ```
+
+
+# Complete Data
+
+Will only look at the complete data set for now.  First separate the data set into positive and negative networks.
+
+```{r cd.1}
+by_complete_positive_weights <- complete_data[complete_data[['rho']] > 0]
+head(by_complete_positive_weights)
+nrow(by_complete_positive_weights)
+```
+
+```{r cd.2}
+by_complete_negative_weights <- complete_data[complete_data[['rho']] < 0]
+head(by_complete_negative_weights)
+nrow(by_complete_negative_weights)
+```
+
