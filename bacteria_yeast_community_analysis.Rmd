@@ -52,7 +52,7 @@ nrow(complete_data)
 
 # Complete Data
 
-Will only look at the complete data set for now.  First separate the data set into positive and negative networks.
+First separate the data set into positive and negative networks:
 
 ```{r cd.1}
 by_complete_positive_weights <- complete_data[complete_data[['rho']] > 0]
@@ -66,3 +66,144 @@ head(by_complete_negative_weights)
 nrow(by_complete_negative_weights)
 ```
 
+## Exposed Communities
+
+### Positive Weights 
+```{r cep.1}
+by_complete_exposed_positive <- by_complete_positive_weights[treatment == "Exposed"]
+by_complete_exposed_positive <- by_complete_exposed_positive[, -1]
+gr_by_complete_exposed_positive <- graph.data.frame(by_complete_exposed_positive, directed = FALSE)
+by_complete_exposed_positive_communities <- cluster_fast_greedy(gr_by_complete_exposed_positive, 
+                                                           weights = E(gr_by_complete_exposed_positive)$rho)
+plot(by_complete_exposed_positive_communities, gr_by_complete_exposed_positive, 
+     layout = layout.fruchterman.reingold(gr_by_complete_exposed_positive),
+     rescaled = TRUE,
+     vertex.size = 2, 
+     vertex.label.cex = 0.25
+     )
+```
+
+### Negative Weights
+
+```{r cen.1}
+by_complete_exposed_negative <- by_complete_negative_weights[treatment == "Exposed"]
+by_complete_exposed_negative <- by_complete_exposed_negative[, -1]
+by_complete_exposed_negative[[3]] <- abs(by_complete_exposed_negative[[3]])
+gr_by_complete_exposed_negative <- graph.data.frame(by_complete_exposed_negative, directed = FALSE)
+by_complete_exposed_negative_communities <- cluster_fast_greedy(gr_by_complete_exposed_negative, 
+                                                           weights = E(gr_by_complete_exposed_negative)$rho)
+plot(by_complete_exposed_negative_communities, gr_by_complete_exposed_negative, 
+     layout = layout.fruchterman.reingold(gr_by_complete_exposed_negative),
+     rescaled = TRUE,
+     vertex.size = 2, 
+     vertex.label.cex = 0.25
+     )
+```
+
+## Caged Communities
+
+### Positive Weights 
+```{r ccp.1}
+by_complete_caged_positive <- by_complete_positive_weights[treatment == "Caged"]
+by_complete_caged_positive <- by_complete_caged_positive[, -1]
+gr_by_complete_caged_positive <- graph.data.frame(by_complete_caged_positive, directed = FALSE)
+by_complete_caged_positive_communities <- cluster_fast_greedy(gr_by_complete_caged_positive, 
+                                                           weights = E(gr_by_complete_caged_positive)$rho)
+plot(by_complete_caged_positive_communities, gr_by_complete_caged_positive, 
+     layout = layout.fruchterman.reingold(gr_by_complete_caged_positive),
+     rescaled = TRUE,
+     vertex.size = 2, 
+     vertex.label.cex = 0.25
+     )
+```
+
+### Negative Weights
+
+```{r ccn.1}
+by_complete_caged_negative <- by_complete_negative_weights[treatment == "Caged"]
+by_complete_caged_negative <- by_complete_caged_negative[, -1]
+by_complete_caged_negative[[3]] <- abs(by_complete_caged_negative[[3]])
+gr_by_complete_caged_negative <- graph.data.frame(by_complete_caged_negative, directed = FALSE)
+by_complete_caged_negative_communities <- cluster_fast_greedy(gr_by_complete_caged_negative, 
+                                                           weights = E(gr_by_complete_caged_negative)$rho)
+plot(by_complete_caged_negative_communities, gr_by_complete_caged_negative, 
+     layout = layout.fruchterman.reingold(gr_by_complete_caged_negative),
+     rescaled = TRUE,
+     vertex.size = 2, 
+     vertex.label.cex = 0.5
+     )
+```
+## Bagged Communities
+
+### Positive Weights 
+```{r cbp.1}
+by_complete_bagged_positive <- by_complete_positive_weights[treatment == "Bagged"]
+by_complete_bagged_positive <- by_complete_bagged_positive[, -1]
+gr_by_complete_bagged_positive <- graph.data.frame(by_complete_bagged_positive, directed = FALSE)
+by_complete_bagged_positive_communities <- cluster_fast_greedy(gr_by_complete_bagged_positive, 
+                                                           weights = E(gr_by_complete_bagged_positive)$rho)
+plot(by_complete_bagged_positive_communities, gr_by_complete_bagged_positive, 
+     layout = layout.fruchterman.reingold(gr_by_complete_bagged_positive),
+     rescaled = TRUE,
+     vertex.size = 2, 
+     vertex.label.cex = 0.25
+     )
+```
+
+### Negative Weights
+```{r cbn.1}
+by_complete_bagged_negative <- by_complete_negative_weights[treatment == "Bagged"]
+by_complete_bagged_negative <- by_complete_bagged_negative[, -1]
+by_complete_bagged_negative[[3]] <- abs(by_complete_bagged_negative[[3]])
+gr_by_complete_bagged_negative <- graph.data.frame(by_complete_bagged_negative, directed = FALSE)
+by_complete_bagged_negative_communities <- cluster_fast_greedy(gr_by_complete_bagged_negative, 
+                                                           weights = E(gr_by_complete_bagged_negative)$rho)
+plot(by_complete_bagged_negative_communities, gr_by_complete_bagged_negative, 
+     layout = layout.fruchterman.reingold(gr_by_complete_bagged_negative),
+     rescaled = TRUE,
+     vertex.size = 2, 
+     vertex.label.cex = 0.5
+     )
+```
+
+
+## All Communities
+
+### Positive Weights
+
+
+```{r cap.1}
+by_complete_all_positive <- by_complete_positive_weights[, -1]
+gr_by_complete_all_positive <- graph.data.frame(by_complete_all_positive, directed = FALSE)
+gr_by_complete_all_positive <- simplify(gr_by_complete_all_positive, 
+                                    edge.attr.comb = list(weight = "mean"))
+by_complete_all_positive_communities <- cluster_fast_greedy(gr_by_complete_all_positive, 
+                                    weights = E(gr_by_complete_all_positive)$rho)
+plot(by_complete_all_positive_communities, gr_by_complete_all_positive, 
+     layout = layout.fruchterman.reingold(gr_by_complete_all_positive),
+     rescaled = TRUE,
+     vertex.size = 2, 
+     vertex.label.cex = 0.25
+)
+```
+
+
+
+### Negative Weights
+
+
+```{r, can.1}
+by_complete_all_negative <- by_complete_negative_weights[, -1]
+by_complete_all_negative[[3]] <- abs(by_complete_all_negative[[3]])
+gr_by_complete_all_negative <- graph.data.frame(by_complete_all_negative, directed = FALSE)
+gr_by_complete_all_negative <- simplify(gr_by_complete_all_negative, 
+                                    edge.attr.comb=list(weight = "mean"))
+by_complete_all_negative_communities <- cluster_fast_greedy(gr_by_complete_all_negative, 
+                                    weights = E(gr_by_complete_all_negative)$rho)
+plot(by_complete_all_negative_communities, gr_by_complete_all_negative, 
+     layout = layout.fruchterman.reingold(gr_by_complete_all_negative),
+     rescaled = TRUE,
+     vertex.size = 2, 
+     vertex.label.cex = 0.65
+)
+```
