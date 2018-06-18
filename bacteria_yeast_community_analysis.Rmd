@@ -1,0 +1,236 @@
+---
+title: "Bacteria and yeast"
+---
+<script>
+$(document).ready(function() {
+  $items = $('div#TOC li');
+  $items.each(function(idx) {
+    num_ul = $(this).parentsUntil('#TOC').length;
+    $(this).css({'text-indent': num_ul * 10, 'padding-left': 0});
+  });
+
+});
+</script>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, message = FALSE, warning = FALSE}
+library(data.table, warn.conflicts = FALSE)
+library(igraph, warn.conflicts = FALSE)
+```
+
+`taxa` is the look-up table for the bacterial and yeast OTUs.  As before, we remove any cyanobacteria and chloropast observations.  
+```{r read_data.1}
+taxa <- data.table(read.delim("./data/bacteria-yeast/bacteria_yeast_classified_otus"))
+taxa <- taxa[, -1]
+colnames(taxa)<-c("OTU",colnames(taxa[,-1]))
+nrow(taxa)
+remove <- taxa[which(taxa[[4]] %in% c("Cyanobacteria","Chloroplast")),]$OTU
+taxa <- taxa[-c(remove),]
+nrow(taxa)
+#5128
+```
+
+`cooccurrence_data` contains coccurrence data for bacteria and yeast.  The bacteria-bacteria interactions should still be the same as in the bacteria only analysis.  Again, we remove any chloroplast or cyanabacteria relation data (operations done in this order for running time concerns).
+
+```{r read_data.2}
+
+cooccurrence_data <- data.table(read.table("./data/bacteria-yeast/bacteria_yeast_cooccurrence", 
+                                    col.names = c("treatment", "OTU_1", "OTU_2", "rho", "p")))
+
+cooccurrence_data <- cooccurrence_data[p <= 0.05, -5]
+
+nrow(cooccurrence_data)
+# 557643
+
+complete_data <- cooccurrence_data[-c(which(apply(cooccurrence_data, 1, function(x) any(remove %in% x)))),]
+
+nrow(complete_data)
+# 516426
+
+```
+
+
+Separating out yeast data
+```{r read_data.3}
+yeast_otus <- taxa[which(startsWith(as.character(taxa[[1]]), "Y")), ]$OTU
+bacteria_only_data <- cooccurrence_data[-c(which(apply(cooccurrence_data, 1, function(x) any(yeast_otus %in% x)))),]
+nrow(bacteria_only_data)
+# 474703
+```
+
+# Complete Data
+
+First separate the data set into positive and negative networks:
+
+```{r cd.1}
+by_complete_positive_weights <- complete_data[complete_data[['rho']] > 0]
+head(by_complete_positive_weights)
+nrow(by_complete_positive_weights)
+```
+
+```{r cd.2}
+by_complete_negative_weights <- complete_data[complete_data[['rho']] < 0]
+head(by_complete_negative_weights)
+nrow(by_complete_negative_weights)
+```
+
+## Exposed Communities
+
+### Positive Weights 
+```{r cep.1}
+by_complete_exposed_positive <- by_complete_positive_weights[treatment == "Exposed"]
+by_complete_exposed_positive <- by_complete_exposed_positive[, -1]
+gr_by_complete_exposed_positive <- graph.data.frame(by_complete_exposed_positive, directed = FALSE)
+by_complete_exposed_positive_communities <- cluster_fast_greedy(gr_by_complete_exposed_positive, 
+                                                           weights = E(gr_by_complete_exposed_positive)$rho)
+plot(by_complete_exposed_positive_communities, gr_by_complete_exposed_positive, 
+     layout = layout.fruchterman.reingold(gr_by_complete_exposed_positive),
+     rescaled = TRUE,
+     vertex.size = 2, 
+     vertex.label.cex = 0.25
+     )
+```
+
+### Negative Weights
+
+```{r cen.1}
+by_complete_exposed_negative <- by_complete_negative_weights[treatment == "Exposed"]
+by_complete_exposed_negative <- by_complete_exposed_negative[, -1]
+by_complete_exposed_negative[[3]] <- abs(by_complete_exposed_negative[[3]])
+gr_by_complete_exposed_negative <- graph.data.frame(by_complete_exposed_negative, directed = FALSE)
+by_complete_exposed_negative_communities <- cluster_fast_greedy(gr_by_complete_exposed_negative, 
+                                                           weights = E(gr_by_complete_exposed_negative)$rho)
+plot(by_complete_exposed_negative_communities, gr_by_complete_exposed_negative, 
+     layout = layout.fruchterman.reingold(gr_by_complete_exposed_negative),
+     rescaled = TRUE,
+     vertex.size = 2, 
+     vertex.label.cex = 0.50
+     )
+```
+
+## Caged Communities
+
+### Positive Weights 
+```{r ccp.1}
+by_complete_caged_positive <- by_complete_positive_weights[treatment == "Caged"]
+by_complete_caged_positive <- by_complete_caged_positive[, -1]
+gr_by_complete_caged_positive <- graph.data.frame(by_complete_caged_positive, directed = FALSE)
+by_complete_caged_positive_communities <- cluster_fast_greedy(gr_by_complete_caged_positive, 
+                                                           weights = E(gr_by_complete_caged_positive)$rho)
+plot(by_complete_caged_positive_communities, gr_by_complete_caged_positive, 
+     layout = layout.fruchterman.reingold(gr_by_complete_caged_positive),
+     rescaled = TRUE,
+     vertex.size = 2, 
+     vertex.label.cex = 0.25
+     )
+```
+
+### Negative Weights
+
+```{r ccn.1}
+by_complete_caged_negative <- by_complete_negative_weights[treatment == "Caged"]
+by_complete_caged_negative <- by_complete_caged_negative[, -1]
+by_complete_caged_negative[[3]] <- abs(by_complete_caged_negative[[3]])
+gr_by_complete_caged_negative <- graph.data.frame(by_complete_caged_negative, directed = FALSE)
+by_complete_caged_negative_communities <- cluster_fast_greedy(gr_by_complete_caged_negative, 
+                                                           weights = E(gr_by_complete_caged_negative)$rho)
+plot(by_complete_caged_negative_communities, gr_by_complete_caged_negative, 
+     layout = layout.fruchterman.reingold(gr_by_complete_caged_negative),
+     rescaled = TRUE,
+     vertex.size = 2, 
+     vertex.label.cex = 0.5
+     )
+```
+
+## Bagged Communities
+
+### Positive Weights 
+```{r cbp.1}
+by_complete_bagged_positive <- by_complete_positive_weights[treatment == "Bagged"]
+by_complete_bagged_positive <- by_complete_bagged_positive[, -1]
+gr_by_complete_bagged_positive <- graph.data.frame(by_complete_bagged_positive, directed = FALSE)
+by_complete_bagged_positive_communities <- cluster_fast_greedy(gr_by_complete_bagged_positive, 
+                                                           weights = E(gr_by_complete_bagged_positive)$rho)
+plot(by_complete_bagged_positive_communities, gr_by_complete_bagged_positive, 
+     layout = layout.fruchterman.reingold(gr_by_complete_bagged_positive),
+     rescaled = TRUE,
+     vertex.size = 2, 
+     vertex.label.cex = 0.25
+     )
+```
+
+### Negative Weights
+```{r cbn.1}
+by_complete_bagged_negative <- by_complete_negative_weights[treatment == "Bagged"]
+by_complete_bagged_negative <- by_complete_bagged_negative[, -1]
+by_complete_bagged_negative[[3]] <- abs(by_complete_bagged_negative[[3]])
+gr_by_complete_bagged_negative <- graph.data.frame(by_complete_bagged_negative, directed = FALSE)
+by_complete_bagged_negative_communities <- cluster_fast_greedy(gr_by_complete_bagged_negative, 
+                                                           weights = E(gr_by_complete_bagged_negative)$rho)
+plot(by_complete_bagged_negative_communities, gr_by_complete_bagged_negative, 
+     layout = layout.fruchterman.reingold(gr_by_complete_bagged_negative),
+     rescaled = TRUE,
+     vertex.size = 2, 
+     vertex.label.cex = 0.5
+     )
+```
+
+The OTUs with the highest degree in the largest community are `OTU_307` and `OTU_32`:
+
+```{r cbn.2}
+degree(gr_by_complete_bagged_negative, communities(by_complete_bagged_negative_communities)[[1]])
+```
+These OTUs are:
+```{r cbn.3}
+taxa[OTU %in% c("OTU_307", "OTU_32")]
+```
+
+The other OTUs in that community are:
+
+```{r cbn.4}
+taxa[OTU %in% communities(by_complete_bagged_negative_communities)[[1]]]
+```
+
+## All Communities
+
+### Positive Weights
+
+
+```{r cap.1}
+by_complete_all_positive <- by_complete_positive_weights[, -1]
+gr_by_complete_all_positive <- graph.data.frame(by_complete_all_positive, directed = FALSE)
+gr_by_complete_all_positive <- simplify(gr_by_complete_all_positive, 
+                                    edge.attr.comb = list(weight = "mean"))
+by_complete_all_positive_communities <- cluster_fast_greedy(gr_by_complete_all_positive, 
+                                    weights = E(gr_by_complete_all_positive)$rho)
+plot(by_complete_all_positive_communities, gr_by_complete_all_positive, 
+     layout = layout.fruchterman.reingold(gr_by_complete_all_positive),
+     rescaled = TRUE,
+     vertex.size = 2, 
+     vertex.label.cex = 0.25
+)
+```
+
+
+
+### Negative Weights
+
+
+```{r, can.1}
+by_complete_all_negative <- by_complete_negative_weights[, -1]
+by_complete_all_negative[[3]] <- abs(by_complete_all_negative[[3]])
+gr_by_complete_all_negative <- graph.data.frame(by_complete_all_negative, directed = FALSE)
+gr_by_complete_all_negative <- simplify(gr_by_complete_all_negative, 
+                                    edge.attr.comb=list(weight = "mean"))
+by_complete_all_negative_communities <- cluster_fast_greedy(gr_by_complete_all_negative, 
+                                    weights = E(gr_by_complete_all_negative)$rho)
+plot(by_complete_all_negative_communities, gr_by_complete_all_negative, 
+     layout = layout.fruchterman.reingold(gr_by_complete_all_negative),
+     rescaled = TRUE,
+     vertex.size = 2, 
+     vertex.label.cex = 0.65
+)
+```

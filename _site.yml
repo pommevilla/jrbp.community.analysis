@@ -5,11 +5,16 @@ navbar:
   left:
   - text: "Home"
     href: index.html
-  - text: "Community Analysis"
-    href: community_analysis.html
+  - text: "Bacteria Only"
+    href: bacteria_community_analysis.html
+  - text: "Bacteria and Yeast"
+    href: bacteria_yeast_community_analysis.html
+    
 output:
   html_document:
     theme: cerulean
     toc: true
     toc_float: 
       smooth_scroll: true
+      collapsed: false
+      

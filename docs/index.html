@@ -185,7 +185,7 @@ $(document).ready(function ()  {
       ignoreSelector: ".toc-ignore",
       scrollTo: 0
     };
-    options.showAndHide = true;
+    options.showAndHide = false;
     options.smoothScroll = true;
 
     // tocify
@@ -248,6 +248,12 @@ div.tocify {
   border-radius: 0px;
 }
 
+.tocify-subheader {
+  display: inline;
+}
+.tocify-subheader .tocify-item {
+  font-size: 0.95em;
+}
 
 </style>
 
@@ -279,7 +285,10 @@ div.tocify {
   <a href="index.html">Home</a>
 </li>
 <li>
-  <a href="community_analysis.html">Community Analysis</a>
+  <a href="bacteria_community_analysis.html">Bacteria Only</a>
+</li>
+<li>
+  <a href="bacteria_yeast_community_analysis.html">Bacteria and Yeast</a>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -298,10 +307,11 @@ div.tocify {
 </div>
 
 
-<p>Network analysis based on work done in the paper <em>Dispersal enhances beta diversity in nectar microbes</em> by Rachel L. Vannette and Tadashi Fukami (paper <a href="https://doi.org/10.1111/ele.12787">here</a>).</p>
+<p>Network analysis based on work done in the paper <em>Dispersal enhances beta diversity in nectar microbes</em> by Rachel L. Vannette and Tadashi Fukami (paper <a href="https://doi.org/10.1111/ele.12787">here</a>). Done in collaboration with <a href="https://github.com/sdsmith1390">Schuyler Smith</a>.</p>
 <div id="about" class="section level2">
 <h2>About</h2>
 <p><em>Under construction</em></p>
+<p>The analysis is broken into two parts. The first analysis considers only bacterial data, while the second is done with both bacterial and yeast data.</p>
 </div>
 <div id="contact" class="section level2">
 <h2>Contact</h2>
