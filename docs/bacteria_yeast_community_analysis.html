@@ -185,7 +185,7 @@ $(document).ready(function ()  {
       ignoreSelector: ".toc-ignore",
       scrollTo: 0
     };
-    options.showAndHide = true;
+    options.showAndHide = false;
     options.smoothScroll = true;
 
     // tocify
@@ -248,6 +248,12 @@ div.tocify {
   border-radius: 0px;
 }
 
+.tocify-subheader {
+  display: inline;
+}
+.tocify-subheader .tocify-item {
+  font-size: 0.95em;
+}
 
 </style>
 
@@ -313,42 +319,298 @@ $(document).ready(function() {
 </script>
 <pre class="r"><code>library(data.table, warn.conflicts = FALSE)
 library(igraph, warn.conflicts = FALSE)</code></pre>
-<p><code>taxa</code> is the look-up table for the OTUs. <code>cooccurrence_data</code> contains pairwise Spearman correlation ranks for pairs of OTUs.</p>
-<pre class="r"><code>taxa &lt;- data.table(read.delim(&quot;./data/bacteria-yeast/bacteria_yeast_classified_otus&quot;));colnames(taxa)&lt;-c(&quot;OTU&quot;,colnames(taxa[,-1]))
-
-head(taxa)</code></pre>
-<pre><code>##          OTU    OTUS   domain                phylum
-## 1: 1000|1030 OTU_660 Bacteria         Bacteroidetes
-## 2: 1000|1182 OTU_624 Bacteria        Proteobacteria
-## 3: 1000|1192 OTU_671 Bacteria       Verrucomicrobia
-## 4: 1000|1289 OTU_670 Bacteria            Firmicutes
-## 5: 1000|1308 OTU_638 Bacteria unclassified_Bacteria
-## 6: 1000|1316 OTU_635 Bacteria        Proteobacteria
-##                           class                        order
-## 1:               Flavobacteriia             Flavobacteriales
-## 2:          Gammaproteobacteria              Pseudomonadales
-## 3: unclassified_Verrucomicrobia unclassified_Verrucomicrobia
-## 4:                   Clostridia                Clostridiales
-## 5:        unclassified_Bacteria        unclassified_Bacteria
-## 6:          Deltaproteobacteria            Bdellovibrionales
-##                          family                        genus
-## 1:            Flavobacteriaceae               Flavobacterium
-## 2:             Pseudomonadaceae                  Pseudomonas
-## 3: unclassified_Verrucomicrobia unclassified_Verrucomicrobia
-## 4:              Ruminococcaceae               Clostridium IV
-## 5:        unclassified_Bacteria        unclassified_Bacteria
-## 6:           Bdellovibrionaceae                 Bdellovibrio</code></pre>
+<p><code>taxa</code> is the look-up table for the bacterial and yeast OTUs. As before, we remove any cyanobacteria and chloropast observations.</p>
+<pre class="r"><code>taxa &lt;- data.table(read.delim(&quot;./data/bacteria-yeast/bacteria_yeast_classified_otus&quot;))
+taxa &lt;- taxa[, -1]
+colnames(taxa)&lt;-c(&quot;OTU&quot;,colnames(taxa[,-1]))
+nrow(taxa)</code></pre>
+<pre><code>## [1] 5521</code></pre>
+<pre class="r"><code>remove &lt;- taxa[which(taxa[[4]] %in% c(&quot;Cyanobacteria&quot;,&quot;Chloroplast&quot;)),]$OTU
+taxa &lt;- taxa[-c(remove),]
+nrow(taxa)</code></pre>
+<pre><code>## [1] 5128</code></pre>
+<pre class="r"><code>#5128</code></pre>
+<p><code>cooccurrence_data</code> contains coccurrence data for bacteria and yeast. The bacteria-bacteria interactions should still be the same as in the bacteria only analysis. Again, we remove any chloroplast or cyanabacteria relation data (operations done in this order for running time concerns).</p>
 <pre class="r"><code>cooccurrence_data &lt;- data.table(read.table(&quot;./data/bacteria-yeast/bacteria_yeast_cooccurrence&quot;, 
                                     col.names = c(&quot;treatment&quot;, &quot;OTU_1&quot;, &quot;OTU_2&quot;, &quot;rho&quot;, &quot;p&quot;)))
 
-head(cooccurrence_data)</code></pre>
-<pre><code>##    treatment   OTU_1     OTU_2        rho          p
-## 1:    Bagged Y_OTU_0 Y_OTU_103 -0.0440976 0.74016600
-## 2:    Bagged Y_OTU_0 Y_OTU_116  0.3674800 0.00419394
-## 3:    Bagged Y_OTU_0 Y_OTU_117 -0.0440976 0.74016600
-## 4:    Bagged Y_OTU_0 Y_OTU_119  0.2359590 0.07199360
-## 5:    Bagged Y_OTU_0 Y_OTU_121 -0.0440976 0.74016600
-## 6:    Bagged Y_OTU_0 Y_OTU_122  0.4115780 0.00120127</code></pre>
+cooccurrence_data &lt;- cooccurrence_data[p &lt;= 0.05, -5]
+
+nrow(cooccurrence_data)</code></pre>
+<pre><code>## [1] 35727</code></pre>
+<pre class="r"><code># 557643
+
+complete_data &lt;- cooccurrence_data[-c(which(apply(cooccurrence_data, 1, function(x) any(remove %in% x)))),]
+
+nrow(complete_data)</code></pre>
+<pre><code>## [1] 33158</code></pre>
+<pre class="r"><code># 516426</code></pre>
+<p>Separating out yeast data</p>
+<pre class="r"><code>yeast_otus &lt;- taxa[which(startsWith(as.character(taxa[[1]]), &quot;Y&quot;)), ]$OTU
+bacteria_only_data &lt;- cooccurrence_data[-c(which(apply(cooccurrence_data, 1, function(x) any(yeast_otus %in% x)))),]
+nrow(bacteria_only_data)</code></pre>
+<pre><code>## [1] 32169</code></pre>
+<pre class="r"><code># 474703</code></pre>
+<div id="complete-data" class="section level1">
+<h1>Complete Data</h1>
+<p>First separate the data set into positive and negative networks:</p>
+<pre class="r"><code>by_complete_positive_weights &lt;- complete_data[complete_data[[&#39;rho&#39;]] &gt; 0]
+head(by_complete_positive_weights)</code></pre>
+<pre><code>##    treatment   OTU_1     OTU_2      rho
+## 1:    Bagged Y_OTU_0 Y_OTU_116 0.367480
+## 2:    Bagged Y_OTU_0 Y_OTU_122 0.411578
+## 3:    Bagged Y_OTU_0 Y_OTU_132 0.548760
+## 4:    Bagged Y_OTU_0 Y_OTU_136 0.461710
+## 5:    Bagged Y_OTU_0 Y_OTU_140 0.396878
+## 6:    Bagged Y_OTU_0 Y_OTU_145 0.426277</code></pre>
+<pre class="r"><code>nrow(by_complete_positive_weights)</code></pre>
+<pre><code>## [1] 32938</code></pre>
+<pre class="r"><code>by_complete_negative_weights &lt;- complete_data[complete_data[[&#39;rho&#39;]] &lt; 0]
+head(by_complete_negative_weights)</code></pre>
+<pre><code>##    treatment     OTU_1   OTU_2       rho
+## 1:    Bagged Y_OTU_132 OTU_705 -0.285294
+## 2:    Bagged Y_OTU_132  OTU_79 -0.283787
+## 3:    Bagged Y_OTU_136  OTU_99 -0.301448
+## 4:    Bagged  Y_OTU_36  OTU_99 -0.395957
+## 5:    Bagged   Y_OTU_5 OTU_204 -0.263784
+## 6:    Bagged   Y_OTU_5 OTU_364 -0.258673</code></pre>
+<pre class="r"><code>nrow(by_complete_negative_weights)</code></pre>
+<pre><code>## [1] 220</code></pre>
+<div id="exposed-communities" class="section level2">
+<h2>Exposed Communities</h2>
+<div id="positive-weights" class="section level3">
+<h3>Positive Weights</h3>
+<pre class="r"><code>by_complete_exposed_positive &lt;- by_complete_positive_weights[treatment == &quot;Exposed&quot;]
+by_complete_exposed_positive &lt;- by_complete_exposed_positive[, -1]
+gr_by_complete_exposed_positive &lt;- graph.data.frame(by_complete_exposed_positive, directed = FALSE)
+by_complete_exposed_positive_communities &lt;- cluster_fast_greedy(gr_by_complete_exposed_positive, 
+                                                           weights = E(gr_by_complete_exposed_positive)$rho)
+plot(by_complete_exposed_positive_communities, gr_by_complete_exposed_positive, 
+     layout = layout.fruchterman.reingold(gr_by_complete_exposed_positive),
+     rescaled = TRUE,
+     vertex.size = 2, 
+     vertex.label.cex = 0.25
+     )</code></pre>
+<p><img src="bacteria_yeast_community_analysis_files/figure-html/cep.1-1.png" width="672" /></p>
+</div>
+<div id="negative-weights" class="section level3">
+<h3>Negative Weights</h3>
+<pre class="r"><code>by_complete_exposed_negative &lt;- by_complete_negative_weights[treatment == &quot;Exposed&quot;]
+by_complete_exposed_negative &lt;- by_complete_exposed_negative[, -1]
+by_complete_exposed_negative[[3]] &lt;- abs(by_complete_exposed_negative[[3]])
+gr_by_complete_exposed_negative &lt;- graph.data.frame(by_complete_exposed_negative, directed = FALSE)
+by_complete_exposed_negative_communities &lt;- cluster_fast_greedy(gr_by_complete_exposed_negative, 
+                                                           weights = E(gr_by_complete_exposed_negative)$rho)
+plot(by_complete_exposed_negative_communities, gr_by_complete_exposed_negative, 
+     layout = layout.fruchterman.reingold(gr_by_complete_exposed_negative),
+     rescaled = TRUE,
+     vertex.size = 2, 
+     vertex.label.cex = 0.50
+     )</code></pre>
+<p><img src="bacteria_yeast_community_analysis_files/figure-html/cen.1-1.png" width="672" /></p>
+</div>
+</div>
+<div id="caged-communities" class="section level2">
+<h2>Caged Communities</h2>
+<div id="positive-weights-1" class="section level3">
+<h3>Positive Weights</h3>
+<pre class="r"><code>by_complete_caged_positive &lt;- by_complete_positive_weights[treatment == &quot;Caged&quot;]
+by_complete_caged_positive &lt;- by_complete_caged_positive[, -1]
+gr_by_complete_caged_positive &lt;- graph.data.frame(by_complete_caged_positive, directed = FALSE)
+by_complete_caged_positive_communities &lt;- cluster_fast_greedy(gr_by_complete_caged_positive, 
+                                                           weights = E(gr_by_complete_caged_positive)$rho)
+plot(by_complete_caged_positive_communities, gr_by_complete_caged_positive, 
+     layout = layout.fruchterman.reingold(gr_by_complete_caged_positive),
+     rescaled = TRUE,
+     vertex.size = 2, 
+     vertex.label.cex = 0.25
+     )</code></pre>
+<p><img src="bacteria_yeast_community_analysis_files/figure-html/ccp.1-1.png" width="672" /></p>
+</div>
+<div id="negative-weights-1" class="section level3">
+<h3>Negative Weights</h3>
+<pre class="r"><code>by_complete_caged_negative &lt;- by_complete_negative_weights[treatment == &quot;Caged&quot;]
+by_complete_caged_negative &lt;- by_complete_caged_negative[, -1]
+by_complete_caged_negative[[3]] &lt;- abs(by_complete_caged_negative[[3]])
+gr_by_complete_caged_negative &lt;- graph.data.frame(by_complete_caged_negative, directed = FALSE)
+by_complete_caged_negative_communities &lt;- cluster_fast_greedy(gr_by_complete_caged_negative, 
+                                                           weights = E(gr_by_complete_caged_negative)$rho)
+plot(by_complete_caged_negative_communities, gr_by_complete_caged_negative, 
+     layout = layout.fruchterman.reingold(gr_by_complete_caged_negative),
+     rescaled = TRUE,
+     vertex.size = 2, 
+     vertex.label.cex = 0.5
+     )</code></pre>
+<p><img src="bacteria_yeast_community_analysis_files/figure-html/ccn.1-1.png" width="672" /></p>
+</div>
+</div>
+<div id="bagged-communities" class="section level2">
+<h2>Bagged Communities</h2>
+<div id="positive-weights-2" class="section level3">
+<h3>Positive Weights</h3>
+<pre class="r"><code>by_complete_bagged_positive &lt;- by_complete_positive_weights[treatment == &quot;Bagged&quot;]
+by_complete_bagged_positive &lt;- by_complete_bagged_positive[, -1]
+gr_by_complete_bagged_positive &lt;- graph.data.frame(by_complete_bagged_positive, directed = FALSE)
+by_complete_bagged_positive_communities &lt;- cluster_fast_greedy(gr_by_complete_bagged_positive, 
+                                                           weights = E(gr_by_complete_bagged_positive)$rho)
+plot(by_complete_bagged_positive_communities, gr_by_complete_bagged_positive, 
+     layout = layout.fruchterman.reingold(gr_by_complete_bagged_positive),
+     rescaled = TRUE,
+     vertex.size = 2, 
+     vertex.label.cex = 0.25
+     )</code></pre>
+<p><img src="bacteria_yeast_community_analysis_files/figure-html/cbp.1-1.png" width="672" /></p>
+</div>
+<div id="negative-weights-2" class="section level3">
+<h3>Negative Weights</h3>
+<pre class="r"><code>by_complete_bagged_negative &lt;- by_complete_negative_weights[treatment == &quot;Bagged&quot;]
+by_complete_bagged_negative &lt;- by_complete_bagged_negative[, -1]
+by_complete_bagged_negative[[3]] &lt;- abs(by_complete_bagged_negative[[3]])
+gr_by_complete_bagged_negative &lt;- graph.data.frame(by_complete_bagged_negative, directed = FALSE)
+by_complete_bagged_negative_communities &lt;- cluster_fast_greedy(gr_by_complete_bagged_negative, 
+                                                           weights = E(gr_by_complete_bagged_negative)$rho)
+plot(by_complete_bagged_negative_communities, gr_by_complete_bagged_negative, 
+     layout = layout.fruchterman.reingold(gr_by_complete_bagged_negative),
+     rescaled = TRUE,
+     vertex.size = 2, 
+     vertex.label.cex = 0.5
+     )</code></pre>
+<p><img src="bacteria_yeast_community_analysis_files/figure-html/cbn.1-1.png" width="672" /></p>
+<p>The OTUs with the highest degree in the largest community are <code>OTU_307</code> and <code>OTU_32</code>:</p>
+<pre class="r"><code>degree(gr_by_complete_bagged_negative, communities(by_complete_bagged_negative_communities)[[1]])</code></pre>
+<pre><code>##  OTU_177  OTU_188  OTU_191  OTU_222  OTU_245  OTU_307   OTU_32  OTU_356 
+##        1        2        1        1        2       14       25        1 
+## OTU_4449 OTU_4488 OTU_5270  OTU_580  OTU_668  OTU_693  OTU_724  OTU_727 
+##        1        2        2        2        2        2        2        2 
+##  OTU_890  OTU_412 OTU_4479   OTU_62  OTU_648  OTU_762  OTU_779  OTU_857 
+##        2        1        1        1        1        1        1        1</code></pre>
+<p>These OTUs are:</p>
+<pre class="r"><code>taxa[OTU %in% c(&quot;OTU_307&quot;, &quot;OTU_32&quot;)]</code></pre>
+<pre><code>##        OTU   domain                phylum                 class
+## 1:  OTU_32 Bacteria unclassified_Bacteria unclassified_Bacteria
+## 2: OTU_307 Bacteria unclassified_Bacteria unclassified_Bacteria
+##                    order                family                 genus
+## 1: unclassified_Bacteria unclassified_Bacteria unclassified_Bacteria
+## 2: unclassified_Bacteria unclassified_Bacteria unclassified_Bacteria</code></pre>
+<p>The other OTUs in that community are:</p>
+<pre class="r"><code>taxa[OTU %in% communities(by_complete_bagged_negative_communities)[[1]]]</code></pre>
+<pre><code>##          OTU            domain                phylum                 class
+##  1: OTU_4449          Bacteria            Firmicutes               Bacilli
+##  2:  OTU_648          Bacteria         Bacteroidetes        Flavobacteriia
+##  3:  OTU_668          Bacteria        Actinobacteria        Actinobacteria
+##  4:  OTU_693          Bacteria        Proteobacteria   Gammaproteobacteria
+##  5: OTU_5270 unclassified_Root     unclassified_Root     unclassified_Root
+##  6:  OTU_724          Bacteria        Actinobacteria        Actinobacteria
+##  7:  OTU_779          Bacteria         Bacteroidetes           Bacteroidia
+##  8:  OTU_727          Bacteria        Proteobacteria   Gammaproteobacteria
+##  9:  OTU_177          Bacteria        Proteobacteria    Betaproteobacteria
+## 10:  OTU_762          Bacteria        Proteobacteria    Betaproteobacteria
+## 11:  OTU_857          Bacteria         Bacteroidetes        Flavobacteriia
+## 12:  OTU_890          Bacteria         Bacteroidetes      Sphingobacteriia
+## 13:  OTU_191          Bacteria        Proteobacteria   Gammaproteobacteria
+## 14:  OTU_188          Bacteria        Actinobacteria        Actinobacteria
+## 15: OTU_4479          Bacteria            Firmicutes               Bacilli
+## 16: OTU_4488          Bacteria            Firmicutes               Bacilli
+## 17:  OTU_222          Bacteria        Actinobacteria        Actinobacteria
+## 18:  OTU_245          Bacteria        Proteobacteria   Gammaproteobacteria
+## 19:   OTU_32          Bacteria unclassified_Bacteria unclassified_Bacteria
+## 20:  OTU_307          Bacteria unclassified_Bacteria unclassified_Bacteria
+## 21:  OTU_356          Bacteria         Bacteroidetes        Flavobacteriia
+## 22:   OTU_62          Bacteria        Proteobacteria   Gammaproteobacteria
+## 23:  OTU_412          Bacteria        Proteobacteria   Alphaproteobacteria
+## 24:  OTU_580          Bacteria        Proteobacteria    Betaproteobacteria
+##          OTU            domain                phylum                 class
+##                     order                       family
+##  1:            Bacillales           Paenibacillaceae 1
+##  2:      Flavobacteriales            Flavobacteriaceae
+##  3:       Actinomycetales               Micrococcaceae
+##  4:         Aeromonadales               Aeromonadaceae
+##  5:     unclassified_Root            unclassified_Root
+##  6:       Actinomycetales         Propionibacteriaceae
+##  7:         Bacteroidales               Prevotellaceae
+##  8:       Pseudomonadales                Moraxellaceae
+##  9:       Burkholderiales             Oxalobacteraceae
+## 10:       Burkholderiales               Comamonadaceae
+## 11:      Flavobacteriales            Flavobacteriaceae
+## 12:    Sphingobacteriales          Sphingobacteriaceae
+## 13:       Pseudomonadales                Moraxellaceae
+## 14:       Actinomycetales               Micrococcaceae
+## 15:            Bacillales           Paenibacillaceae 1
+## 16:       Lactobacillales             Streptococcaceae
+## 17:       Actinomycetales              Nocardioidaceae
+## 18:       Pseudomonadales                Moraxellaceae
+## 19: unclassified_Bacteria        unclassified_Bacteria
+## 20: unclassified_Bacteria        unclassified_Bacteria
+## 21:      Flavobacteriales            Flavobacteriaceae
+## 22:       Pseudomonadales                Moraxellaceae
+## 23:       Rhodobacterales             Rhodobacteraceae
+## 24:       Burkholderiales unclassified_Burkholderiales
+##                     order                       family
+##                             genus
+##  1:                 Paenibacillus
+##  2:              Chryseobacterium
+##  3:                       Kocuria
+##  4:   unclassified_Aeromonadaceae
+##  5:             unclassified_Root
+##  6:             Propionibacterium
+##  7:                    Prevotella
+##  8:    unclassified_Moraxellaceae
+##  9:                     Rugamonas
+## 10:   unclassified_Comamonadaceae
+## 11:                      Soonwooa
+## 12:              Sphingobacterium
+## 13:                 Enhydrobacter
+## 14:                        Rothia
+## 15:              Saccharibacillus
+## 16:                 Streptococcus
+## 17:                  Nocardioides
+## 18:                 Acinetobacter
+## 19:         unclassified_Bacteria
+## 20:         unclassified_Bacteria
+## 21:               Cloacibacterium
+## 22:                 Acinetobacter
+## 23: unclassified_Rhodobacteraceae
+## 24:  unclassified_Burkholderiales
+##                             genus</code></pre>
+</div>
+</div>
+<div id="all-communities" class="section level2">
+<h2>All Communities</h2>
+<div id="positive-weights-3" class="section level3">
+<h3>Positive Weights</h3>
+<pre class="r"><code>by_complete_all_positive &lt;- by_complete_positive_weights[, -1]
+gr_by_complete_all_positive &lt;- graph.data.frame(by_complete_all_positive, directed = FALSE)
+gr_by_complete_all_positive &lt;- simplify(gr_by_complete_all_positive, 
+                                    edge.attr.comb = list(weight = &quot;mean&quot;))
+by_complete_all_positive_communities &lt;- cluster_fast_greedy(gr_by_complete_all_positive, 
+                                    weights = E(gr_by_complete_all_positive)$rho)
+plot(by_complete_all_positive_communities, gr_by_complete_all_positive, 
+     layout = layout.fruchterman.reingold(gr_by_complete_all_positive),
+     rescaled = TRUE,
+     vertex.size = 2, 
+     vertex.label.cex = 0.25
+)</code></pre>
+<p><img src="bacteria_yeast_community_analysis_files/figure-html/cap.1-1.png" width="672" /></p>
+</div>
+<div id="negative-weights-3" class="section level3">
+<h3>Negative Weights</h3>
+<pre class="r"><code>by_complete_all_negative &lt;- by_complete_negative_weights[, -1]
+by_complete_all_negative[[3]] &lt;- abs(by_complete_all_negative[[3]])
+gr_by_complete_all_negative &lt;- graph.data.frame(by_complete_all_negative, directed = FALSE)
+gr_by_complete_all_negative &lt;- simplify(gr_by_complete_all_negative, 
+                                    edge.attr.comb=list(weight = &quot;mean&quot;))
+by_complete_all_negative_communities &lt;- cluster_fast_greedy(gr_by_complete_all_negative, 
+                                    weights = E(gr_by_complete_all_negative)$rho)
+plot(by_complete_all_negative_communities, gr_by_complete_all_negative, 
+     layout = layout.fruchterman.reingold(gr_by_complete_all_negative),
+     rescaled = TRUE,
+     vertex.size = 2, 
+     vertex.label.cex = 0.65
+)</code></pre>
+<p><img src="bacteria_yeast_community_analysis_files/figure-html/can.1-1.png" width="672" /></p>
+</div>
+</div>
+</div>
 
 
 

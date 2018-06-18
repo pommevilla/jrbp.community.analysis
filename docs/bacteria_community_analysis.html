@@ -185,7 +185,7 @@ $(document).ready(function ()  {
       ignoreSelector: ".toc-ignore",
       scrollTo: 0
     };
-    options.showAndHide = true;
+    options.showAndHide = false;
     options.smoothScroll = true;
 
     // tocify
@@ -248,6 +248,12 @@ div.tocify {
   border-radius: 0px;
 }
 
+.tocify-subheader {
+  display: inline;
+}
+.tocify-subheader .tocify-item {
+  font-size: 0.95em;
+}
 
 </style>
 
@@ -798,7 +804,7 @@ trimmed_all_positive_communities &lt;- cluster_fast_greedy(gr_trimmed_all_positi
 <pre><code>## Error in cluster_fast_greedy(gr_trimmed_all_positive, weights = E(gr_trimmed_all_positive)$rho): At fast_community.c:639 : fast-greedy community finding works only on graphs without multiple edges, Invalid value</code></pre>
 <p>Because all the treatments are being combined into one graph, there can be multiple (parallel) edges between OTUs. The clustering algorithm we have been using requires that there not be multiple edges between OTUs. We will collapse multiple edges by taking their mean - that is the mean correlation of the two OTUs across all treatments. (Are there potential problems with this collapsing rule?)</p>
 <pre class="r"><code>gr_trimmed_all_positive &lt;- simplify(gr_trimmed_all_positive, 
-                                    edge.attr.comb = list(weight = &quot;mean&quot;))
+                                    edge.attr.comb = &quot;mean&quot;)
 trimmed_all_positive_communities &lt;- cluster_fast_greedy(gr_trimmed_all_positive, 
                                     weights = E(gr_trimmed_all_positive)$rho)
 plot(trimmed_all_positive_communities, gr_trimmed_all_positive, 
@@ -816,7 +822,7 @@ plot(trimmed_all_positive_communities, gr_trimmed_all_positive,
 trimmed_all_negative[[3]] &lt;- abs(trimmed_all_negative[[3]])
 gr_trimmed_all_negative &lt;- graph.data.frame(trimmed_all_negative, directed = FALSE)
 gr_trimmed_all_negative &lt;- simplify(gr_trimmed_all_negative, 
-                                    edge.attr.comb=list(weight = &quot;mean&quot;))
+                                    edge.attr.comb = &quot;mean&quot;)
 trimmed_all_negative_communities &lt;- cluster_fast_greedy(gr_trimmed_all_negative, 
                                     weights = E(gr_trimmed_all_negative)$rho)
 plot(trimmed_all_negative_communities, gr_trimmed_all_negative, 
@@ -828,6 +834,22 @@ plot(trimmed_all_negative_communities, gr_trimmed_all_negative,
 <p><img src="bacteria_community_analysis_files/figure-html/tan.1-1.png" width="672" /></p>
 <p><code>OTU_6</code> is again in the center of a community. The members of that community are:</p>
 <pre class="r"><code>taxa[OTU %in% communities(trimmed_all_negative_communities)[[2]]]</code></pre>
+<pre><code>##       OTU   domain         phylum               class             order
+## 1:  OTU_3 Bacteria Proteobacteria Alphaproteobacteria  Rhodospirillales
+## 2:  OTU_5 Bacteria Proteobacteria  Betaproteobacteria   Burkholderiales
+## 3:  OTU_7 Bacteria Proteobacteria Gammaproteobacteria Enterobacteriales
+## 4:  OTU_8 Bacteria  Bacteroidetes      Flavobacteriia  Flavobacteriales
+## 5:  OTU_9 Bacteria     Firmicutes             Bacilli        Bacillales
+## 6: OTU_27 Bacteria     Firmicutes             Bacilli   Lactobacillales
+##                family          genus
+## 1:   Acetobacteraceae  Neokomagataea
+## 2:   Burkholderiaceae   Burkholderia
+## 3: Enterobacteriaceae        Pantoea
+## 4:  Flavobacteriaceae       Soonwooa
+## 5:  Staphylococcaceae Staphylococcus
+## 6:   Lactobacillaceae  Lactobacillus</code></pre>
+<p>And we see a preponderence of <span class="math inline">\(\textit{proteobacteria}\)</span>. We also see the familiar pattern with <code>OTU_5</code>. The OTUs in this cluster are:</p>
+<pre class="r"><code>taxa[OTU %in% communities(trimmed_all_negative_communities)[[1]]]</code></pre>
 <pre><code>##          OTU   domain                phylum                       class
 ##  1:    OTU_6 Bacteria        Proteobacteria         Gammaproteobacteria
 ##  2:   OTU_16 Bacteria        Proteobacteria          Betaproteobacteria
@@ -885,22 +907,6 @@ plot(trimmed_all_negative_communities, gr_trimmed_all_negative,
 ## 16:  unclassified_Enterobacteriaceae
 ## 17:      unclassified_Comamonadaceae
 ## 18:                      Actinomyces</code></pre>
-<p>And we see a preponderence of <span class="math inline">\(\textit{proteobacteria}\)</span>. We also see the familiar pattern with <code>OTU_5</code>. The OTUs in this cluster are:</p>
-<pre class="r"><code>taxa[OTU %in% communities(trimmed_all_negative_communities)[[1]]]</code></pre>
-<pre><code>##       OTU   domain         phylum               class             order
-## 1:  OTU_3 Bacteria Proteobacteria Alphaproteobacteria  Rhodospirillales
-## 2:  OTU_5 Bacteria Proteobacteria  Betaproteobacteria   Burkholderiales
-## 3:  OTU_7 Bacteria Proteobacteria Gammaproteobacteria Enterobacteriales
-## 4:  OTU_8 Bacteria  Bacteroidetes      Flavobacteriia  Flavobacteriales
-## 5:  OTU_9 Bacteria     Firmicutes             Bacilli        Bacillales
-## 6: OTU_27 Bacteria     Firmicutes             Bacilli   Lactobacillales
-##                family          genus
-## 1:   Acetobacteraceae  Neokomagataea
-## 2:   Burkholderiaceae   Burkholderia
-## 3: Enterobacteriaceae        Pantoea
-## 4:  Flavobacteriaceae       Soonwooa
-## 5:  Staphylococcaceae Staphylococcus
-## 6:   Lactobacillaceae  Lactobacillus</code></pre>
 </div>
 </div>
 </div>
@@ -938,7 +944,7 @@ plot(complete_exposed_positive_communities, gr_complete_exposed_positive,
      layout = layout.fruchterman.reingold(gr_complete_exposed_positive),
      rescaled = TRUE,
      vertex.size = 2, 
-     vertex.label.cex = 0.25
+     vertex.label = NA
      )</code></pre>
 <p><img src="bacteria_community_analysis_files/figure-html/cep.1-1.png" width="672" /></p>
 </div>
@@ -954,7 +960,7 @@ plot(complete_exposed_negative_communities, gr_complete_exposed_negative,
      layout = layout.fruchterman.reingold(gr_complete_exposed_negative),
      rescaled = TRUE,
      vertex.size = 2, 
-     vertex.label.cex = 0.25
+     vertex.label = NA
      )</code></pre>
 <p><img src="bacteria_community_analysis_files/figure-html/cen.1-1.png" width="672" /></p>
 </div>
@@ -972,7 +978,7 @@ plot(complete_caged_positive_communities, gr_complete_caged_positive,
      layout = layout.fruchterman.reingold(gr_complete_caged_positive),
      rescaled = TRUE,
      vertex.size = 2, 
-     vertex.label.cex = 0.25
+     vertex.label = NA
      )</code></pre>
 <p><img src="bacteria_community_analysis_files/figure-html/ccp.1-1.png" width="672" /></p>
 </div>
@@ -1154,7 +1160,7 @@ plot(complete_bagged_negative_communities, gr_complete_bagged_negative,
 <pre class="r"><code>complete_all_positive &lt;- complete_positive_weights[, -1]
 gr_complete_all_positive &lt;- graph.data.frame(complete_all_positive, directed = FALSE)
 gr_complete_all_positive &lt;- simplify(gr_complete_all_positive, 
-                                    edge.attr.comb = list(weight = &quot;mean&quot;))
+                                    edge.attr.comb = &quot;mean&quot;)
 complete_all_positive_communities &lt;- cluster_fast_greedy(gr_complete_all_positive, 
                                     weights = E(gr_complete_all_positive)$rho)
 plot(complete_all_positive_communities, gr_complete_all_positive, 
@@ -1171,7 +1177,7 @@ plot(complete_all_positive_communities, gr_complete_all_positive,
 complete_all_negative[[3]] &lt;- abs(complete_all_negative[[3]])
 gr_complete_all_negative &lt;- graph.data.frame(complete_all_negative, directed = FALSE)
 gr_complete_all_negative &lt;- simplify(gr_complete_all_negative, 
-                                    edge.attr.comb=list(weight = &quot;mean&quot;))
+                                    edge.attr.comb = &quot;mean&quot;)
 complete_all_negative_communities &lt;- cluster_fast_greedy(gr_complete_all_negative, 
                                     weights = E(gr_complete_all_negative)$rho)
 plot(complete_all_negative_communities, gr_complete_all_negative, 
@@ -1183,144 +1189,105 @@ plot(complete_all_negative_communities, gr_complete_all_negative,
 <p><img src="bacteria_community_analysis_files/figure-html/can.1-1.png" width="672" /> Same story, but the communities aren’t as distinct. The OTUs in the <code>OTU_6</code> cluster:</p>
 <pre class="r"><code>taxa[OTU %in% communities(complete_all_negative_communities)[[2]]]</code></pre>
 <pre><code>##          OTU   domain                phylum                       class
-##  1:    OTU_6 Bacteria        Proteobacteria         Gammaproteobacteria
-##  2:    OTU_7 Bacteria        Proteobacteria         Gammaproteobacteria
-##  3:    OTU_9 Bacteria            Firmicutes                     Bacilli
-##  4:   OTU_16 Bacteria        Proteobacteria          Betaproteobacteria
-##  5:   OTU_45 Bacteria        Proteobacteria          Betaproteobacteria
-##  6:   OTU_49 Bacteria        Actinobacteria              Actinobacteria
-##  7:   OTU_92 Bacteria        Proteobacteria         Alphaproteobacteria
-##  8:  OTU_233 Bacteria unclassified_Bacteria       unclassified_Bacteria
-##  9:  OTU_336 Bacteria        Proteobacteria         Gammaproteobacteria
-## 10:  OTU_395 Bacteria        Proteobacteria         Alphaproteobacteria
-## 11:  OTU_446 Bacteria        Actinobacteria              Actinobacteria
-## 12: OTU_1011  Archaea        Woesearchaeota unclassified_Woesearchaeota
-## 13: OTU_1035 Bacteria        Proteobacteria         Deltaproteobacteria
-## 14: OTU_1076 Bacteria            Firmicutes                  Clostridia
-## 15: OTU_3950 Bacteria        Proteobacteria         Alphaproteobacteria
-##                                order                           family
-##  1:                  Pseudomonadales                 Pseudomonadaceae
-##  2:                Enterobacteriales               Enterobacteriaceae
-##  3:                       Bacillales                Staphylococcaceae
-##  4:                    Rhodocyclales                   Rhodocyclaceae
-##  5:                  Burkholderiales                 Burkholderiaceae
-##  6:                  Actinomycetales                Microbacteriaceae
-##  7:                      Rhizobiales              Methylobacteriaceae
-##  8:            unclassified_Bacteria            unclassified_Bacteria
-##  9: unclassified_Gammaproteobacteria unclassified_Gammaproteobacteria
-## 10:                      Rhizobiales                Bradyrhizobiaceae
-## 11:                  Actinomycetales                  Nocardioidaceae
-## 12:      unclassified_Woesearchaeota      unclassified_Woesearchaeota
-## 13:               Desulfovibrionales              Desulfovibrionaceae
-## 14:                    Clostridiales                  Lachnospiraceae
-## 15:                 Rhodospirillales                Rhodospirillaceae
-##                                genus
-##  1:                      Pseudomonas
-##  2:                          Pantoea
-##  3:                   Staphylococcus
-##  4:                    Dechloromonas
-##  5:                      Cupriavidus
-##  6:                    Rathayibacter
-##  7:                 Methylobacterium
-##  8:            unclassified_Bacteria
-##  9: unclassified_Gammaproteobacteria
-## 10:   unclassified_Bradyrhizobiaceae
-## 11:                     Nocardioides
-## 12:      unclassified_Woesearchaeota
-## 13:                    Desulfovibrio
-## 14:                 Clostridium XlVa
-## 15:   unclassified_Rhodospirillaceae</code></pre>
+##  1:   OTU_18 Bacteria        Proteobacteria         Gammaproteobacteria
+##  2:   OTU_21 Bacteria        Proteobacteria         Alphaproteobacteria
+##  3:   OTU_22 Bacteria        Actinobacteria              Actinobacteria
+##  4:   OTU_44 Bacteria        Actinobacteria              Actinobacteria
+##  5:   OTU_88 Bacteria        Proteobacteria         Gammaproteobacteria
+##  6:  OTU_131 Bacteria unclassified_Bacteria       unclassified_Bacteria
+##  7:  OTU_164 Bacteria   Deinococcus-Thermus                  Deinococci
+##  8:  OTU_172 Bacteria unclassified_Bacteria       unclassified_Bacteria
+##  9:  OTU_256 Bacteria        Actinobacteria              Actinobacteria
+## 10:  OTU_510 Bacteria unclassified_Bacteria       unclassified_Bacteria
+## 11:  OTU_669 Bacteria            Firmicutes                     Bacilli
+## 12: OTU_1934  Archaea        Diapherotrites unclassified_Diapherotrites
+## 13: OTU_4004  Archaea        Diapherotrites unclassified_Diapherotrites
+## 14: OTU_4153 Bacteria        Proteobacteria         Gammaproteobacteria
+## 15: OTU_4191 Bacteria unclassified_Bacteria       unclassified_Bacteria
+## 16: OTU_4218 Bacteria        Actinobacteria              Actinobacteria
+##                           order                       family
+##  1:             Pseudomonadales                Moraxellaceae
+##  2:            Sphingomonadales           Erythrobacteraceae
+##  3:             Actinomycetales unclassified_Actinomycetales
+##  4:             Actinomycetales               Micrococcaceae
+##  5:             Xanthomonadales              Sinobacteraceae
+##  6:       unclassified_Bacteria        unclassified_Bacteria
+##  7:               Deinococcales               Deinococcaceae
+##  8:       unclassified_Bacteria        unclassified_Bacteria
+##  9:             Actinomycetales               Micrococcaceae
+## 10:       unclassified_Bacteria        unclassified_Bacteria
+## 11:                  Bacillales          Alicyclobacillaceae
+## 12: unclassified_Diapherotrites  unclassified_Diapherotrites
+## 13: unclassified_Diapherotrites  unclassified_Diapherotrites
+## 14:               Legionellales                 Coxiellaceae
+## 15:       unclassified_Bacteria        unclassified_Bacteria
+## 16:             Actinomycetales              Nocardioidaceae
+##                               genus
+##  1:                   Enhydrobacter
+##  2: unclassified_Erythrobacteraceae
+##  3:    unclassified_Actinomycetales
+##  4:                     Micrococcus
+##  5:    unclassified_Sinobacteraceae
+##  6:           unclassified_Bacteria
+##  7:                     Deinococcus
+##  8:           unclassified_Bacteria
+##  9:                          Rothia
+## 10:           unclassified_Bacteria
+## 11:                Alicyclobacillus
+## 12:         Candidatus Iainarchaeum
+## 13:         Candidatus Iainarchaeum
+## 14:                       Aquicella
+## 15:           unclassified_Bacteria
+## 16:                     Marmoricola</code></pre>
 <pre class="r"><code>taxa[OTU %in% communities(complete_all_negative_communities)[[4]]]</code></pre>
 <pre><code>##          OTU   domain                    phylum                      class
-##  1:    OTU_5 Bacteria            Proteobacteria         Betaproteobacteria
-##  2:   OTU_20 Bacteria            Proteobacteria        Gammaproteobacteria
-##  3:   OTU_27 Bacteria                Firmicutes                    Bacilli
-##  4:   OTU_42 Bacteria                Firmicutes                    Bacilli
-##  5:   OTU_43 Bacteria            Actinobacteria             Actinobacteria
-##  6:  OTU_110 Bacteria Cyanobacteria/Chloroplast                Chloroplast
-##  7:  OTU_130 Bacteria            Proteobacteria        Alphaproteobacteria
-##  8:  OTU_148 Bacteria             Bacteroidetes           Sphingobacteriia
-##  9:  OTU_156 Bacteria     unclassified_Bacteria      unclassified_Bacteria
-## 10:  OTU_260 Bacteria            Proteobacteria        Alphaproteobacteria
-## 11:  OTU_267 Bacteria             Bacteroidetes           Sphingobacteriia
-## 12:  OTU_435 Bacteria             Bacteroidetes                Bacteroidia
-## 13:  OTU_550 Bacteria              Fusobacteria              Fusobacteriia
-## 14: OTU_1205 Bacteria             Bacteroidetes                 Cytophagia
-## 15: OTU_3128 Bacteria Cyanobacteria/Chloroplast              Cyanobacteria
-## 16: OTU_3181 Bacteria     unclassified_Bacteria      unclassified_Bacteria
-## 17: OTU_3204 Bacteria     unclassified_Bacteria      unclassified_Bacteria
-## 18: OTU_3505 Bacteria             Parcubacteria unclassified_Parcubacteria
-## 19: OTU_3509 Bacteria            Proteobacteria        Gammaproteobacteria
-## 20: OTU_3603 Bacteria            Proteobacteria        Deltaproteobacteria
-## 21: OTU_3646 Bacteria            Proteobacteria         Betaproteobacteria
-## 22: OTU_3986 Bacteria             Parcubacteria unclassified_Parcubacteria
-## 23: OTU_4161 Bacteria            Proteobacteria        Deltaproteobacteria
-## 24: OTU_4337 Bacteria                Firmicutes                 Clostridia
-## 25: OTU_4345 Bacteria            Proteobacteria        Gammaproteobacteria
-## 26: OTU_4385 Bacteria     unclassified_Bacteria      unclassified_Bacteria
-## 27: OTU_4598 Bacteria Cyanobacteria/Chloroplast                Chloroplast
-## 28: OTU_4616 Bacteria     unclassified_Bacteria      unclassified_Bacteria
-##          OTU   domain                    phylum                      class
-##                               order                          family
-##  1:                 Burkholderiales                Burkholderiaceae
-##  2:                 Xanthomonadales                Xanthomonadaceae
-##  3:                 Lactobacillales                Lactobacillaceae
-##  4:                      Bacillales              Paenibacillaceae 1
-##  5:                 Actinomycetales    unclassified_Actinomycetales
-##  6:        unclassified_Chloroplast                     Chloroplast
-##  7:                Sphingomonadales               Sphingomonadaceae
-##  8:              Sphingobacteriales                  Saprospiraceae
-##  9:           unclassified_Bacteria           unclassified_Bacteria
-## 10:                     Rhizobiales                Beijerinckiaceae
-## 11:              Sphingobacteriales             Sphingobacteriaceae
-## 12:                   Bacteroidales                  Prevotellaceae
-## 13:                 Fusobacteriales                Fusobacteriaceae
-## 14:                    Cytophagales       unclassified_Cytophagales
-## 15:      unclassified_Cyanobacteria                        Family V
-## 16:           unclassified_Bacteria           unclassified_Bacteria
-## 17:           unclassified_Bacteria           unclassified_Bacteria
-## 18:      unclassified_Parcubacteria      unclassified_Parcubacteria
-## 19:               Oceanospirillales                  Halomonadaceae
-## 20:               Bdellovibrionales              Bdellovibrionaceae
-## 21: unclassified_Betaproteobacteria unclassified_Betaproteobacteria
-## 22:      unclassified_Parcubacteria      unclassified_Parcubacteria
-## 23:               Bdellovibrionales              Bdellovibrionaceae
-## 24:                   Clostridiales                 Lachnospiraceae
-## 25:                   Aeromonadales                  Aeromonadaceae
-## 26:           unclassified_Bacteria           unclassified_Bacteria
-## 27:        unclassified_Chloroplast                     Chloroplast
-## 28:           unclassified_Bacteria           unclassified_Bacteria
-##                               order                          family
+##  1:   OTU_23 Bacteria            Proteobacteria        Alphaproteobacteria
+##  2:   OTU_28 Bacteria                Firmicutes                    Bacilli
+##  3:   OTU_51 Bacteria             Parcubacteria unclassified_Parcubacteria
+##  4:   OTU_60 Bacteria            Proteobacteria        Gammaproteobacteria
+##  5:   OTU_94 Bacteria Cyanobacteria/Chloroplast              Cyanobacteria
+##  6:  OTU_214 Bacteria            Actinobacteria             Actinobacteria
+##  7:  OTU_225 Bacteria               Chloroflexi             Thermomicrobia
+##  8:  OTU_253 Bacteria                Firmicutes                 Clostridia
+##  9:  OTU_267 Bacteria             Bacteroidetes           Sphingobacteriia
+## 10:  OTU_345 Bacteria                Firmicutes                 Clostridia
+## 11: OTU_1300  Archaea             Pacearchaeota unclassified_Pacearchaeota
+## 12: OTU_2079 Bacteria             Bacteroidetes unclassified_Bacteroidetes
+## 13: OTU_2168 Bacteria           Verrucomicrobia                   Opitutae
+## 14: OTU_3913 Bacteria     unclassified_Bacteria      unclassified_Bacteria
+## 15: OTU_4508 Bacteria            Proteobacteria        Alphaproteobacteria
+##                          order                     family
+##  1:           Sphingomonadales          Sphingomonadaceae
+##  2:                 Bacillales         Paenibacillaceae 1
+##  3: unclassified_Parcubacteria unclassified_Parcubacteria
+##  4:          Oceanospirillales             Halomonadaceae
+##  5: unclassified_Cyanobacteria                   Family I
+##  6:            Actinomycetales          Cellulomonadaceae
+##  7:          Sphaerobacterales         Sphaerobacteraceae
+##  8:              Clostridiales         Gracilibacteraceae
+##  9:         Sphingobacteriales        Sphingobacteriaceae
+## 10:              Clostridiales           Clostridiaceae 1
+## 11: unclassified_Pacearchaeota unclassified_Pacearchaeota
+## 12: unclassified_Bacteroidetes unclassified_Bacteroidetes
+## 13:                 Opitutales                Opitutaceae
+## 14:      unclassified_Bacteria      unclassified_Bacteria
+## 15:              Rickettsiales             Rickettsiaceae
 ##                                   genus
-##  1:                        Burkholderia
-##  2:                         Xanthomonas
-##  3:                       Lactobacillus
-##  4:                       Paenibacillus
-##  5:        unclassified_Actinomycetales
-##  6:                     Bacillariophyta
-##  7:                        Sphingomonas
-##  8:         unclassified_Saprospiraceae
-##  9:               unclassified_Bacteria
-## 10:       unclassified_Beijerinckiaceae
-## 11:    unclassified_Sphingobacteriaceae
-## 12:                          Prevotella
-## 13:                       Fusobacterium
-## 14:           unclassified_Cytophagales
-## 15:                                 GpV
-## 16:               unclassified_Bacteria
-## 17:               unclassified_Bacteria
-## 18: Parcubacteria_genera_incertae_sedis
-## 19:         unclassified_Halomonadaceae
-## 20:                       Vampirovibrio
-## 21:     unclassified_Betaproteobacteria
-## 22: Parcubacteria_genera_incertae_sedis
-## 23:                        Bdellovibrio
-## 24:        unclassified_Lachnospiraceae
-## 25:         unclassified_Aeromonadaceae
-## 26:               unclassified_Bacteria
-## 27:                        Streptophyta
-## 28:               unclassified_Bacteria
-##                                   genus</code></pre>
+##  1:                        Sphingomonas
+##  2:                       Paenibacillus
+##  3: Parcubacteria_genera_incertae_sedis
+##  4:                           Kushneria
+##  5:                                 GpI
+##  6:                        Cellulomonas
+##  7:                         Nitrolancea
+##  8:                       Gracilibacter
+##  9:    unclassified_Sphingobacteriaceae
+## 10:           Clostridium sensu stricto
+## 11:   Pacearchaeota Incertae Sedis AR13
+## 12:          unclassified_Bacteroidetes
+## 13:                            Opitutus
+## 14:               unclassified_Bacteria
+## 15:                          Rickettsia</code></pre>
 </div>
 </div>
 <div id="patristic-distance-analysis" class="section level2">
@@ -1350,7 +1317,7 @@ trimmed_bird &lt;- bird_data[which(apply(complete_data, 1, function(x) any(otus_
 <pre class="r"><code>trimmed_bird_positive &lt;- trimmed_bird[trimmed_bird[[&#39;rho&#39;]] &gt; 0]
 gr_trimmed_bird_positive &lt;- graph.data.frame(trimmed_bird_positive, directed = FALSE)
 gr_trimmed_bird_positive &lt;- simplify(gr_trimmed_bird_positive, 
-                                    edge.attr.comb=list(weight = &quot;mean&quot;))
+                                    edge.attr.comb = &quot;mean&quot;)
 trimmed_bird_positive_communities &lt;- cluster_fast_greedy(gr_trimmed_bird_positive, 
                                     weights = E(gr_trimmed_bird_positive)$rho)
 plot(trimmed_bird_positive_communities, gr_trimmed_bird_positive, 
@@ -1359,7 +1326,7 @@ plot(trimmed_bird_positive_communities, gr_trimmed_bird_positive,
      vertex.size = 2, 
      vertex.label.cex = 0.25
 )</code></pre>
-<p><img src="bacteria_community_analysis_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<p><img src="bacteria_community_analysis_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
 <pre class="r"><code>plot(trimmed_bird_positive_communities, gr_trimmed_bird_positive, 
      layout = layout.fruchterman.reingold(gr_trimmed_bird_positive),
      rescaled = TRUE,
@@ -1368,10 +1335,10 @@ plot(trimmed_bird_positive_communities, gr_trimmed_bird_positive,
      vertex.label = ifelse(V(gr_trimmed_bird_positive)$name == &quot;OTU_6&quot;, 
                            V(gr_trimmed_bird_positive)$name, &quot;&quot;)
 )</code></pre>
-<p><img src="bacteria_community_analysis_files/figure-html/unnamed-chunk-15-2.png" width="672" /></p>
+<p><img src="bacteria_community_analysis_files/figure-html/unnamed-chunk-7-2.png" width="672" /></p>
 <pre class="r"><code>adjacent_vertices(gr_trimmed_bird_positive, &quot;OTU_6&quot;)</code></pre>
 <pre><code>## $OTU_6
-## + 2/401 vertices, named, from c7a29d3:
+## + 2/401 vertices, named, from 83c24de:
 ## [1] OTU_5931 OTU_442</code></pre>
 <pre class="r"><code>degree(gr_trimmed_bird_positive, &quot;OTU_6&quot;)</code></pre>
 <pre><code>## OTU_6 
@@ -1383,7 +1350,7 @@ plot(trimmed_bird_positive_communities, gr_trimmed_bird_positive,
 trimmed_bird_negative[[3]] &lt;- abs(trimmed_bird_negative[[3]])
 gr_trimmed_bird_negative &lt;- graph.data.frame(trimmed_bird_negative, directed = FALSE)
 gr_trimmed_bird_negative &lt;- simplify(gr_trimmed_bird_negative, 
-                                    edge.attr.comb=list(weight = &quot;mean&quot;))
+                                    edge.attr.comb = &quot;mean&quot;)
 trimmed_bird_negative_communities &lt;- cluster_fast_greedy(gr_trimmed_bird_negative, 
                                     weights = E(gr_trimmed_bird_negative)$rho)
 plot(trimmed_bird_negative_communities, gr_trimmed_bird_negative, 
@@ -1392,11 +1359,11 @@ plot(trimmed_bird_negative_communities, gr_trimmed_bird_negative,
      vertex.size = 2, 
      vertex.label.cex = 0.25
 )</code></pre>
-<p><img src="bacteria_community_analysis_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
+<p><img src="bacteria_community_analysis_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
 <pre class="r"><code>gr_trimmed_bird_negative</code></pre>
-<pre><code>## IGRAPH 6070bf7 UN-- 2 1 -- 
-## + attr: name (v/c), rho (e/x)
-## + edge from 6070bf7 (vertex names):
+<pre><code>## IGRAPH 406b755 UN-- 2 1 -- 
+## + attr: name (v/c), rho (e/n)
+## + edge from 406b755 (vertex names):
 ## [1] OTU_4898--OTU_9</code></pre>
 <pre class="r"><code>taxa[OTU %in% c(&quot;OTU_4898&quot;, &quot;OTU_9&quot;)]</code></pre>
 <pre><code>##      OTU   domain     phylum   class      order            family
@@ -1412,7 +1379,7 @@ plot(trimmed_bird_negative_communities, gr_trimmed_bird_negative,
 <pre class="r"><code>bird_positive &lt;- bird_data[bird_data[[&#39;rho&#39;]] &gt; 0]
 gr_bird_positive &lt;- graph.data.frame(bird_positive, directed = FALSE)
 gr_bird_positive &lt;- simplify(gr_bird_positive, 
-                                    edge.attr.comb=list(weight = &quot;mean&quot;))
+                                    edge.attr.comb = &quot;mean&quot;)
 bird_positive_communities &lt;- cluster_fast_greedy(gr_bird_positive, 
                                     weights = E(gr_bird_positive)$rho)
 plot(bird_positive_communities, gr_bird_positive, 
@@ -1421,7 +1388,7 @@ plot(bird_positive_communities, gr_bird_positive,
      vertex.size = 2, 
      vertex.label.cex = 0.25
 )</code></pre>
-<p><img src="bacteria_community_analysis_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
+<p><img src="bacteria_community_analysis_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
 </div>
 <div id="negative-weights-9" class="section level3">
 <h3>Negative Weights</h3>
@@ -1429,7 +1396,7 @@ plot(bird_positive_communities, gr_bird_positive,
 bird_negative[[3]] &lt;- abs(bird_negative[[3]])
 gr_bird_negative &lt;- graph.data.frame(bird_negative, directed = FALSE)
 gr_bird_negative &lt;- simplify(gr_bird_negative, 
-                                    edge.attr.comb = list(weight = &quot;mean&quot;))
+                                    edge.attr.comb = &quot;mean&quot;)
 bird_negative_communities &lt;- cluster_fast_greedy(gr_bird_negative, 
                                     weights = E(gr_bird_negative)$rho)
 plot(bird_negative_communities, gr_bird_negative, 
@@ -1438,7 +1405,7 @@ plot(bird_negative_communities, gr_bird_negative,
      vertex.size = 2, 
      vertex.label.cex = 0.25
 )</code></pre>
-<p><img src="bacteria_community_analysis_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
+<p><img src="bacteria_community_analysis_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
 </div>
 </div>
 </div>

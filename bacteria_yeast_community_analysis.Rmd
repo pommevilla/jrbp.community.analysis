@@ -30,6 +30,7 @@ nrow(taxa)
 remove <- taxa[which(taxa[[4]] %in% c("Cyanobacteria","Chloroplast")),]$OTU
 taxa <- taxa[-c(remove),]
 nrow(taxa)
+#5128
 ```
 
 `cooccurrence_data` contains coccurrence data for bacteria and yeast.  The bacteria-bacteria interactions should still be the same as in the bacteria only analysis.  Again, we remove any chloroplast or cyanabacteria relation data (operations done in this order for running time concerns).
@@ -42,13 +43,23 @@ cooccurrence_data <- data.table(read.table("./data/bacteria-yeast/bacteria_yeast
 cooccurrence_data <- cooccurrence_data[p <= 0.05, -5]
 
 nrow(cooccurrence_data)
+# 557643
 
 complete_data <- cooccurrence_data[-c(which(apply(cooccurrence_data, 1, function(x) any(remove %in% x)))),]
 
 nrow(complete_data)
+# 516426
 
 ```
 
+
+Separating out yeast data
+```{r read_data.3}
+yeast_otus <- taxa[which(startsWith(as.character(taxa[[1]]), "Y")), ]$OTU
+bacteria_only_data <- cooccurrence_data[-c(which(apply(cooccurrence_data, 1, function(x) any(yeast_otus %in% x)))),]
+nrow(bacteria_only_data)
+# 474703
+```
 
 # Complete Data
 
@@ -96,7 +107,7 @@ plot(by_complete_exposed_negative_communities, gr_by_complete_exposed_negative,
      layout = layout.fruchterman.reingold(gr_by_complete_exposed_negative),
      rescaled = TRUE,
      vertex.size = 2, 
-     vertex.label.cex = 0.25
+     vertex.label.cex = 0.50
      )
 ```
 
@@ -133,6 +144,7 @@ plot(by_complete_caged_negative_communities, gr_by_complete_caged_negative,
      vertex.label.cex = 0.5
      )
 ```
+
 ## Bagged Communities
 
 ### Positive Weights 
@@ -166,6 +178,21 @@ plot(by_complete_bagged_negative_communities, gr_by_complete_bagged_negative,
      )
 ```
 
+The OTUs with the highest degree in the largest community are `OTU_307` and `OTU_32`:
+
+```{r cbn.2}
+degree(gr_by_complete_bagged_negative, communities(by_complete_bagged_negative_communities)[[1]])
+```
+These OTUs are:
+```{r cbn.3}
+taxa[OTU %in% c("OTU_307", "OTU_32")]
+```
+
+The other OTUs in that community are:
+
+```{r cbn.4}
+taxa[OTU %in% communities(by_complete_bagged_negative_communities)[[1]]]
+```
 
 ## All Communities
 

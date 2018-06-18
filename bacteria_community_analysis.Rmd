@@ -42,6 +42,8 @@ cooccurrence_data <- cooccurrence_data[, -5]      # Remove p-values from table
 remove <- taxa[which(taxa[[4]] %in% c("Cyanobacteria","Chloroplast")),]$OTU
 taxa <- taxa[-c(remove),]
 complete_data <- cooccurrence_data[-c(which(apply(cooccurrence_data, 1, function(x) any(remove %in% x)))),]
+
+
 bird_data <- cooccurrence_data[treatment == "Bird", ]
 complete_data <- cooccurrence_data[treatment != "Bird", ]
 ```
@@ -266,7 +268,7 @@ Because all the treatments are being combined into one graph, there can be multi
 
 ```{r tap.2}
 gr_trimmed_all_positive <- simplify(gr_trimmed_all_positive, 
-                                    edge.attr.comb = list(weight = "mean"))
+                                    edge.attr.comb = "mean")
 trimmed_all_positive_communities <- cluster_fast_greedy(gr_trimmed_all_positive, 
                                     weights = E(gr_trimmed_all_positive)$rho)
 plot(trimmed_all_positive_communities, gr_trimmed_all_positive, 
@@ -287,7 +289,7 @@ trimmed_all_negative <- trimmed_negative_weights[, -1]
 trimmed_all_negative[[3]] <- abs(trimmed_all_negative[[3]])
 gr_trimmed_all_negative <- graph.data.frame(trimmed_all_negative, directed = FALSE)
 gr_trimmed_all_negative <- simplify(gr_trimmed_all_negative, 
-                                    edge.attr.comb=list(weight = "mean"))
+                                    edge.attr.comb = "mean")
 trimmed_all_negative_communities <- cluster_fast_greedy(gr_trimmed_all_negative, 
                                     weights = E(gr_trimmed_all_negative)$rho)
 plot(trimmed_all_negative_communities, gr_trimmed_all_negative, 
@@ -338,7 +340,7 @@ plot(complete_exposed_positive_communities, gr_complete_exposed_positive,
      layout = layout.fruchterman.reingold(gr_complete_exposed_positive),
      rescaled = TRUE,
      vertex.size = 2, 
-     vertex.label.cex = 0.25
+     vertex.label = NA
      )
 ```
 
@@ -355,7 +357,7 @@ plot(complete_exposed_negative_communities, gr_complete_exposed_negative,
      layout = layout.fruchterman.reingold(gr_complete_exposed_negative),
      rescaled = TRUE,
      vertex.size = 2, 
-     vertex.label.cex = 0.25
+     vertex.label = NA
      )
 ```
 
@@ -372,7 +374,7 @@ plot(complete_caged_positive_communities, gr_complete_caged_positive,
      layout = layout.fruchterman.reingold(gr_complete_caged_positive),
      rescaled = TRUE,
      vertex.size = 2, 
-     vertex.label.cex = 0.25
+     vertex.label = NA
      )
 ```
 
@@ -456,7 +458,7 @@ taxa[OTU %in% communities(complete_bagged_negative_communities)[[2]]]
 complete_all_positive <- complete_positive_weights[, -1]
 gr_complete_all_positive <- graph.data.frame(complete_all_positive, directed = FALSE)
 gr_complete_all_positive <- simplify(gr_complete_all_positive, 
-                                    edge.attr.comb = list(weight = "mean"))
+                                    edge.attr.comb = "mean")
 complete_all_positive_communities <- cluster_fast_greedy(gr_complete_all_positive, 
                                     weights = E(gr_complete_all_positive)$rho)
 plot(complete_all_positive_communities, gr_complete_all_positive, 
@@ -477,7 +479,7 @@ complete_all_negative <- complete_negative_weights[, -1]
 complete_all_negative[[3]] <- abs(complete_all_negative[[3]])
 gr_complete_all_negative <- graph.data.frame(complete_all_negative, directed = FALSE)
 gr_complete_all_negative <- simplify(gr_complete_all_negative, 
-                                    edge.attr.comb=list(weight = "mean"))
+                                    edge.attr.comb = "mean")
 complete_all_negative_communities <- cluster_fast_greedy(gr_complete_all_negative, 
                                     weights = E(gr_complete_all_negative)$rho)
 plot(complete_all_negative_communities, gr_complete_all_negative, 
@@ -533,7 +535,7 @@ trimmed_bird <- bird_data[which(apply(complete_data, 1, function(x) any(otus_of_
 trimmed_bird_positive <- trimmed_bird[trimmed_bird[['rho']] > 0]
 gr_trimmed_bird_positive <- graph.data.frame(trimmed_bird_positive, directed = FALSE)
 gr_trimmed_bird_positive <- simplify(gr_trimmed_bird_positive, 
-                                    edge.attr.comb=list(weight = "mean"))
+                                    edge.attr.comb = "mean")
 trimmed_bird_positive_communities <- cluster_fast_greedy(gr_trimmed_bird_positive, 
                                     weights = E(gr_trimmed_bird_positive)$rho)
 plot(trimmed_bird_positive_communities, gr_trimmed_bird_positive, 
@@ -565,7 +567,7 @@ trimmed_bird_negative <- trimmed_bird[trimmed_bird[['rho']] < 0]
 trimmed_bird_negative[[3]] <- abs(trimmed_bird_negative[[3]])
 gr_trimmed_bird_negative <- graph.data.frame(trimmed_bird_negative, directed = FALSE)
 gr_trimmed_bird_negative <- simplify(gr_trimmed_bird_negative, 
-                                    edge.attr.comb=list(weight = "mean"))
+                                    edge.attr.comb = "mean")
 trimmed_bird_negative_communities <- cluster_fast_greedy(gr_trimmed_bird_negative, 
                                     weights = E(gr_trimmed_bird_negative)$rho)
 plot(trimmed_bird_negative_communities, gr_trimmed_bird_negative, 
@@ -587,7 +589,7 @@ taxa[OTU %in% c("OTU_4898", "OTU_9")]
 bird_positive <- bird_data[bird_data[['rho']] > 0]
 gr_bird_positive <- graph.data.frame(bird_positive, directed = FALSE)
 gr_bird_positive <- simplify(gr_bird_positive, 
-                                    edge.attr.comb=list(weight = "mean"))
+                                    edge.attr.comb = "mean")
 bird_positive_communities <- cluster_fast_greedy(gr_bird_positive, 
                                     weights = E(gr_bird_positive)$rho)
 plot(bird_positive_communities, gr_bird_positive, 
@@ -605,7 +607,7 @@ bird_negative <- bird_data[bird_data[['rho']] < 0]
 bird_negative[[3]] <- abs(bird_negative[[3]])
 gr_bird_negative <- graph.data.frame(bird_negative, directed = FALSE)
 gr_bird_negative <- simplify(gr_bird_negative, 
-                                    edge.attr.comb = list(weight = "mean"))
+                                    edge.attr.comb = "mean")
 bird_negative_communities <- cluster_fast_greedy(gr_bird_negative, 
                                     weights = E(gr_bird_negative)$rho)
 plot(bird_negative_communities, gr_bird_negative, 
