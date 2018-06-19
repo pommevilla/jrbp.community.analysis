@@ -43,7 +43,6 @@ remove <- taxa[which(taxa[[4]] %in% c("Cyanobacteria","Chloroplast")),]$OTU
 taxa <- taxa[-c(remove),]
 complete_data <- cooccurrence_data[-c(which(apply(cooccurrence_data, 1, function(x) any(remove %in% x)))),]
 
-
 bird_data <- cooccurrence_data[treatment == "Bird", ]
 complete_data <- cooccurrence_data[treatment != "Bird", ]
 ```

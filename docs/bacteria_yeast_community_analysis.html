@@ -345,7 +345,7 @@ complete_data &lt;- cooccurrence_data[-c(which(apply(cooccurrence_data, 1, funct
 nrow(complete_data)</code></pre>
 <pre><code>## [1] 33158</code></pre>
 <pre class="r"><code># 516426</code></pre>
-<p>Separating out yeast data</p>
+<p>Separating out yeast data:</p>
 <pre class="r"><code>yeast_otus &lt;- taxa[which(startsWith(as.character(taxa[[1]]), &quot;Y&quot;)), ]$OTU
 bacteria_only_data &lt;- cooccurrence_data[-c(which(apply(cooccurrence_data, 1, function(x) any(yeast_otus %in% x)))),]
 nrow(bacteria_only_data)</code></pre>

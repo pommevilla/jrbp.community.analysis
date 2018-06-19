@@ -349,6 +349,15 @@ head(cooccurrence_data)</code></pre>
 ## 5:    Bagged OTU_5142  OTU_162 0.449131 2.82600e-04
 ## 6:    Bagged OTU_5142 OTU_4153 0.368088 3.51595e-03</code></pre>
 <p>We process <code>coocurrence_data</code> by removing OTU interactions non-significant <span class="math inline">\(\rho\)</span> values by filtering out those with a <span class="math inline">\(p\)</span>-value less than <span class="math inline">\(0.05\)</span>, then filtering out cyanobacteria and choloroplast data, as well as all observations from bird samples:</p>
+<pre class="r"><code>cooccurrence_data &lt;- cooccurrence_data[p &lt;= 0.05]
+cooccurrence_data &lt;- cooccurrence_data[, -5]      # Remove p-values from table
+remove &lt;- taxa[which(taxa[[4]] %in% c(&quot;Cyanobacteria&quot;,&quot;Chloroplast&quot;)),]$OTU
+taxa &lt;- taxa[-c(remove),]
+complete_data &lt;- cooccurrence_data[-c(which(apply(cooccurrence_data, 1, function(x) any(remove %in% x)))),]
+
+
+bird_data &lt;- cooccurrence_data[treatment == &quot;Bird&quot;, ]
+complete_data &lt;- cooccurrence_data[treatment != &quot;Bird&quot;, ]</code></pre>
 <p>We then remove all edges that are <span class="math inline">\(\textit{not}\)</span> connected to the indicated OTUs of interest:</p>
 <pre class="r"><code>otus_of_interest &lt;- c(&quot;Acinetobacter&quot;, &quot;Gluconobacter&quot;, &quot;Neokomagataea&quot;, &quot;erwinia&quot;, &quot;Pantoea&quot;, &quot;resenbergiella&quot;, &quot;Asaia&quot;, &quot;Lactobacillus&quot;, &quot;Pseudomonas&quot;)
 otus_of_interest &lt;- taxa[which(apply(taxa, 1, function(x) any(otus_of_interest %in% x))),]$OTU
@@ -1341,7 +1350,7 @@ plot(trimmed_bird_positive_communities, gr_trimmed_bird_positive,
 <p><img src="bacteria_community_analysis_files/figure-html/unnamed-chunk-6-2.png" width="672" /></p>
 <pre class="r"><code>adjacent_vertices(gr_trimmed_bird_positive, &quot;OTU_6&quot;)</code></pre>
 <pre><code>## $OTU_6
-## + 2/401 vertices, named, from fec0bcf:
+## + 2/401 vertices, named, from e7066dc:
 ## [1] OTU_5931 OTU_442</code></pre>
 <pre class="r"><code>degree(gr_trimmed_bird_positive, &quot;OTU_6&quot;)</code></pre>
 <pre><code>## OTU_6 
@@ -1364,9 +1373,9 @@ plot(trimmed_bird_negative_communities, gr_trimmed_bird_negative,
 )</code></pre>
 <p><img src="bacteria_community_analysis_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
 <pre class="r"><code>gr_trimmed_bird_negative</code></pre>
-<pre><code>## IGRAPH 3dcfbb8 UN-- 2 1 -- 
+<pre><code>## IGRAPH ac37b67 UN-- 2 1 -- 
 ## + attr: name (v/c), rho (e/n)
-## + edge from 3dcfbb8 (vertex names):
+## + edge from ac37b67 (vertex names):
 ## [1] OTU_4898--OTU_9</code></pre>
 <pre class="r"><code>taxa[OTU %in% c(&quot;OTU_4898&quot;, &quot;OTU_9&quot;)]</code></pre>
 <pre><code>##      OTU   domain     phylum   class      order            family
