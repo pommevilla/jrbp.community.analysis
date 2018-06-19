@@ -348,16 +348,19 @@ head(cooccurrence_data)</code></pre>
 ## 4:    Bagged OTU_5142 OTU_5823 0.251251 5.07966e-02
 ## 5:    Bagged OTU_5142  OTU_162 0.449131 2.82600e-04
 ## 6:    Bagged OTU_5142 OTU_4153 0.368088 3.51595e-03</code></pre>
-<p>We process <code>coocurrence_data</code> by removing OTU’s non-significant <span class="math inline">\(\rho\)</span> values by filtering out those with a <span class="math inline">\(p\)</span>-value less than <span class="math inline">\(0.05\)</span> and then filtering out cyanobacteria and choloroplast data, as well as all observations from bird samples:</p>
+<p>We process <code>coocurrence_data</code> by removing OTU interactions non-significant <span class="math inline">\(\rho\)</span> values by filtering out those with a <span class="math inline">\(p\)</span>-value less than <span class="math inline">\(0.05\)</span>, then filtering out cyanobacteria and choloroplast data, as well as all observations from bird samples:</p>
 <p>We then remove all edges that are <span class="math inline">\(\textit{not}\)</span> connected to the indicated OTUs of interest:</p>
-<pre class="r"><code>head(complete_data)</code></pre>
-<pre><code>##    treatment    OTU_1    OTU_2      rho
-## 1:    Bagged OTU_5142 OTU_5257 0.521706
-## 2:    Bagged OTU_5142 OTU_2529 0.430690
-## 3:    Bagged OTU_5142  OTU_162 0.449131
-## 4:    Bagged OTU_5142 OTU_4153 0.368088
-## 5:    Bagged OTU_5142 OTU_3496 0.374365
-## 6:    Bagged OTU_5142  OTU_304 0.310852</code></pre>
+<pre class="r"><code>otus_of_interest &lt;- c(&quot;Acinetobacter&quot;, &quot;Gluconobacter&quot;, &quot;Neokomagataea&quot;, &quot;erwinia&quot;, &quot;Pantoea&quot;, &quot;resenbergiella&quot;, &quot;Asaia&quot;, &quot;Lactobacillus&quot;, &quot;Pseudomonas&quot;)
+otus_of_interest &lt;- taxa[which(apply(taxa, 1, function(x) any(otus_of_interest %in% x))),]$OTU
+trimmed_data &lt;- complete_data[which(apply(complete_data, 1, function(x) any(otus_of_interest %in% x))), ]
+head(trimmed_data)</code></pre>
+<pre><code>##    treatment    OTU_1   OTU_2      rho
+## 1:    Bagged OTU_5142 OTU_888 0.310852
+## 2:    Bagged OTU_5257  OTU_11 0.322057
+## 3:    Bagged OTU_5616  OTU_64 0.273840
+## 4:    Bagged OTU_3925  OTU_70 0.376471
+## 5:    Bagged OTU_5872 OTU_635 0.316777
+## 6:    Bagged OTU_1546 OTU_635 0.328961</code></pre>
 <p>We seperate the coocurrence data into a positive and negative group.</p>
 <pre class="r"><code>trimmed_positive_weights &lt;- trimmed_data[trimmed_data[[&#39;rho&#39;]] &gt; 0]
 head(trimmed_positive_weights)</code></pre>
@@ -377,10 +380,10 @@ head(trimmed_negative_weights)</code></pre>
 ## 4:    Bagged OTU_6    OTU_5 -0.308091
 ## 5:    Bagged OTU_3    OTU_8 -0.261619
 ## 6:    Bagged OTU_5   OTU_27 -0.262223</code></pre>
-<p>We’ll look at the positive and negative networks for each of the tree treatments.</p>
+<p>We’ll look at the positive and negative networks for each of the three treatments, as well as when all the treatments are combined together.</p>
 <div id="trimmed-data" class="section level1">
 <h1>Trimmed Data</h1>
-<p>All the following analysis is performed on the trimmed data set.</p>
+<p>All the following analysis is performed on the trimmed data set. Specifically, this analysis only examines interactions between <em>Acinetobacter, Gluconobacter, Neokomagataea, erwinia, Pantoea, resenbergiella, Asaia, Lactobacillus, Pseudomonas</em></p>
 <div id="exposed-communities" class="section level2">
 <h2>Exposed Communities</h2>
 <div id="positive-weights" class="section level3">
@@ -1326,7 +1329,7 @@ plot(trimmed_bird_positive_communities, gr_trimmed_bird_positive,
      vertex.size = 2, 
      vertex.label.cex = 0.25
 )</code></pre>
-<p><img src="bacteria_community_analysis_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p><img src="bacteria_community_analysis_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
 <pre class="r"><code>plot(trimmed_bird_positive_communities, gr_trimmed_bird_positive, 
      layout = layout.fruchterman.reingold(gr_trimmed_bird_positive),
      rescaled = TRUE,
@@ -1335,10 +1338,10 @@ plot(trimmed_bird_positive_communities, gr_trimmed_bird_positive,
      vertex.label = ifelse(V(gr_trimmed_bird_positive)$name == &quot;OTU_6&quot;, 
                            V(gr_trimmed_bird_positive)$name, &quot;&quot;)
 )</code></pre>
-<p><img src="bacteria_community_analysis_files/figure-html/unnamed-chunk-7-2.png" width="672" /></p>
+<p><img src="bacteria_community_analysis_files/figure-html/unnamed-chunk-6-2.png" width="672" /></p>
 <pre class="r"><code>adjacent_vertices(gr_trimmed_bird_positive, &quot;OTU_6&quot;)</code></pre>
 <pre><code>## $OTU_6
-## + 2/401 vertices, named, from 83c24de:
+## + 2/401 vertices, named, from fec0bcf:
 ## [1] OTU_5931 OTU_442</code></pre>
 <pre class="r"><code>degree(gr_trimmed_bird_positive, &quot;OTU_6&quot;)</code></pre>
 <pre><code>## OTU_6 
@@ -1359,11 +1362,11 @@ plot(trimmed_bird_negative_communities, gr_trimmed_bird_negative,
      vertex.size = 2, 
      vertex.label.cex = 0.25
 )</code></pre>
-<p><img src="bacteria_community_analysis_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p><img src="bacteria_community_analysis_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
 <pre class="r"><code>gr_trimmed_bird_negative</code></pre>
-<pre><code>## IGRAPH 406b755 UN-- 2 1 -- 
+<pre><code>## IGRAPH 3dcfbb8 UN-- 2 1 -- 
 ## + attr: name (v/c), rho (e/n)
-## + edge from 406b755 (vertex names):
+## + edge from 3dcfbb8 (vertex names):
 ## [1] OTU_4898--OTU_9</code></pre>
 <pre class="r"><code>taxa[OTU %in% c(&quot;OTU_4898&quot;, &quot;OTU_9&quot;)]</code></pre>
 <pre><code>##      OTU   domain     phylum   class      order            family
@@ -1388,7 +1391,7 @@ plot(bird_positive_communities, gr_bird_positive,
      vertex.size = 2, 
      vertex.label.cex = 0.25
 )</code></pre>
-<p><img src="bacteria_community_analysis_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p><img src="bacteria_community_analysis_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
 </div>
 <div id="negative-weights-9" class="section level3">
 <h3>Negative Weights</h3>
@@ -1405,7 +1408,7 @@ plot(bird_negative_communities, gr_bird_negative,
      vertex.size = 2, 
      vertex.label.cex = 0.25
 )</code></pre>
-<p><img src="bacteria_community_analysis_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p><img src="bacteria_community_analysis_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
 </div>
 </div>
 </div>

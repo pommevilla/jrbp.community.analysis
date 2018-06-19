@@ -34,7 +34,7 @@ cooccurrence_data <- data.table(read.table("./data/bacteria/bacteria_cooccurrenc
 head(cooccurrence_data)
 ```
 
-We process `coocurrence_data` by removing OTU's non-significant $\rho$ values by filtering out those with a $p$-value less than $0.05$ and then filtering out cyanobacteria and choloroplast data, as well as all observations from bird samples:
+We process `coocurrence_data` by removing OTU interactions non-significant $\rho$ values by filtering out those with a $p$-value less than $0.05$, then filtering out cyanobacteria and choloroplast data, as well as all observations from bird samples:
 
 ```{r complete_data, echo = FALSE}
 cooccurrence_data <- cooccurrence_data[p <= 0.05]
@@ -50,14 +50,11 @@ complete_data <- cooccurrence_data[treatment != "Bird", ]
 
 We then remove all edges that are $\textit{not}$ connected to the indicated OTUs of interest:
 
-```{r trim_data, echo = FALSE}
+```{r trim_data}
 otus_of_interest <- c("Acinetobacter", "Gluconobacter", "Neokomagataea", "erwinia", "Pantoea", "resenbergiella", "Asaia", "Lactobacillus", "Pseudomonas")
 otus_of_interest <- taxa[which(apply(taxa, 1, function(x) any(otus_of_interest %in% x))),]$OTU
 trimmed_data <- complete_data[which(apply(complete_data, 1, function(x) any(otus_of_interest %in% x))), ]
-```
-
-```{r}
-head(complete_data)
+head(trimmed_data)
 ```
 
 We seperate the coocurrence data into a positive and negative group.
@@ -72,11 +69,11 @@ trimmed_negative_weights <- trimmed_data[trimmed_data[['rho']] < 0]
 head(trimmed_negative_weights)
 ```
 
-We'll look at the positive and negative networks for each of the tree treatments.
+We'll look at the positive and negative networks for each of the three treatments, as well as when all the treatments are combined together.
 
 # Trimmed Data
 
-All the following analysis is performed on the trimmed data set.
+All the following analysis is performed on the trimmed data set.  Specifically, this analysis only examines interactions between *Acinetobacter, Gluconobacter, Neokomagataea, erwinia, Pantoea, resenbergiella, Asaia, Lactobacillus, Pseudomonas*
 
 ## Exposed Communities
 
