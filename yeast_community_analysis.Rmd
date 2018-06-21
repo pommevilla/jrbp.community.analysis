@@ -1,5 +1,5 @@
 ---
-title: "Bacteria and yeast"
+title: "Yeast only"
 ---
 <script>
 $(document).ready(function() {
