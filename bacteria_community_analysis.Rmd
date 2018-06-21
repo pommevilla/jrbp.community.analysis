@@ -97,17 +97,21 @@ plot(exposed_communities_greedy_positive, gr_exposed_positive,
      vertex.label.cex = 0.25
      )
 ```
+The modularity of the community structure is:
+```{r tep.3}
+tep.mod <- modularity(gr_exposed_positive, membership(exposed_communities_greedy_positive))
+```
 
 Note the community by itself.  The members of this community are:
 
-```{r tep.3}
+```{r tep.4}
 communities(exposed_communities_greedy_positive)[[6]]
 taxa[OTU %in% communities(exposed_communities_greedy_positive)[[6]]]
 ```
 
 At the center of this community is `OTU_6`:
 
-```{r tep.4}
+```{r tep.5}
 taxa[OTU == "OTU_6"]
 ```
 
@@ -132,15 +136,20 @@ plot(exposed_communities_greedy_negative, gr_exposed_negative,
      vertex.size = 2, vertex.label.cex = 0.75)
 ```
 
+The modularity of the community structure is:
+```{r ten.3}
+ten.mod <- modularity(gr_exposed_negative, membership(exposed_communities_greedy_negative))
+```
+
 We again find `OTU_6` as the center of a community.  Below are the OTUs in this community.  Notice that they are mostly $\textit{Proteobacteria}:
 
-```{r ten.3}
+```{r ten.4}
 taxa[OTU %in% communities(exposed_communities_greedy_negative)[[1]]]
 ```
 
 Something else to note of interest is `OTU_5`, another $\textit{Proteobacteria}$:
 
-```{r ten.4}
+```{r ten.5}
 taxa[OTU == "OTU_5"]
 ```
 
@@ -166,9 +175,14 @@ plot(caged_communities_greedy_positive, gr_caged_positive,
       )
 ```
 
+The modularity of the community structure is:
+```{r tcp.3}
+tcp.mod <- modularity(gr_caged_positive, membership(caged_communities_greedy_positive))
+```
+
 We again find `OTU_6` as the central member of a cluster that is well-separated from the rest of the community.  The OTUs in this cluster are:
 
-```{r tcp.3}
+```{r tcp.4}
 taxa[OTU %in% communities(caged_communities_greedy_positive)[[7]]]
 ```
 
@@ -186,14 +200,19 @@ plot(caged_communities_greedy_negative, gr_caged_negative,
      vertex.size = 2, vertex.label.cex = 0.75)
 ```
 
+The modularity of the community structure is:
+```{r tcn.2}
+tcn.mod <- modularity(gr_caged_negative, membership(caged_communities_greedy_negative))
+```
 
 The OTUs in the same community of `OTU_6` are:
-```{r tcn.2}
+```{r tcn.3}
 taxa[OTU %in% communities(caged_communities_greedy_negative)[[2]]]
 ```
 
+
 As mentioned above, we see `OTU_5` negatively correlated with `OTU_6` and as highly central node.  While we don't see $\textit{Proteobacteria}$ in the `OTU_6` cluster,  the OTUs in the cluster of `OTU_5` are all $\textit{Proteobacteria}$:
-```{r tcn.3}
+```{r tcn.4}
 taxa[OTU %in% communities(caged_communities_greedy_negative)[[1]]]
 ```
 
@@ -214,14 +233,21 @@ plot(bagged_communities_greedy_positive, gr_bagged_positive,
 )
 ```
 
-In the case of the bagged treatment, the communities aren't as well separated.  For completeness, here are the OTUs in the same community as `OTU_6`:
+The modularity score of the community structure is:
 
 ```{r tbp.2}
+tbp.mod <- modularity(gr_bagged_positive, membership(bagged_communities_greedy_positive))
+```
+
+
+For completeness, here are the OTUs in the same community as `OTU_6`:
+
+```{r tbp.3}
 taxa[OTU %in% communities(bagged_communities_greedy_positive)[[1]]]
 ```
 
 `OTU_5` was not present in this graph.
-```{r}
+```{r tbp.4}
 'OTU_5' %in% V(gr_bagged_positive)$name
 ```
 
@@ -239,11 +265,16 @@ plot(bagged_communities_greedy_negative, gr_bagged_negative,
      vertex.size = 2, vertex.label.cex = 0.75)
 ```
 
+Modularity score:
 ```{r tbn.2}
-taxa[OTU %in% communities(bagged_communities_greedy_negative)[[1]]]
+tbn.mod <- modularity(gr_bagged_negative, membership(bagged_communities_greedy_negative))
 ```
 
 ```{r tbn.3}
+taxa[OTU %in% communities(bagged_communities_greedy_negative)[[1]]]
+```
+
+```{r tbn.4}
 taxa[OTU %in% communities(bagged_communities_greedy_negative)[[2]]]
 ```
 ## All Treatments
@@ -275,7 +306,12 @@ plot(trimmed_all_positive_communities, gr_trimmed_all_positive,
 )
 ```
 
-What's interesting here is that the graph has a lot of "spokes," which hints at important OTUs.  
+What's interesting here is that the graph has a lot of "spokes," which hints at important OTUs. 
+
+Modularity score:
+```{r tap.3}
+tap.mod <- modularity(gr_trimmed_all_positive, membership(trimmed_all_positive_communities))
+```
 
 ### Negative Weights
 
@@ -306,6 +342,11 @@ And we see a preponderence of $\textit{proteobacteria}$.  We also see the famili
 
 ```{r, tan.3}
 taxa[OTU %in% communities(trimmed_all_negative_communities)[[1]]]
+```
+
+Modularity score:
+```{r tan.4}
+tan.mod <- modularity(gr_trimmed_all_negative, membership(trimmed_all_negative_communities))
 ```
 
 # Complete Data
@@ -339,6 +380,10 @@ plot(complete_exposed_positive_communities, gr_complete_exposed_positive,
      vertex.label = NA
      )
 ```
+Modularity:
+```{r cep.2}
+cep.mod <- modularity(gr_complete_exposed_positive, membership(complete_exposed_positive_communities))
+```
 
 ### Negative Weights
 
@@ -356,6 +401,11 @@ plot(complete_exposed_negative_communities, gr_complete_exposed_negative,
      vertex.label = NA
      )
 ```
+Modularity:
+```{r cen.2}
+cen.mod <- modularity(gr_complete_exposed_negative, membership(complete_exposed_negative_communities))
+```
+
 
 ## Caged Communities
 
@@ -374,6 +424,10 @@ plot(complete_caged_positive_communities, gr_complete_caged_positive,
      )
 ```
 
+Modularity:
+```{r ccp.2}
+ccp.mod <- modularity(gr_complete_caged_positive, membership(complete_caged_positive_communities))
+```
 ### Negative Weights
 
 ```{r ccn.1}
@@ -391,15 +445,18 @@ plot(complete_caged_negative_communities, gr_complete_caged_negative,
      )
 ```
 
-Again, the familiar pattern.  However, `OTU_6` has lower centrality in its cluster while `OTU_5` remains highly central.  The OTUs in the `OTU_6` cluster are:
+Modularity:
+```{r ccn.2}
+ccn.mod <- modularity(gr_complete_caged_negative, membership(complete_caged_negative_communities))
+```
 
-```{r, ccn.2}
+Again, the familiar pattern.  However, `OTU_6` has lower centrality in its cluster while `OTU_5` remains highly central.  The OTUs in the `OTU_6` cluster are:
+```{r, ccn.3}
 taxa[OTU %in% communities(complete_caged_negative_communities)[[1]]]
 ```
 
 In the `OTU_5` cluster:
-
-```{r, ccn.3}
+```{r, ccn.4}
 taxa[OTU %in% communities(complete_caged_negative_communities)[[3]]]
 ```
 
@@ -420,6 +477,11 @@ plot(complete_bagged_positive_communities, gr_complete_bagged_positive,
      )
 ```
 
+Modularity:
+```{r cbp.2}
+cbp.mod <- modularity(gr_complete_bagged_positive, membership(complete_bagged_positive_communities))
+```
+
 ### Negative Weights
 ```{r cbn.1}
 complete_bagged_negative <- complete_negative_weights[treatment == "Bagged"]
@@ -435,14 +497,20 @@ plot(complete_bagged_negative_communities, gr_complete_bagged_negative,
      vertex.label.cex = 0.5
      )
 ```
+
+Modularity:
+```{r cbn.2}
+cbn.mod <- modularity(gr_complete_bagged_negative, membership(complete_bagged_negative_communities))
+```
+
 Same story as in the caged samples for the complete data.  The `OTU_6` cluster:
-```{r, cbn.2}
+```{r, cbn.3}
 taxa[OTU %in% communities(complete_bagged_negative_communities)[[1]]]
 ```
 
 The `OTU_5` cluster:
 
-```{r, cbn.3}
+```{r, cbn.4}
 taxa[OTU %in% communities(complete_bagged_negative_communities)[[2]]]
 ```
 ## All Treatments
@@ -463,6 +531,11 @@ plot(complete_all_positive_communities, gr_complete_all_positive,
      vertex.size = 2, 
      vertex.label.cex = 0.25
 )
+```
+
+Modularity score:
+```{r cap.2}
+cap.mod <- modularity(gr_complete_all_positive, membership(complete_all_positive_communities))
 ```
 
 
@@ -487,11 +560,16 @@ plot(complete_all_negative_communities, gr_complete_all_negative,
 ```
 Same story, but the communities aren't as distinct.  The OTUs in the `OTU_6` cluster:
 
-```{r, can.2}
+Modularity score:
+```{r can.2}
+can.mod <- modularity(gr_complete_all_negative, membership(complete_all_negative_communities))
+```
+
+```{r can.3}
 taxa[OTU %in% communities(complete_all_negative_communities)[[2]]]
 ```
 
-```{r, can.3}
+```{r can.4}
 taxa[OTU %in% communities(complete_all_negative_communities)[[4]]]
 ```
 
@@ -512,6 +590,23 @@ rownames(pd_matrix) <- sub("^[^_]*_", "", rownames(pd_matrix))
 colnames(pd_matrix) <- sub("^[^_]*_", "", colnames(pd_matrix))
 otu_6.matrix <- pd_matrix["OTU_6", ]
 head(otu_6.matrix)
+```
+
+# Modularity
+
+Collecting all modularity scores:
+
+```{r mod.1}
+treatment <- c("tep", "ten", "tcp", "tcn", "tbp", "tbn", "tap", "tan",
+                        "cep", "cen", "ccp", "ccn", "cbp", "cbn", "cap", "can")
+scores <- c(tep.mod, ten.mod, tcp.mod, tcn.mod, tbp.mod, tbn.mod, tap.mod, tan.mod,
+            cep.mod, cen.mod, ccp.mod, ccn.mod, cbp.mod, cbn.mod, cap.mod, can.mod)
+mod.scores <- data.table(treatment.networks, scores)
+
+
+library(ggplot2, warn.conflicts = FALSE)
+ggplot(mod.scores, aes(x = "", y = scores)) + geom_boxplot() + 
+    geom_jitter(shape = 16, aes(color = treatment))
 ```
 
 # Birds
