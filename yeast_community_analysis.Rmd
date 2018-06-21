@@ -1,0 +1,149 @@
+---
+title: "Bacteria and yeast"
+---
+<script>
+$(document).ready(function() {
+  $items = $('div#TOC li');
+  $items.each(function(idx) {
+    num_ul = $(this).parentsUntil('#TOC').length;
+    $(this).css({'text-indent': num_ul * 10, 'padding-left': 0});
+  });
+
+});
+</script>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, message = FALSE, warning = FALSE}
+library(data.table, warn.conflicts = FALSE)
+library(igraph, warn.conflicts = FALSE)
+```
+
+`taxa` is the look-up table for the bacterial and yeast OTUs.  As before, we remove any cyanobacteria and chloropast observations.  
+```{r read_data.1}
+taxa <- data.table(read.delim("./data/bacteria-yeast/bacteria_yeast_classified_otus"))
+taxa <- taxa[, -1]
+colnames(taxa)<-c("OTU",colnames(taxa[,-1]))
+nrow(taxa)
+remove <- taxa[which(taxa[[4]] %in% c("Cyanobacteria","Chloroplast")),]$OTU
+taxa <- taxa[-c(remove),]
+```
+
+Reading in the data set and separating out the yeast data.  Yeast OTUs are labeled `Y_OTU_xxx`:
+
+```{r read_data.2}
+
+cooccurrence_data <- data.table(read.table("./data/bacteria-yeast/bacteria_yeast_cooccurrence", 
+                                    col.names = c("treatment", "OTU_1", "OTU_2", "rho", "p")))
+cooccurrence_data <- cooccurrence_data[p <= 0.05, -5]
+complete_data <- cooccurrence_data[-c(which(apply(cooccurrence_data, 1, function(x) any(remove %in% x)))),]
+yeast_otus <- taxa[which(startsWith(as.character(taxa[[1]]), "Y")), ]$OTU
+yeast_cooccurrence <- cooccurrence_data[ OTU_1 %in% yeast_otus & OTU_2 %in% yeast_otus]
+head(yeast_cooccurrence)
+```
+
+# Complete Data
+
+Separating data into positive and negative networks.
+
+The positive network:
+```{r cd.1}
+yeast_positive <- yeast_cooccurrence[yeast_cooccurrence[['rho']] > 0]
+head(yeast_positive)
+```
+
+Note that there aren't any negative cooccurrences between the yeast OTUs.
+```{r cd.2}
+yeast_cooccurrence_negative <- yeast_cooccurrence[yeast_cooccurrence[['rho']] < 0]
+head(yeast_cooccurrence_negative)
+```
+
+## Exposed Communities
+
+### Positive Weights 
+```{r ye.1}
+yeast_positive_exposed <- yeast_positive[treatment == "Exposed"]
+yeast_positive_exposed <- yeast_positive_exposed[, -1]
+gr_yeast_positive_exposed <- graph.data.frame(yeast_positive_exposed, directed = FALSE)
+yeast_positive_exposed_communities <- cluster_fast_greedy(gr_yeast_positive_exposed, 
+                                                           weights = E(gr_yeast_positive_exposed)$rho)
+plot(yeast_positive_exposed_communities, gr_yeast_positive_exposed, 
+     layout = layout.fruchterman.reingold(gr_yeast_positive_exposed),
+     rescaled = TRUE,
+     vertex.size = 2, 
+     vertex.label = NA
+     )
+```
+Modularity:
+```{r ye.2}
+modularity(gr_yeast_positive_exposed, membership(yeast_positive_exposed_communities))
+```
+
+## Caged Communities
+
+### Positive Weights 
+```{r yc.1}
+yeast_positive_caged <- yeast_positive[treatment == "Caged"]
+yeast_positive_caged <- yeast_positive_caged[, -1]
+gr_yeast_positive_caged <- graph.data.frame(yeast_positive_caged, directed = FALSE)
+yeast_positive_caged_communities <- cluster_fast_greedy(gr_yeast_positive_caged, 
+                                                           weights = E(gr_yeast_positive_caged)$rho)
+plot(yeast_positive_caged_communities, gr_yeast_positive_caged, 
+     layout = layout.fruchterman.reingold(gr_yeast_positive_caged),
+     rescaled = TRUE,
+     vertex.size = 2, 
+     vertex.label = NA
+     )
+```
+Modularity:
+```{r yc.2}
+modularity(gr_yeast_positive_caged, membership(yeast_positive_caged_communities))
+```
+
+## Bagged Communities
+
+### Positive Weights 
+```{r yb.1}
+yeast_positive_bagged <- yeast_positive[treatment == "Bagged"]
+yeast_positive_bagged <- yeast_positive_bagged[, -1]
+gr_yeast_positive_bagged <- graph.data.frame(yeast_positive_bagged, directed = FALSE)
+yeast_positive_bagged_communities <- cluster_fast_greedy(gr_yeast_positive_bagged, 
+                                                           weights = E(gr_yeast_positive_bagged)$rho)
+plot(yeast_positive_bagged_communities, gr_yeast_positive_bagged, 
+     layout = layout.fruchterman.reingold(gr_yeast_positive_bagged),
+     rescaled = TRUE,
+     vertex.size = 2, 
+     vertex.label = NA
+     )
+```
+Modularity:
+```{r yb.2}
+modularity(gr_yeast_positive_bagged, membership(yeast_positive_bagged_communities))
+```
+
+## All Communities
+
+### Positive Weights
+
+
+```{r yp.1}
+yeast_positive_all <- yeast_positive[, -1]
+gr_yeast_positive_all <- graph.data.frame(yeast_positive_all, directed = FALSE)
+gr_yeast_positive_all <- simplify(gr_yeast_positive_all, 
+                                    edge.attr.comb = "mean")
+yeast_positive_all_communities <- cluster_fast_greedy(gr_yeast_positive_all, 
+                                    weights = E(gr_yeast_positive_all)$rho)
+plot(yeast_positive_all_communities, gr_yeast_positive_all, 
+     layout = layout.fruchterman.reingold(gr_yeast_positive_all),
+     rescaled = TRUE,
+     vertex.size = 2, 
+     vertex.label.cex = 0.25
+)
+```
+
+Modularity:
+```{r yp.2}
+modularity(gr_yeast_positive_all, membership(yeast_positive_all_communities))
+```
