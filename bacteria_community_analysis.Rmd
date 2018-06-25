@@ -611,7 +611,7 @@ ggplot(mod.scores, aes(x = "", y = scores)) + geom_boxplot() +
 
 # Birds
 
-```{r}
+```{r bd.1}
 bird_data <- bird_data[, -1]
 otus_of_interest <- c("Acinetobacter", "Gluconobacter", "Neokomagataea", "erwinia", "Pantoea", "resenbergiella", "Asaia", "Lactobacillus", "Pseudomonas")
 otus_of_interest <- taxa[which(apply(taxa, 1, function(x) any(otus_of_interest %in% x))),]$OTU
@@ -622,7 +622,7 @@ trimmed_bird <- bird_data[which(apply(complete_data, 1, function(x) any(otus_of_
 
 ### Positive Weights
 
-```{r}
+```{r tbdp.1}
 trimmed_bird_positive <- trimmed_bird[trimmed_bird[['rho']] > 0]
 gr_trimmed_bird_positive <- graph.data.frame(trimmed_bird_positive, directed = FALSE)
 gr_trimmed_bird_positive <- simplify(gr_trimmed_bird_positive, 
@@ -653,7 +653,7 @@ degree(gr_trimmed_bird_positive, "OTU_6")
 ### Negative Weights
 
 
-```{r}
+```{r tbdn.1}
 trimmed_bird_negative <- trimmed_bird[trimmed_bird[['rho']] < 0]
 trimmed_bird_negative[[3]] <- abs(trimmed_bird_negative[[3]])
 gr_trimmed_bird_negative <- graph.data.frame(trimmed_bird_negative, directed = FALSE)
@@ -676,7 +676,7 @@ taxa[OTU %in% c("OTU_4898", "OTU_9")]
 ### Positive Weights
 
 
-```{r}
+```{r cbdp.1}
 bird_positive <- bird_data[bird_data[['rho']] > 0]
 gr_bird_positive <- graph.data.frame(bird_positive, directed = FALSE)
 gr_bird_positive <- simplify(gr_bird_positive, 
@@ -693,7 +693,7 @@ plot(bird_positive_communities, gr_bird_positive,
 
 ### Negative Weights
 
-```{r}
+```{r cbdn.1}
 bird_negative <- bird_data[bird_data[['rho']] < 0]
 bird_negative[[3]] <- abs(bird_negative[[3]])
 gr_bird_negative <- graph.data.frame(bird_negative, directed = FALSE)
