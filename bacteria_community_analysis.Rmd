@@ -24,7 +24,8 @@ library(igraph, warn.conflicts = FALSE)
 `taxa` is the look-up table for the OTUs.  `cooccurrence_data` contains pairwise Spearman correlation ranks for pairs of OTUs.
 
 ```{r read_data}
-taxa <- data.table(read.delim("./data/bacteria/bacteria_classified_otus"));colnames(taxa)<-c("OTU",colnames(taxa[,-1]))
+taxa <- data.table(read.delim("./data/bacteria/bacteria_classified_otus_UPDATED", 
+                              sep = "", header = TRUE))
 
 head(taxa)
 
@@ -37,8 +38,7 @@ head(cooccurrence_data)
 We process `coocurrence_data` by removing OTU interactions non-significant $\rho$ values by filtering out those with a $p$-value less than $0.05$, then filtering out cyanobacteria and choloroplast data, as well as all observations from bird samples:
 
 ```{r complete_data}
-cooccurrence_data <- cooccurrence_data[p <= 0.05]
-cooccurrence_data <- cooccurrence_data[, -5]      # Remove p-values from table
+cooccurrence_data <- cooccurrence_data[p <= 0.05, -5]      # Remove p-values from table
 remove <- taxa[which(taxa[[4]] %in% c("Cyanobacteria","Chloroplast")),]$OTU
 taxa <- taxa[-c(remove),]
 complete_data <- cooccurrence_data[-c(which(apply(cooccurrence_data, 1, function(x) any(remove %in% x)))),]
@@ -597,16 +597,16 @@ head(otu_6.matrix)
 Collecting all modularity scores:
 
 ```{r mod.1}
-treatment <- c("tep", "ten", "tcp", "tcn", "tbp", "tbn", "tap", "tan",
+treatments <- c("tep", "ten", "tcp", "tcn", "tbp", "tbn", "tap", "tan",
                         "cep", "cen", "ccp", "ccn", "cbp", "cbn", "cap", "can")
 scores <- c(tep.mod, ten.mod, tcp.mod, tcn.mod, tbp.mod, tbn.mod, tap.mod, tan.mod,
             cep.mod, cen.mod, ccp.mod, ccn.mod, cbp.mod, cbn.mod, cap.mod, can.mod)
-mod.scores <- data.table(treatment.networks, scores)
+mod.scores <- data.table(treatments, scores)
 
 
 library(ggplot2, warn.conflicts = FALSE)
 ggplot(mod.scores, aes(x = "", y = scores)) + geom_boxplot() + 
-    geom_jitter(shape = 16, aes(color = treatment))
+    geom_jitter(shape = 16, aes(color = treatments))
 ```
 
 # Birds
