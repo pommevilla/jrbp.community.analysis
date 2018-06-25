@@ -323,23 +323,24 @@ $(document).ready(function() {
 <pre class="r"><code>library(data.table, warn.conflicts = FALSE)
 library(igraph, warn.conflicts = FALSE)</code></pre>
 <p><code>taxa</code> is the look-up table for the OTUs. <code>cooccurrence_data</code> contains pairwise Spearman correlation ranks for pairs of OTUs.</p>
-<pre class="r"><code>taxa &lt;- data.table(read.delim(&quot;./data/bacteria/bacteria_classified_otus&quot;));colnames(taxa)&lt;-c(&quot;OTU&quot;,colnames(taxa[,-1]))
+<pre class="r"><code>taxa &lt;- data.table(read.delim(&quot;./data/bacteria/bacteria_classified_otus&quot;, 
+                              sep = &quot;&quot;, header = TRUE))
 
 head(taxa)</code></pre>
-<pre><code>##      OTU   domain                    phylum                 class
-## 1: OTU_1 Bacteria Cyanobacteria/Chloroplast           Chloroplast
-## 2: OTU_2 Bacteria     unclassified_Bacteria unclassified_Bacteria
-## 3: OTU_3 Bacteria            Proteobacteria   Alphaproteobacteria
-## 4: OTU_4 Bacteria            Proteobacteria   Gammaproteobacteria
-## 5: OTU_5 Bacteria            Proteobacteria    Betaproteobacteria
-## 6: OTU_6 Bacteria            Proteobacteria   Gammaproteobacteria
-##                       order                family                 genus
-## 1: unclassified_Chloroplast           Chloroplast          Streptophyta
-## 2:    unclassified_Bacteria unclassified_Bacteria unclassified_Bacteria
-## 3:         Rhodospirillales      Acetobacteraceae         Neokomagataea
-## 4:          Pseudomonadales         Moraxellaceae         Acinetobacter
-## 5:          Burkholderiales      Burkholderiaceae          Burkholderia
-## 6:          Pseudomonadales      Pseudomonadaceae           Pseudomonas</code></pre>
+<pre><code>##         OTU   domain         phylum               class              order
+## 1: OTU_4337 Bacteria Proteobacteria Gammaproteobacteria    Pseudomonadales
+## 2:  OTU_893 Bacteria    Chloroflexi      Thermomicrobia       JG30-KF-CM45
+## 3: OTU_4335 Bacteria Proteobacteria Alphaproteobacteria        Rhizobiales
+## 4: OTU_2826 Bacteria            TM6               SJA-4                   
+## 5: OTU_4333  Archaea  Euryarchaeota     Methanobacteria Methanobacteriales
+## 6: OTU_4332  Archaea  Euryarchaeota                DSEG      HydGC-84-221A
+##                family         genus
+## 1:      Moraxellaceae Acinetobacter
+## 2:                                 
+## 3: Phyllobacteriaceae Mesorhizobium
+## 4:                                 
+## 5:                                 
+## 6:</code></pre>
 <pre class="r"><code>cooccurrence_data &lt;- data.table(read.table(&quot;./data/bacteria/bacteria_cooccurrence&quot;, 
                                     col.names = c(&quot;treatment&quot;, &quot;OTU_1&quot;, &quot;OTU_2&quot;, &quot;rho&quot;, &quot;p&quot;)))
 
@@ -352,8 +353,7 @@ head(cooccurrence_data)</code></pre>
 ## 5:    Bagged OTU_5142  OTU_162 0.449131 2.82600e-04
 ## 6:    Bagged OTU_5142 OTU_4153 0.368088 3.51595e-03</code></pre>
 <p>We process <code>coocurrence_data</code> by removing OTU interactions non-significant <span class="math inline">\(\rho\)</span> values by filtering out those with a <span class="math inline">\(p\)</span>-value less than <span class="math inline">\(0.05\)</span>, then filtering out cyanobacteria and choloroplast data, as well as all observations from bird samples:</p>
-<pre class="r"><code>cooccurrence_data &lt;- cooccurrence_data[p &lt;= 0.05]
-cooccurrence_data &lt;- cooccurrence_data[, -5]      # Remove p-values from table
+<pre class="r"><code>cooccurrence_data &lt;- cooccurrence_data[p &lt;= 0.05, -5]      # Remove p-values from table
 remove &lt;- taxa[which(taxa[[4]] %in% c(&quot;Cyanobacteria&quot;,&quot;Chloroplast&quot;)),]$OTU
 taxa &lt;- taxa[-c(remove),]
 complete_data &lt;- cooccurrence_data[-c(which(apply(cooccurrence_data, 1, function(x) any(remove %in% x)))),]
@@ -365,32 +365,32 @@ complete_data &lt;- cooccurrence_data[treatment != &quot;Bird&quot;, ]</code></p
 otus_of_interest &lt;- taxa[which(apply(taxa, 1, function(x) any(otus_of_interest %in% x))),]$OTU
 trimmed_data &lt;- complete_data[which(apply(complete_data, 1, function(x) any(otus_of_interest %in% x))), ]
 head(trimmed_data)</code></pre>
-<pre><code>##    treatment    OTU_1   OTU_2      rho
-## 1:    Bagged OTU_5142 OTU_888 0.310852
-## 2:    Bagged OTU_5257  OTU_11 0.322057
-## 3:    Bagged OTU_5616  OTU_64 0.273840
-## 4:    Bagged OTU_3925  OTU_70 0.376471
-## 5:    Bagged OTU_5872 OTU_635 0.316777
-## 6:    Bagged OTU_1546 OTU_635 0.328961</code></pre>
+<pre><code>##    treatment    OTU_1    OTU_2      rho
+## 1:    Bagged OTU_5142  OTU_162 0.449131
+## 2:    Bagged OTU_3559 OTU_4597 0.291322
+## 3:    Bagged OTU_3559 OTU_4570 0.291322
+## 4:    Bagged OTU_3559 OTU_4796 0.439302
+## 5:    Bagged OTU_3559 OTU_2323 0.285776
+## 6:    Bagged OTU_3559 OTU_5804 0.291322</code></pre>
 <p>We seperate the coocurrence data into a positive and negative group.</p>
 <pre class="r"><code>trimmed_positive_weights &lt;- trimmed_data[trimmed_data[[&#39;rho&#39;]] &gt; 0]
 head(trimmed_positive_weights)</code></pre>
-<pre><code>##    treatment    OTU_1   OTU_2      rho
-## 1:    Bagged OTU_5142 OTU_888 0.310852
-## 2:    Bagged OTU_5257  OTU_11 0.322057
-## 3:    Bagged OTU_5616  OTU_64 0.273840
-## 4:    Bagged OTU_3925  OTU_70 0.376471
-## 5:    Bagged OTU_5872 OTU_635 0.316777
-## 6:    Bagged OTU_1546 OTU_635 0.328961</code></pre>
+<pre><code>##    treatment    OTU_1    OTU_2      rho
+## 1:    Bagged OTU_5142  OTU_162 0.449131
+## 2:    Bagged OTU_3559 OTU_4597 0.291322
+## 3:    Bagged OTU_3559 OTU_4570 0.291322
+## 4:    Bagged OTU_3559 OTU_4796 0.439302
+## 5:    Bagged OTU_3559 OTU_2323 0.285776
+## 6:    Bagged OTU_3559 OTU_5804 0.291322</code></pre>
 <pre class="r"><code>trimmed_negative_weights &lt;- trimmed_data[trimmed_data[[&#39;rho&#39;]] &lt; 0]
 head(trimmed_negative_weights)</code></pre>
-<pre><code>##    treatment OTU_1    OTU_2       rho
-## 1:    Bagged OTU_6 OTU_3492 -0.254160
-## 2:    Bagged OTU_6 OTU_5398 -0.258791
-## 3:    Bagged OTU_6   OTU_21 -0.316472
-## 4:    Bagged OTU_6    OTU_5 -0.308091
-## 5:    Bagged OTU_3    OTU_8 -0.261619
-## 6:    Bagged OTU_5   OTU_27 -0.262223</code></pre>
+<pre><code>##    treatment    OTU_1    OTU_2       rho
+## 1:    Bagged OTU_5257    OTU_8 -0.253046
+## 2:    Bagged OTU_4036 OTU_3492 -0.293861
+## 3:    Bagged    OTU_6 OTU_3492 -0.254160
+## 4:    Bagged    OTU_6 OTU_5398 -0.258791
+## 5:    Bagged    OTU_6   OTU_21 -0.316472
+## 6:    Bagged    OTU_6    OTU_5 -0.308091</code></pre>
 <p>We’ll look at the positive and negative networks for each of the three treatments, as well as when all the treatments are combined together.</p>
 <div id="trimmed-data" class="section level1">
 <h1>Trimmed Data</h1>
@@ -418,58 +418,106 @@ plot(exposed_communities_greedy_positive, gr_exposed_positive,
 <pre class="r"><code>tep.mod &lt;- modularity(gr_exposed_positive, membership(exposed_communities_greedy_positive))</code></pre>
 <p>Note the community by itself. The members of this community are:</p>
 <pre class="r"><code>communities(exposed_communities_greedy_positive)[[6]]</code></pre>
-<pre><code>##  [1] &quot;OTU_3115&quot; &quot;OTU_4345&quot; &quot;OTU_5778&quot; &quot;OTU_5776&quot; &quot;OTU_5324&quot; &quot;OTU_4036&quot;
-##  [7] &quot;OTU_4191&quot; &quot;OTU_4337&quot; &quot;OTU_3986&quot; &quot;OTU_6&quot;    &quot;OTU_3477&quot; &quot;OTU_8&quot;   
-## [13] &quot;OTU_28&quot;   &quot;OTU_151&quot;  &quot;OTU_3979&quot; &quot;OTU_3883&quot;</code></pre>
+<pre><code>##  [1] &quot;OTU_3609&quot; &quot;OTU_345&quot;  &quot;OTU_5917&quot; &quot;OTU_4224&quot; &quot;OTU_304&quot;  &quot;OTU_86&quot;  
+##  [7] &quot;OTU_609&quot;  &quot;OTU_556&quot;  &quot;OTU_965&quot;  &quot;OTU_2346&quot; &quot;OTU_736&quot;  &quot;OTU_678&quot; 
+## [13] &quot;OTU_1228&quot; &quot;OTU_847&quot;  &quot;OTU_168&quot;  &quot;OTU_67&quot;   &quot;OTU_1919&quot; &quot;OTU_3510&quot;
+## [19] &quot;OTU_231&quot;  &quot;OTU_186&quot;  &quot;OTU_3572&quot; &quot;OTU_5784&quot; &quot;OTU_1631&quot; &quot;OTU_5545&quot;
+## [25] &quot;OTU_394&quot;  &quot;OTU_5047&quot; &quot;OTU_4397&quot; &quot;OTU_1741&quot; &quot;OTU_130&quot;  &quot;OTU_4680&quot;
+## [31] &quot;OTU_1416&quot; &quot;OTU_571&quot;  &quot;OTU_591&quot;  &quot;OTU_287&quot;  &quot;OTU_3653&quot; &quot;OTU_4387&quot;
+## [37] &quot;OTU_980&quot;  &quot;OTU_1476&quot; &quot;OTU_359&quot;  &quot;OTU_1243&quot; &quot;OTU_126&quot;  &quot;OTU_1702&quot;</code></pre>
 <pre class="r"><code>taxa[OTU %in% communities(exposed_communities_greedy_positive)[[6]]]</code></pre>
-<pre><code>##          OTU   domain                phylum                       class
-##  1:    OTU_6 Bacteria        Proteobacteria         Gammaproteobacteria
-##  2:    OTU_8 Bacteria         Bacteroidetes              Flavobacteriia
-##  3:   OTU_28 Bacteria            Firmicutes                     Bacilli
-##  4:  OTU_151 Bacteria        Proteobacteria         Alphaproteobacteria
-##  5: OTU_3115 Bacteria            Firmicutes                     Bacilli
-##  6: OTU_3477  Archaea        Woesearchaeota unclassified_Woesearchaeota
-##  7: OTU_3883 Bacteria         Parcubacteria  unclassified_Parcubacteria
-##  8: OTU_3979 Bacteria unclassified_Bacteria       unclassified_Bacteria
-##  9: OTU_3986 Bacteria         Parcubacteria  unclassified_Parcubacteria
-## 10: OTU_4036 Bacteria        Proteobacteria         Deltaproteobacteria
-## 11: OTU_4191 Bacteria unclassified_Bacteria       unclassified_Bacteria
-## 12: OTU_4337 Bacteria            Firmicutes                  Clostridia
-## 13: OTU_4345 Bacteria        Proteobacteria         Gammaproteobacteria
-##                           order                      family
-##  1:             Pseudomonadales            Pseudomonadaceae
-##  2:            Flavobacteriales           Flavobacteriaceae
-##  3:                  Bacillales          Paenibacillaceae 1
-##  4:                 Rhizobiales            Beijerinckiaceae
-##  5:                  Bacillales               Bacillaceae 2
-##  6: unclassified_Woesearchaeota unclassified_Woesearchaeota
-##  7:  unclassified_Parcubacteria  unclassified_Parcubacteria
-##  8:       unclassified_Bacteria       unclassified_Bacteria
-##  9:  unclassified_Parcubacteria  unclassified_Parcubacteria
-## 10:                Myxococcales   unclassified_Myxococcales
-## 11:       unclassified_Bacteria       unclassified_Bacteria
-## 12:               Clostridiales             Lachnospiraceae
-## 13:               Aeromonadales              Aeromonadaceae
-##                                   genus
-##  1:                         Pseudomonas
-##  2:                            Soonwooa
-##  3:                       Paenibacillus
-##  4:                        Beijerinckia
-##  5:                       Lentibacillus
-##  6:  Woesearchaeota Incertae Sedis AR16
-##  7: Parcubacteria_genera_incertae_sedis
-##  8:               unclassified_Bacteria
-##  9: Parcubacteria_genera_incertae_sedis
-## 10:           unclassified_Myxococcales
-## 11:               unclassified_Bacteria
-## 12:        unclassified_Lachnospiraceae
-## 13:         unclassified_Aeromonadaceae</code></pre>
+<pre><code>##          OTU   domain         phylum                 class
+##  1:   OTU_67 Bacteria Proteobacteria   Alphaproteobacteria
+##  2:  OTU_847 Bacteria Proteobacteria   Alphaproteobacteria
+##  3: OTU_3609 Bacteria Proteobacteria   Gammaproteobacteria
+##  4: OTU_5047 Bacteria     Firmicutes               Bacilli
+##  5:  OTU_609 Bacteria Actinobacteria        Actinobacteria
+##  6:  OTU_287 Bacteria  Bacteroidetes            Cytophagia
+##  7: OTU_1228 Bacteria Proteobacteria   Alphaproteobacteria
+##  8:  OTU_678 Bacteria            OP3                koll11
+##  9: OTU_1243 Bacteria  Bacteroidetes         [Saprospirae]
+## 10:  OTU_345 Bacteria Proteobacteria   Gammaproteobacteria
+## 11: OTU_4387 Bacteria     Firmicutes               Bacilli
+## 12:  OTU_359 Bacteria            OD1                   ZB2
+## 13: OTU_1476 Bacteria  Cyanobacteria Oscillatoriophycideae
+## 14: OTU_3510 Bacteria Proteobacteria   Alphaproteobacteria
+## 15: OTU_4397 Bacteria     Firmicutes               Bacilli
+## 16:  OTU_591 Bacteria Proteobacteria    Betaproteobacteria
+## 17: OTU_3572 Bacteria Proteobacteria   Alphaproteobacteria
+## 18:  OTU_168 Bacteria Proteobacteria   Alphaproteobacteria
+## 19:  OTU_186 Bacteria Proteobacteria   Alphaproteobacteria
+## 20:  OTU_304 Bacteria Proteobacteria   Gammaproteobacteria
+## 21:  OTU_980 Bacteria     Firmicutes               Bacilli
+## 22: OTU_2346 Bacteria Actinobacteria        Actinobacteria
+## 23: OTU_1631 Bacteria Proteobacteria   Alphaproteobacteria
+## 24: OTU_4680 Bacteria  Bacteroidetes        Flavobacteriia
+## 25: OTU_5784 Bacteria Proteobacteria   Alphaproteobacteria
+## 26: OTU_4224 Bacteria Proteobacteria   Gammaproteobacteria
+## 27: OTU_1741 Bacteria     Firmicutes               Bacilli
+## 28:  OTU_126 Bacteria  Bacteroidetes      Sphingobacteriia
+## 29:  OTU_231 Bacteria Proteobacteria   Alphaproteobacteria
+## 30: OTU_3653 Bacteria Proteobacteria    Betaproteobacteria
+## 31:  OTU_394 Bacteria Proteobacteria   Alphaproteobacteria
+## 32: OTU_5545 Bacteria Proteobacteria   Alphaproteobacteria
+## 33:  OTU_571 Bacteria     Firmicutes               Bacilli
+## 34:   OTU_86 Bacteria Proteobacteria   Gammaproteobacteria
+## 35:  OTU_736 Bacteria Actinobacteria        Actinobacteria
+## 36: OTU_1702 Bacteria Proteobacteria    Betaproteobacteria
+## 37:  OTU_965 Bacteria Actinobacteria        Actinobacteria
+## 38: OTU_5917 Bacteria Proteobacteria   Gammaproteobacteria
+## 39:  OTU_130 Bacteria Proteobacteria    Betaproteobacteria
+## 40: OTU_1919 Bacteria Proteobacteria   Alphaproteobacteria
+## 41: OTU_1416 Bacteria     Firmicutes               Bacilli
+##          OTU   domain         phylum                 class
+##                  order              family             genus
+##  1:   Sphingomonadales  Erythrobacteraceae                  
+##  2:    Caulobacterales    Caulobacteraceae         Mycoplana
+##  3:  Oceanospirillales      Halomonadaceae         Halomonas
+##  4:         Bacillales   Staphylococcaceae    Staphylococcus
+##  5:    Actinomycetales  Corynebacteriaceae   Corynebacterium
+##  6:       Cytophagales       Cytophagaceae      Hymenobacter
+##  7:   Rhodospirillales    Acetobacteraceae        Roseomonas
+##  8:                                                         
+##  9:    [Saprospirales]    Chitinophagaceae                  
+## 10:  Oceanospirillales      Halomonadaceae Haererehalobacter
+## 11:         Bacillales         Bacillaceae     Anoxybacillus
+## 12:                                                         
+## 13:      Chroococcales       Xenococcaceae                  
+## 14:   Sphingomonadales   Sphingomonadaceae                  
+## 15:         Bacillales   Staphylococcaceae    Staphylococcus
+## 16:    Burkholderiales      Comamonadaceae                  
+## 17:        Rhizobiales   Bradyrhizobiaceae             Bosea
+## 18:    Caulobacterales    Caulobacteraceae  Phenylobacterium
+## 19:        Rhizobiales    Beijerinckiaceae                  
+## 20:      Aeromonadales      Aeromonadaceae                  
+## 21:         Bacillales    Paenibacillaceae     Paenibacillus
+## 22:    Actinomycetales    Actinomycetaceae       Actinomyces
+## 23:        Rhizobiales Methylobacteriaceae                  
+## 24:   Flavobacteriales   Flavobacteriaceae    Flavobacterium
+## 25:        Rhizobiales    Methylocystaceae                  
+## 26:  Enterobacteriales  Enterobacteriaceae                  
+## 27:    Lactobacillales    Lactobacillaceae     Lactobacillus
+## 28: Sphingobacteriales Sphingobacteriaceae        Pedobacter
+## 29:   Sphingomonadales   Sphingomonadaceae      Sphingomonas
+## 30:    Burkholderiales    Oxalobacteraceae Janthinobacterium
+## 31:      Rickettsiales        mitochondria                  
+## 32:      Rickettsiales        mitochondria                  
+## 33:         Bacillales    Paenibacillaceae     Paenibacillus
+## 34:      Aeromonadales      Aeromonadaceae                  
+## 35:    Actinomycetales    Actinomycetaceae               N09
+## 36:    Burkholderiales    Oxalobacteraceae                  
+## 37:    Actinomycetales    Dermabacteraceae   Brachybacterium
+## 38:  Enterobacteriales  Enterobacteriaceae                  
+## 39:    Burkholderiales    Oxalobacteraceae                  
+## 40:   Sphingomonadales   Sphingomonadaceae                  
+## 41:         Bacillales    Paenibacillaceae     Paenibacillus
+##                  order              family             genus</code></pre>
 <p>At the center of this community is <code>OTU_6</code>:</p>
 <pre class="r"><code>taxa[OTU == &quot;OTU_6&quot;]</code></pre>
 <pre><code>##      OTU   domain         phylum               class           order
 ## 1: OTU_6 Bacteria Proteobacteria Gammaproteobacteria Pseudomonadales
-##              family       genus
-## 1: Pseudomonadaceae Pseudomonas</code></pre>
+##           family         genus
+## 1: Moraxellaceae Acinetobacter</code></pre>
 </div>
 <div id="negative-weights" class="section level3">
 <h3>Negative Weights</h3>
@@ -491,66 +539,38 @@ plot(exposed_communities_greedy_negative, gr_exposed_negative,
 <pre class="r"><code>ten.mod &lt;- modularity(gr_exposed_negative, membership(exposed_communities_greedy_negative))</code></pre>
 <p>We again find <code>OTU_6</code> as the center of a community. Below are the OTUs in this community. Notice that they are mostly $:</p>
 <pre class="r"><code>taxa[OTU %in% communities(exposed_communities_greedy_negative)[[1]]]</code></pre>
-<pre><code>##          OTU   domain          phylum               class
-##  1:    OTU_6 Bacteria  Proteobacteria Gammaproteobacteria
-##  2:   OTU_16 Bacteria  Proteobacteria  Betaproteobacteria
-##  3:   OTU_18 Bacteria  Proteobacteria Gammaproteobacteria
-##  4:   OTU_20 Bacteria  Proteobacteria Gammaproteobacteria
-##  5:   OTU_21 Bacteria  Proteobacteria Alphaproteobacteria
-##  6:   OTU_45 Bacteria  Proteobacteria  Betaproteobacteria
-##  7:  OTU_336 Bacteria  Proteobacteria Gammaproteobacteria
-##  8:  OTU_395 Bacteria  Proteobacteria Alphaproteobacteria
-##  9:  OTU_446 Bacteria  Actinobacteria      Actinobacteria
-## 10: OTU_1035 Bacteria  Proteobacteria Deltaproteobacteria
-## 11: OTU_1076 Bacteria      Firmicutes          Clostridia
-## 12: OTU_2168 Bacteria Verrucomicrobia            Opitutae
-## 13: OTU_3950 Bacteria  Proteobacteria Alphaproteobacteria
-## 14: OTU_4161 Bacteria  Proteobacteria Deltaproteobacteria
-## 15: OTU_4222 Bacteria  Proteobacteria Gammaproteobacteria
-## 16: OTU_4227 Bacteria  Proteobacteria  Betaproteobacteria
-## 17: OTU_4387 Bacteria  Actinobacteria      Actinobacteria
-##                                order                           family
-##  1:                  Pseudomonadales                 Pseudomonadaceae
-##  2:                    Rhodocyclales                   Rhodocyclaceae
-##  3:                  Pseudomonadales                    Moraxellaceae
-##  4:                  Xanthomonadales                 Xanthomonadaceae
-##  5:                 Sphingomonadales               Erythrobacteraceae
-##  6:                  Burkholderiales                 Burkholderiaceae
-##  7: unclassified_Gammaproteobacteria unclassified_Gammaproteobacteria
-##  8:                      Rhizobiales                Bradyrhizobiaceae
-##  9:                  Actinomycetales                  Nocardioidaceae
-## 10:               Desulfovibrionales              Desulfovibrionaceae
-## 11:                    Clostridiales                  Lachnospiraceae
-## 12:                       Opitutales                      Opitutaceae
-## 13:                 Rhodospirillales                Rhodospirillaceae
-## 14:                Bdellovibrionales               Bdellovibrionaceae
-## 15:                Enterobacteriales               Enterobacteriaceae
-## 16:                  Burkholderiales                   Comamonadaceae
-## 17:                  Actinomycetales                 Actinomycetaceae
-##                                genus
-##  1:                      Pseudomonas
-##  2:                    Dechloromonas
-##  3:                    Enhydrobacter
-##  4:                      Xanthomonas
-##  5:  unclassified_Erythrobacteraceae
-##  6:                      Cupriavidus
-##  7: unclassified_Gammaproteobacteria
-##  8:   unclassified_Bradyrhizobiaceae
-##  9:                     Nocardioides
-## 10:                    Desulfovibrio
-## 11:                 Clostridium XlVa
-## 12:                         Opitutus
-## 13:   unclassified_Rhodospirillaceae
-## 14:                     Bdellovibrio
-## 15:  unclassified_Enterobacteriaceae
-## 16:      unclassified_Comamonadaceae
-## 17:                      Actinomyces</code></pre>
+<pre><code>##          OTU   domain         phylum               class             order
+##  1: OTU_4337 Bacteria Proteobacteria Gammaproteobacteria   Pseudomonadales
+##  2: OTU_5778 Bacteria Proteobacteria Gammaproteobacteria   Pseudomonadales
+##  3: OTU_5776 Bacteria Proteobacteria Gammaproteobacteria   Pseudomonadales
+##  4:    OTU_5 Bacteria Proteobacteria Alphaproteobacteria     Rickettsiales
+##  5: OTU_4191 Bacteria Proteobacteria Gammaproteobacteria   Pseudomonadales
+##  6: OTU_5806 Bacteria Proteobacteria Gammaproteobacteria Enterobacteriales
+##  7: OTU_4036 Bacteria Proteobacteria Gammaproteobacteria   Pseudomonadales
+##  8: OTU_3986 Bacteria Proteobacteria Gammaproteobacteria   Pseudomonadales
+##  9: OTU_5834 Bacteria Proteobacteria Gammaproteobacteria   Pseudomonadales
+## 10:   OTU_43 Bacteria Proteobacteria  Betaproteobacteria   Burkholderiales
+## 11: OTU_5701 Bacteria Proteobacteria  Betaproteobacteria   Burkholderiales
+## 12: OTU_4345 Bacteria Proteobacteria Gammaproteobacteria   Pseudomonadales
+##                 family         genus
+##  1:      Moraxellaceae Acinetobacter
+##  2:      Moraxellaceae Acinetobacter
+##  3:      Moraxellaceae Acinetobacter
+##  4:       mitochondria              
+##  5:      Moraxellaceae Acinetobacter
+##  6: Enterobacteriaceae              
+##  7:      Moraxellaceae Acinetobacter
+##  8:      Moraxellaceae Acinetobacter
+##  9:      Moraxellaceae Acinetobacter
+## 10:   Oxalobacteraceae   Cupriavidus
+## 11:     Comamonadaceae              
+## 12:      Moraxellaceae Acinetobacter</code></pre>
 <p>Something else to note of interest is <code>OTU_5</code>, another <span class="math inline">\(\textit{Proteobacteria}\)</span>:</p>
 <pre class="r"><code>taxa[OTU == &quot;OTU_5&quot;]</code></pre>
-<pre><code>##      OTU   domain         phylum              class           order
-## 1: OTU_5 Bacteria Proteobacteria Betaproteobacteria Burkholderiales
-##              family        genus
-## 1: Burkholderiaceae Burkholderia</code></pre>
+<pre><code>##      OTU   domain         phylum               class         order
+## 1: OTU_5 Bacteria Proteobacteria Alphaproteobacteria Rickettsiales
+##          family genus
+## 1: mitochondria</code></pre>
 <p>Of interest is that <code>OTU_5</code> is in its own cluster, separate from <code>OTU_6</code>, and that there is no overlap in their own communities. Though it is not shown here, we will see here that <code>OTU_5</code> plays a role similar to that of <code>OTU_6</code> - a highly central node in its own community.</p>
 </div>
 </div>
@@ -569,33 +589,24 @@ plot(exposed_communities_greedy_negative, gr_exposed_negative,
 <pre class="r"><code>tcp.mod &lt;- modularity(gr_caged_positive, membership(caged_communities_greedy_positive))</code></pre>
 <p>We again find <code>OTU_6</code> as the central member of a cluster that is well-separated from the rest of the community. The OTUs in this cluster are:</p>
 <pre class="r"><code>taxa[OTU %in% communities(caged_communities_greedy_positive)[[7]]]</code></pre>
-<pre><code>##         OTU   domain                phylum                      class
-## 1:    OTU_6 Bacteria        Proteobacteria        Gammaproteobacteria
-## 2:   OTU_28 Bacteria            Firmicutes                    Bacilli
-## 3:  OTU_148 Bacteria         Bacteroidetes           Sphingobacteriia
-## 4:  OTU_157 Bacteria        Proteobacteria        Alphaproteobacteria
-## 5:  OTU_510 Bacteria unclassified_Bacteria      unclassified_Bacteria
-## 6: OTU_3115 Bacteria            Firmicutes                    Bacilli
-## 7: OTU_3986 Bacteria         Parcubacteria unclassified_Parcubacteria
-## 8: OTU_4036 Bacteria        Proteobacteria        Deltaproteobacteria
-##                         order                     family
-## 1:            Pseudomonadales           Pseudomonadaceae
-## 2:                 Bacillales         Paenibacillaceae 1
-## 3:         Sphingobacteriales             Saprospiraceae
-## 4:            Rhodobacterales           Rhodobacteraceae
-## 5:      unclassified_Bacteria      unclassified_Bacteria
-## 6:                 Bacillales              Bacillaceae 2
-## 7: unclassified_Parcubacteria unclassified_Parcubacteria
-## 8:               Myxococcales  unclassified_Myxococcales
-##                                  genus
-## 1:                         Pseudomonas
-## 2:                       Paenibacillus
-## 3:         unclassified_Saprospiraceae
-## 4:                    Rubellimicrobium
-## 5:               unclassified_Bacteria
-## 6:                       Lentibacillus
-## 7: Parcubacteria_genera_incertae_sedis
-## 8:           unclassified_Myxococcales</code></pre>
+<pre><code>##         OTU   domain         phylum               class            order
+## 1: OTU_3780 Bacteria Proteobacteria  Betaproteobacteria    Rhodocyclales
+## 2:   OTU_50 Bacteria     Firmicutes             Bacilli       Bacillales
+## 3:  OTU_120 Bacteria Actinobacteria      Actinobacteria  Actinomycetales
+## 4: OTU_4191 Bacteria Proteobacteria Gammaproteobacteria  Pseudomonadales
+## 5: OTU_3096 Bacteria Proteobacteria  Betaproteobacteria  Burkholderiales
+## 6: OTU_5701 Bacteria Proteobacteria  Betaproteobacteria  Burkholderiales
+## 7:    OTU_7 Bacteria  Bacteroidetes      Flavobacteriia Flavobacteriales
+## 8:   OTU_27 Bacteria     Firmicutes             Bacilli  Lactobacillales
+##               family           genus
+## 1:    Rhodocyclaceae   Dechloromonas
+## 2:       Bacillaceae                
+## 3: Microbacteriaceae                
+## 4:     Moraxellaceae   Acinetobacter
+## 5:    Alcaligenaceae      Sutterella
+## 6:    Comamonadaceae                
+## 7:   [Weeksellaceae] Cloacibacterium
+## 8:  Streptococcaceae   Streptococcus</code></pre>
 </div>
 <div id="negative-weights-1" class="section level3">
 <h3>Negative Weights</h3>
@@ -613,26 +624,28 @@ plot(caged_communities_greedy_negative, gr_caged_negative,
 <pre class="r"><code>tcn.mod &lt;- modularity(gr_caged_negative, membership(caged_communities_greedy_negative))</code></pre>
 <p>The OTUs in the same community of <code>OTU_6</code> are:</p>
 <pre class="r"><code>taxa[OTU %in% communities(caged_communities_greedy_negative)[[2]]]</code></pre>
-<pre><code>##        OTU   domain                phylum                 class
-## 1:   OTU_6 Bacteria        Proteobacteria   Gammaproteobacteria
-## 2:   OTU_9 Bacteria            Firmicutes               Bacilli
-## 3: OTU_233 Bacteria unclassified_Bacteria unclassified_Bacteria
-##                    order                family                 genus
-## 1:       Pseudomonadales      Pseudomonadaceae           Pseudomonas
-## 2:            Bacillales     Staphylococcaceae        Staphylococcus
-## 3: unclassified_Bacteria unclassified_Bacteria unclassified_Bacteria</code></pre>
+<pre><code>##         OTU   domain         phylum               class            order
+## 1: OTU_5302 Bacteria Proteobacteria Alphaproteobacteria    Rickettsiales
+## 2: OTU_4227 Bacteria Proteobacteria Alphaproteobacteria    Rickettsiales
+## 3:    OTU_8 Bacteria Proteobacteria Alphaproteobacteria Rhodospirillales
+##              family         genus
+## 1:     mitochondria              
+## 2:     mitochondria              
+## 3: Acetobacteraceae Gluconobacter</code></pre>
 <p>As mentioned above, we see <code>OTU_5</code> negatively correlated with <code>OTU_6</code> and as highly central node. While we don’t see <span class="math inline">\(\textit{Proteobacteria}\)</span> in the <code>OTU_6</code> cluster, the OTUs in the cluster of <code>OTU_5</code> are all <span class="math inline">\(\textit{Proteobacteria}\)</span>:</p>
 <pre class="r"><code>taxa[OTU %in% communities(caged_communities_greedy_negative)[[1]]]</code></pre>
-<pre><code>##         OTU   domain         phylum               class             order
-## 1:    OTU_3 Bacteria Proteobacteria Alphaproteobacteria  Rhodospirillales
-## 2:    OTU_5 Bacteria Proteobacteria  Betaproteobacteria   Burkholderiales
-## 3:   OTU_64 Bacteria Proteobacteria Gammaproteobacteria   Pseudomonadales
-## 4: OTU_4161 Bacteria Proteobacteria Deltaproteobacteria Bdellovibrionales
-##                family         genus
-## 1:   Acetobacteraceae Neokomagataea
-## 2:   Burkholderiaceae  Burkholderia
-## 3:   Pseudomonadaceae   Pseudomonas
-## 4: Bdellovibrionaceae  Bdellovibrio</code></pre>
+<pre><code>##         OTU   domain         phylum               class           order
+## 1:   OTU_20 Bacteria Proteobacteria Gammaproteobacteria Pseudomonadales
+## 2:    OTU_5 Bacteria Proteobacteria Alphaproteobacteria   Rickettsiales
+## 3: OTU_4161 Bacteria Proteobacteria Alphaproteobacteria   Rickettsiales
+## 4: OTU_3986 Bacteria Proteobacteria Gammaproteobacteria Pseudomonadales
+## 5: OTU_5834 Bacteria Proteobacteria Gammaproteobacteria Pseudomonadales
+##           family         genus
+## 1: Moraxellaceae Acinetobacter
+## 2:  mitochondria              
+## 3:  mitochondria              
+## 4: Moraxellaceae Acinetobacter
+## 5: Moraxellaceae Acinetobacter</code></pre>
 </div>
 </div>
 <div id="bagged-communities" class="section level2">
@@ -654,129 +667,170 @@ plot(bagged_communities_greedy_positive, gr_bagged_positive,
 <pre class="r"><code>tbp.mod &lt;- modularity(gr_bagged_positive, membership(bagged_communities_greedy_positive))</code></pre>
 <p>For completeness, here are the OTUs in the same community as <code>OTU_6</code>:</p>
 <pre class="r"><code>taxa[OTU %in% communities(bagged_communities_greedy_positive)[[1]]]</code></pre>
-<pre><code>##          OTU   domain                    phylum                      class
-##  1:    OTU_6 Bacteria            Proteobacteria        Gammaproteobacteria
-##  2:    OTU_7 Bacteria            Proteobacteria        Gammaproteobacteria
-##  3:    OTU_8 Bacteria             Bacteroidetes             Flavobacteriia
-##  4:   OTU_13 Bacteria            Actinobacteria             Actinobacteria
-##  5:   OTU_18 Bacteria            Proteobacteria        Gammaproteobacteria
-##  6:   OTU_20 Bacteria            Proteobacteria        Gammaproteobacteria
-##  7:   OTU_28 Bacteria                Firmicutes                    Bacilli
-##  8:   OTU_40 Bacteria                Firmicutes                    Bacilli
-##  9:   OTU_45 Bacteria            Proteobacteria         Betaproteobacteria
-## 10:   OTU_52 Bacteria            Actinobacteria             Actinobacteria
-## 11:   OTU_74 Bacteria                Firmicutes                    Bacilli
-## 12:   OTU_81 Bacteria            Actinobacteria             Actinobacteria
-## 13:  OTU_153 Bacteria                Firmicutes                 Clostridia
-## 14:  OTU_219 Bacteria            Actinobacteria             Actinobacteria
-## 15:  OTU_221 Bacteria            Proteobacteria        Alphaproteobacteria
-## 16:  OTU_339 Bacteria            Proteobacteria        Alphaproteobacteria
-## 17:  OTU_351 Bacteria            Proteobacteria        Alphaproteobacteria
-## 18:  OTU_510 Bacteria     unclassified_Bacteria      unclassified_Bacteria
-## 19:  OTU_705 Bacteria     unclassified_Bacteria      unclassified_Bacteria
-## 20:  OTU_841 Bacteria             Bacteroidetes           Sphingobacteriia
-## 21: OTU_1159 Bacteria            Actinobacteria             Actinobacteria
-## 22: OTU_1337 Bacteria             Bacteroidetes                Bacteroidia
-## 23: OTU_1546 Bacteria     unclassified_Bacteria      unclassified_Bacteria
-## 24: OTU_1700 Bacteria           Verrucomicrobia                   Opitutae
-## 25: OTU_1708 Bacteria                Firmicutes                 Clostridia
-## 26: OTU_2025 Bacteria            Proteobacteria        Gammaproteobacteria
-## 27: OTU_2350 Bacteria     unclassified_Bacteria      unclassified_Bacteria
-## 28: OTU_2734 Bacteria            Proteobacteria        Gammaproteobacteria
-## 29: OTU_2898 Bacteria Cyanobacteria/Chloroplast                Chloroplast
-## 30: OTU_3780 Bacteria            Proteobacteria         Betaproteobacteria
-## 31: OTU_3883 Bacteria             Parcubacteria unclassified_Parcubacteria
-## 32: OTU_4036 Bacteria            Proteobacteria        Deltaproteobacteria
-## 33: OTU_4191 Bacteria     unclassified_Bacteria      unclassified_Bacteria
-## 34: OTU_4228 Bacteria             Bacteroidetes             Flavobacteriia
-## 35: OTU_4261 Bacteria            Actinobacteria             Actinobacteria
-## 36: OTU_4447 Bacteria                Chlamydiae                 Chlamydiia
-## 37: OTU_4570 Bacteria            Planctomycetes             Planctomycetia
-## 38: OTU_4597 Bacteria                Firmicutes                    Bacilli
-## 39: OTU_4624 Bacteria Cyanobacteria/Chloroplast                Chloroplast
-##          OTU   domain                    phylum                      class
-##                          order                       family
-##  1:            Pseudomonadales             Pseudomonadaceae
-##  2:          Enterobacteriales           Enterobacteriaceae
-##  3:           Flavobacteriales            Flavobacteriaceae
-##  4:            Actinomycetales           Corynebacteriaceae
-##  5:            Pseudomonadales                Moraxellaceae
-##  6:            Xanthomonadales             Xanthomonadaceae
-##  7:                 Bacillales           Paenibacillaceae 1
-##  8:                 Bacillales                Bacillaceae 1
-##  9:            Burkholderiales             Burkholderiaceae
-## 10:            Actinomycetales          Geodermatophilaceae
-## 11:                 Bacillales           Paenibacillaceae 1
-## 12:            Actinomycetales               Micrococcaceae
-## 13:              Clostridiales              Lachnospiraceae
-## 14:            Actinomycetales             Mycobacteriaceae
-## 15:            Rhodobacterales             Rhodobacteraceae
-## 16:           Sphingomonadales            Sphingomonadaceae
-## 17:            Rhodobacterales             Rhodobacteraceae
-## 18:      unclassified_Bacteria        unclassified_Bacteria
-## 19:      unclassified_Bacteria        unclassified_Bacteria
-## 20:         Sphingobacteriales          Sphingobacteriaceae
-## 21:            Actinomycetales unclassified_Actinomycetales
-## 22:              Bacteroidales   unclassified_Bacteroidales
-## 23:      unclassified_Bacteria        unclassified_Bacteria
-## 24:                 Opitutales                  Opitutaceae
-## 25:              Clostridiales   unclassified_Clostridiales
-## 26:          Oceanospirillales               Halomonadaceae
-## 27:      unclassified_Bacteria        unclassified_Bacteria
-## 28:            Alteromonadales               Shewanellaceae
-## 29:   unclassified_Chloroplast                  Chloroplast
-## 30:            Burkholderiales               Alcaligenaceae
-## 31: unclassified_Parcubacteria   unclassified_Parcubacteria
-## 32:               Myxococcales    unclassified_Myxococcales
-## 33:      unclassified_Bacteria        unclassified_Bacteria
-## 34:           Flavobacteriales            Flavobacteriaceae
-## 35:            Actinomycetales           Corynebacteriaceae
-## 36:               Chlamydiales            Parachlamydiaceae
-## 37:           Planctomycetales            Planctomycetaceae
-## 38:            Lactobacillales            Carnobacteriaceae
-## 39:   unclassified_Chloroplast                  Chloroplast
-##                          order                       family
-##                                   genus
-##  1:                         Pseudomonas
-##  2:                             Pantoea
-##  3:                            Soonwooa
-##  4:                     Corynebacterium
-##  5:                       Enhydrobacter
-##  6:                         Xanthomonas
-##  7:                       Paenibacillus
-##  8:                       Anoxybacillus
-##  9:                         Cupriavidus
-## 10:                       Modestobacter
-## 11:                       Paenibacillus
-## 12:                        Arthrobacter
-## 13:                    Fusicatenibacter
-## 14:                       Mycobacterium
-## 15:                         Rhodobacter
-## 16:                         Sphingobium
-## 17:                    Rubellimicrobium
-## 18:               unclassified_Bacteria
-## 19:               unclassified_Bacteria
-## 20:                          Pedobacter
-## 21:        unclassified_Actinomycetales
-## 22:          unclassified_Bacteroidales
-## 23:               unclassified_Bacteria
-## 24:                            Opitutus
-## 25:          unclassified_Clostridiales
-## 26:                          Zymobacter
-## 27:               unclassified_Bacteria
-## 28:                          Shewanella
-## 29:                        Streptophyta
-## 30:                       Achromobacter
-## 31: Parcubacteria_genera_incertae_sedis
-## 32:           unclassified_Myxococcales
-## 33:               unclassified_Bacteria
-## 34:                      Flavobacterium
-## 35:                     Corynebacterium
-## 36:                        Neochlamydia
-## 37:                       Rubinisphaera
-## 38:                      Granulicatella
-## 39:                        Streptophyta
-##                                   genus</code></pre>
+<pre><code>##          OTU   domain         phylum                 class
+##  1: OTU_3426 Bacteria Proteobacteria    Betaproteobacteria
+##  2: OTU_3425 Bacteria Proteobacteria    Betaproteobacteria
+##  3: OTU_1035 Bacteria  Bacteroidetes      Sphingobacteriia
+##  4: OTU_5709 Bacteria Proteobacteria    Betaproteobacteria
+##  5: OTU_5708 Bacteria Proteobacteria    Betaproteobacteria
+##  6: OTU_3153 Bacteria Proteobacteria   Alphaproteobacteria
+##  7:   OTU_52 Bacteria Proteobacteria    Betaproteobacteria
+##  8: OTU_1011 Bacteria Proteobacteria    Betaproteobacteria
+##  9: OTU_1018 Bacteria Proteobacteria   Alphaproteobacteria
+## 10: OTU_3930 Bacteria Proteobacteria   Alphaproteobacteria
+## 11:   OTU_42 Bacteria  Bacteroidetes            Cytophagia
+## 12:  OTU_994 Bacteria  Bacteroidetes            Cytophagia
+## 13:  OTU_841 Bacteria Proteobacteria   Gammaproteobacteria
+## 14: OTU_5074 Bacteria Proteobacteria   Gammaproteobacteria
+## 15: OTU_3925 Bacteria Proteobacteria    Betaproteobacteria
+## 16:   OTU_38 Bacteria Proteobacteria   Gammaproteobacteria
+## 17:  OTU_479 Bacteria Proteobacteria   Alphaproteobacteria
+## 18: OTU_5192 Bacteria Proteobacteria    Betaproteobacteria
+## 19:  OTU_461 Bacteria     Firmicutes            Clostridia
+## 20: OTU_5454 Bacteria Proteobacteria   Gammaproteobacteria
+## 21: OTU_1228 Bacteria Proteobacteria   Alphaproteobacteria
+## 22:   OTU_16 Bacteria Proteobacteria    Betaproteobacteria
+## 23:   OTU_13 Bacteria Proteobacteria    Betaproteobacteria
+## 24:  OTU_671 Bacteria Actinobacteria        Actinobacteria
+## 25: OTU_4624 Bacteria Proteobacteria    Betaproteobacteria
+## 26:  OTU_349 Bacteria Proteobacteria   Deltaproteobacteria
+## 27: OTU_3429 Bacteria Proteobacteria   Gammaproteobacteria
+## 28: OTU_5307 Bacteria Proteobacteria    Betaproteobacteria
+## 29: OTU_5367 Bacteria Actinobacteria        Actinobacteria
+## 30: OTU_1476 Bacteria  Cyanobacteria Oscillatoriophycideae
+## 31:  OTU_582 Bacteria Proteobacteria   Alphaproteobacteria
+## 32: OTU_3721 Bacteria Proteobacteria    Betaproteobacteria
+## 33: OTU_2100 Bacteria Proteobacteria   Gammaproteobacteria
+## 34:  OTU_596 Bacteria  Bacteroidetes      Sphingobacteriia
+## 35:  OTU_786 Bacteria Proteobacteria    Betaproteobacteria
+## 36: OTU_5113 Bacteria Actinobacteria        Actinobacteria
+## 37: OTU_2169 Bacteria  Acidobacteria          Solibacteres
+## 38:  OTU_329 Bacteria Proteobacteria   Alphaproteobacteria
+## 39:  OTU_550 Bacteria Proteobacteria   Alphaproteobacteria
+## 40:  OTU_158 Bacteria Proteobacteria   Deltaproteobacteria
+## 41:  OTU_153 Bacteria     Firmicutes               Bacilli
+## 42:  OTU_336 Bacteria Proteobacteria   Alphaproteobacteria
+## 43:  OTU_338 Bacteria Proteobacteria   Gammaproteobacteria
+## 44: OTU_5879 Bacteria Proteobacteria   Alphaproteobacteria
+## 45: OTU_5878 Bacteria Proteobacteria   Gammaproteobacteria
+## 46: OTU_5667 Bacteria Proteobacteria    Betaproteobacteria
+## 47: OTU_2529 Bacteria Proteobacteria    Betaproteobacteria
+## 48: OTU_1546 Bacteria Proteobacteria   Gammaproteobacteria
+## 49: OTU_1084 Bacteria Proteobacteria                  TA18
+## 50: OTU_1762 Bacteria Proteobacteria   Alphaproteobacteria
+## 51: OTU_5702 Bacteria Proteobacteria    Betaproteobacteria
+## 52:  OTU_502 Bacteria  Bacteroidetes        Flavobacteriia
+## 53: OTU_5548 Bacteria Proteobacteria    Betaproteobacteria
+## 54: OTU_3269 Bacteria Proteobacteria   Alphaproteobacteria
+## 55: OTU_2132 Bacteria Actinobacteria        Actinobacteria
+## 56:  OTU_510 Bacteria Proteobacteria    Betaproteobacteria
+## 57: OTU_1741 Bacteria     Firmicutes               Bacilli
+## 58: OTU_5447 Bacteria Proteobacteria    Betaproteobacteria
+## 59:  OTU_126 Bacteria  Bacteroidetes      Sphingobacteriia
+## 60: OTU_5623 Bacteria  Bacteroidetes        Flavobacteriia
+## 61: OTU_4920 Bacteria Proteobacteria    Betaproteobacteria
+## 62:  OTU_717 Bacteria  Bacteroidetes        Flavobacteriia
+## 63:  OTU_711 Bacteria  Bacteroidetes        Flavobacteriia
+## 64: OTU_1080 Bacteria  Bacteroidetes        Flavobacteriia
+## 65: OTU_2718 Bacteria Proteobacteria   Alphaproteobacteria
+## 66:   OTU_81 Bacteria     Firmicutes               Bacilli
+## 67: OTU_5972 Bacteria Proteobacteria    Betaproteobacteria
+## 68:  OTU_221 Bacteria Proteobacteria   Alphaproteobacteria
+## 69: OTU_1708 Bacteria  Bacteroidetes         [Saprospirae]
+## 70: OTU_1700 Bacteria     Firmicutes               Bacilli
+## 71:  OTU_219 Bacteria       [Thermi]            Deinococci
+## 72:  OTU_218 Bacteria  Acidobacteria  [Chloracidobacteria]
+## 73: OTU_5745 Bacteria Proteobacteria    Betaproteobacteria
+## 74: OTU_2748 Bacteria  Bacteroidetes           Bacteroidia
+## 75:  OTU_130 Bacteria Proteobacteria    Betaproteobacteria
+## 76: OTU_1759 Bacteria Proteobacteria   Alphaproteobacteria
+## 77: OTU_5763 Bacteria Proteobacteria   Alphaproteobacteria
+## 78: OTU_4759 Bacteria Proteobacteria    Betaproteobacteria
+## 79: OTU_5029 Bacteria Proteobacteria    Betaproteobacteria
+## 80:  OTU_355 Bacteria Proteobacteria   Gammaproteobacteria
+##          OTU   domain         phylum                 class
+##                  order              family             genus
+##  1:    Burkholderiales      Comamonadaceae                  
+##  2:    Burkholderiales      Comamonadaceae       Ramlibacter
+##  3: Sphingobacteriales Sphingobacteriaceae  Sphingobacterium
+##  4:      Rhodocyclales      Rhodocyclaceae          Zoogloea
+##  5:    Burkholderiales      Comamonadaceae                  
+##  6:   Sphingomonadales   Sphingomonadaceae   Novosphingobium
+##  7:      Rhodocyclales      Rhodocyclaceae                  
+##  8:    Burkholderiales      Comamonadaceae                  
+##  9:    Rhodobacterales     Hyphomonadaceae                  
+## 10:        Rhizobiales   Bradyrhizobiaceae                  
+## 11:       Cytophagales       Cytophagaceae                  
+## 12:       Cytophagales       Cytophagaceae      Hymenobacter
+## 13:                                                         
+## 14:  Oceanospirillales      Halomonadaceae        Candidatus
+## 15:    Burkholderiales      Comamonadaceae       Methylibium
+## 16:    Pseudomonadales    Pseudomonadaceae       Pseudomonas
+## 17:    Rhodobacterales    Rhodobacteraceae        Paracoccus
+## 18:    Burkholderiales      Comamonadaceae         Pelomonas
+## 19:      Clostridiales   [Tissierellaceae]        Finegoldia
+## 20:    Xanthomonadales    Xanthomonadaceae                  
+## 21:   Rhodospirillales    Acetobacteraceae        Roseomonas
+## 22:    Burkholderiales      Comamonadaceae     Aquabacterium
+## 23:    Burkholderiales      Comamonadaceae        Acidovorax
+## 24:    Actinomycetales    Mycobacteriaceae     Mycobacterium
+## 25:    Burkholderiales      Comamonadaceae       Curvibacter
+## 26:              MIZ46                                      
+## 27:  Enterobacteriales  Enterobacteriaceae           Erwinia
+## 28:    Burkholderiales      Comamonadaceae                  
+## 29:    Actinomycetales  Intrasporangiaceae                  
+## 30:      Chroococcales       Xenococcaceae                  
+## 31:    Caulobacterales    Caulobacteraceae                  
+## 32:    Burkholderiales    Oxalobacteraceae Janthinobacterium
+## 33:    Pseudomonadales    Pseudomonadaceae       Pseudomonas
+## 34: Sphingobacteriales                                      
+## 35:    Burkholderiales      Comamonadaceae                  
+## 36:    Actinomycetales   Microbacteriaceae   Salinibacterium
+## 37:     Solibacterales                                      
+## 38:    Caulobacterales    Caulobacteraceae                  
+## 39:        Rhizobiales Methylobacteriaceae  Methylobacterium
+## 40:       Myxococcales                                      
+## 41:    Lactobacillales    Lactobacillaceae     Lactobacillus
+## 42:        Rhizobiales Methylobacteriaceae                  
+## 43:    Pseudomonadales    Pseudomonadaceae       Pseudomonas
+## 44:        Rhizobiales                                      
+## 45:    Pseudomonadales       Moraxellaceae     Acinetobacter
+## 46:    Burkholderiales      Comamonadaceae                  
+## 47:    Burkholderiales      Comamonadaceae                  
+## 48:    Alteromonadales             211ds20                  
+## 49:          PHOS-HD29                                      
+## 50:   Sphingomonadales   Sphingomonadaceae      Sphingomonas
+## 51:      Rhodocyclales      Rhodocyclaceae     Dechloromonas
+## 52:   Flavobacteriales   Flavobacteriaceae    Flavobacterium
+## 53:      Rhodocyclales      Rhodocyclaceae     Dechloromonas
+## 54:   Sphingomonadales   Sphingomonadaceae      Sphingomonas
+## 55:    Actinomycetales              ACK-M1                  
+## 56:      Rhodocyclales      Rhodocyclaceae     Dechloromonas
+## 57:    Lactobacillales    Lactobacillaceae     Lactobacillus
+## 58:    Burkholderiales      Comamonadaceae        Acidovorax
+## 59: Sphingobacteriales Sphingobacteriaceae        Pedobacter
+## 60:   Flavobacteriales   Flavobacteriaceae    Flavobacterium
+## 61:      Rhodocyclales      Rhodocyclaceae     Dechloromonas
+## 62:   Flavobacteriales     [Weeksellaceae]  Chryseobacterium
+## 63:   Flavobacteriales     [Weeksellaceae]   Elizabethkingia
+## 64:   Flavobacteriales     [Weeksellaceae]  Chryseobacterium
+## 65:    Caulobacterales    Caulobacteraceae                  
+## 66:         Gemellales         Gemellaceae           Gemella
+## 67:    Burkholderiales      Comamonadaceae     Limnohabitans
+## 68:    Rhodobacterales    Rhodobacteraceae       Rhodobacter
+## 69:    [Saprospirales]                                      
+## 70:         Bacillales   Staphylococcaceae      Salinicoccus
+## 71:      Deinococcales      Deinococcaceae       Deinococcus
+## 72:               RB41           Ellin6075                  
+## 73:    Burkholderiales      Comamonadaceae                  
+## 74:      Bacteroidales      Bacteroidaceae       Bacteroides
+## 75:    Burkholderiales    Oxalobacteraceae                  
+## 76:      Rickettsiales        mitochondria                  
+## 77:                                                         
+## 78:    Burkholderiales      Comamonadaceae                  
+## 79:    Burkholderiales      Comamonadaceae                  
+## 80:  Oceanospirillales      Halomonadaceae         Halomonas
+##                  order              family             genus</code></pre>
 <p><code>OTU_5</code> was not present in this graph.</p>
 <pre class="r"><code>&#39;OTU_5&#39; %in% V(gr_bagged_positive)$name</code></pre>
 <pre><code>## [1] FALSE</code></pre>
@@ -796,25 +850,29 @@ plot(bagged_communities_greedy_negative, gr_bagged_negative,
 <p>Modularity score:</p>
 <pre class="r"><code>tbn.mod &lt;- modularity(gr_bagged_negative, membership(bagged_communities_greedy_negative))</code></pre>
 <pre class="r"><code>taxa[OTU %in% communities(bagged_communities_greedy_negative)[[1]]]</code></pre>
-<pre><code>##         OTU   domain         phylum                       class
-## 1:    OTU_6 Bacteria Proteobacteria         Gammaproteobacteria
-## 2:   OTU_21 Bacteria Proteobacteria         Alphaproteobacteria
-## 3: OTU_3492 Bacteria Proteobacteria unclassified_Proteobacteria
-##                          order                      family
-## 1:             Pseudomonadales            Pseudomonadaceae
-## 2:            Sphingomonadales          Erythrobacteraceae
-## 3: unclassified_Proteobacteria unclassified_Proteobacteria
-##                              genus
-## 1:                     Pseudomonas
-## 2: unclassified_Erythrobacteraceae
-## 3:     unclassified_Proteobacteria</code></pre>
-<pre class="r"><code>taxa[OTU %in% communities(bagged_communities_greedy_negative)[[2]]]</code></pre>
-<pre><code>##       OTU   domain         phylum              class           order
-## 1:  OTU_5 Bacteria Proteobacteria Betaproteobacteria Burkholderiales
-## 2: OTU_27 Bacteria     Firmicutes            Bacilli Lactobacillales
+<pre><code>##         OTU   domain         phylum               class           order
+## 1:    OTU_5 Bacteria Proteobacteria Alphaproteobacteria   Rickettsiales
+## 2: OTU_4938 Bacteria Proteobacteria Alphaproteobacteria   Rickettsiales
+## 3: OTU_5398 Bacteria Proteobacteria Gammaproteobacteria Pseudomonadales
+## 4:    OTU_6 Bacteria Proteobacteria Gammaproteobacteria Pseudomonadales
 ##              family         genus
-## 1: Burkholderiaceae  Burkholderia
-## 2: Lactobacillaceae Lactobacillus</code></pre>
+## 1:     mitochondria              
+## 2:     mitochondria              
+## 3: Pseudomonadaceae   Pseudomonas
+## 4:    Moraxellaceae Acinetobacter</code></pre>
+<pre class="r"><code>taxa[OTU %in% communities(bagged_communities_greedy_negative)[[2]]]</code></pre>
+<pre><code>##         OTU   domain         phylum               class             order
+## 1: OTU_3478 Bacteria Proteobacteria Alphaproteobacteria     Rickettsiales
+## 2: OTU_5867 Bacteria Proteobacteria Gammaproteobacteria Enterobacteriales
+## 3:    OTU_8 Bacteria Proteobacteria Alphaproteobacteria  Rhodospirillales
+## 4:    OTU_3 Bacteria Proteobacteria Gammaproteobacteria Enterobacteriales
+## 5: OTU_5257 Bacteria Proteobacteria  Betaproteobacteria   Burkholderiales
+##                family         genus
+## 1:       mitochondria              
+## 2: Enterobacteriaceae              
+## 3:   Acetobacteraceae Gluconobacter
+## 4: Enterobacteriaceae       Erwinia
+## 5:     Comamonadaceae     Pelomonas</code></pre>
 </div>
 </div>
 <div id="all-treatments" class="section level2">
@@ -861,79 +919,78 @@ plot(trimmed_all_negative_communities, gr_trimmed_all_negative,
 <p><img src="bacteria_community_analysis_files/figure-html/tan.1-1.png" width="672" /></p>
 <p><code>OTU_6</code> is again in the center of a community. The members of that community are:</p>
 <pre class="r"><code>taxa[OTU %in% communities(trimmed_all_negative_communities)[[2]]]</code></pre>
-<pre><code>##       OTU   domain         phylum               class             order
-## 1:  OTU_3 Bacteria Proteobacteria Alphaproteobacteria  Rhodospirillales
-## 2:  OTU_5 Bacteria Proteobacteria  Betaproteobacteria   Burkholderiales
-## 3:  OTU_7 Bacteria Proteobacteria Gammaproteobacteria Enterobacteriales
-## 4:  OTU_8 Bacteria  Bacteroidetes      Flavobacteriia  Flavobacteriales
-## 5:  OTU_9 Bacteria     Firmicutes             Bacilli        Bacillales
-## 6: OTU_27 Bacteria     Firmicutes             Bacilli   Lactobacillales
-##                family          genus
-## 1:   Acetobacteraceae  Neokomagataea
-## 2:   Burkholderiaceae   Burkholderia
-## 3: Enterobacteriaceae        Pantoea
-## 4:  Flavobacteriaceae       Soonwooa
-## 5:  Staphylococcaceae Staphylococcus
-## 6:   Lactobacillaceae  Lactobacillus</code></pre>
+<pre><code>##          OTU   domain         phylum               class
+##  1: OTU_1035 Bacteria  Bacteroidetes    Sphingobacteriia
+##  2: OTU_3950 Bacteria Proteobacteria  Betaproteobacteria
+##  3:   OTU_45 Bacteria Proteobacteria Gammaproteobacteria
+##  4:  OTU_446 Bacteria     Firmicutes          Clostridia
+##  5:   OTU_16 Bacteria Proteobacteria  Betaproteobacteria
+##  6: OTU_5629 Bacteria Proteobacteria Gammaproteobacteria
+##  7: OTU_2168 Bacteria Proteobacteria Gammaproteobacteria
+##  8:  OTU_336 Bacteria Proteobacteria Alphaproteobacteria
+##  9: OTU_5247 Bacteria Proteobacteria Gammaproteobacteria
+## 10:  OTU_233 Bacteria     Firmicutes             Bacilli
+## 11: OTU_4938 Bacteria Proteobacteria Alphaproteobacteria
+## 12: OTU_5854 Bacteria Proteobacteria  Betaproteobacteria
+## 13: OTU_5398 Bacteria Proteobacteria Gammaproteobacteria
+## 14:  OTU_225 Bacteria Proteobacteria Gammaproteobacteria
+## 15: OTU_1076 Bacteria Actinobacteria      Actinobacteria
+## 16:    OTU_9 Bacteria Proteobacteria Gammaproteobacteria
+## 17:    OTU_6 Bacteria Proteobacteria Gammaproteobacteria
+## 18:    OTU_7 Bacteria  Bacteroidetes      Flavobacteriia
+##                  order              family            genus
+##  1: Sphingobacteriales Sphingobacteriaceae Sphingobacterium
+##  2:    Burkholderiales      Comamonadaceae      Methylibium
+##  3:    Pseudomonadales       Moraxellaceae    Enhydrobacter
+##  4:      Clostridiales  [Mogibacteriaceae]                 
+##  5:    Burkholderiales      Comamonadaceae    Aquabacterium
+##  6:  Enterobacteriales  Enterobacteriaceae                 
+##  7:  Enterobacteriales  Enterobacteriaceae     Enterobacter
+##  8:        Rhizobiales Methylobacteriaceae                 
+##  9:  Enterobacteriales  Enterobacteriaceae                 
+## 10:         Bacillales    Paenibacillaceae    Paenibacillus
+## 11:      Rickettsiales        mitochondria                 
+## 12:    Burkholderiales    Burkholderiaceae     Burkholderia
+## 13:    Pseudomonadales    Pseudomonadaceae      Pseudomonas
+## 14:    Pseudomonadales       Moraxellaceae    Acinetobacter
+## 15:    Actinomycetales  Pseudonocardiaceae   Pseudonocardia
+## 16:    Pseudomonadales    Pseudomonadaceae      Pseudomonas
+## 17:    Pseudomonadales       Moraxellaceae    Acinetobacter
+## 18:   Flavobacteriales     [Weeksellaceae]  Cloacibacterium</code></pre>
 <p>And we see a preponderence of <span class="math inline">\(\textit{proteobacteria}\)</span>. We also see the familiar pattern with <code>OTU_5</code>. The OTUs in this cluster are:</p>
 <pre class="r"><code>taxa[OTU %in% communities(trimmed_all_negative_communities)[[1]]]</code></pre>
-<pre><code>##          OTU   domain                phylum                       class
-##  1:    OTU_6 Bacteria        Proteobacteria         Gammaproteobacteria
-##  2:   OTU_16 Bacteria        Proteobacteria          Betaproteobacteria
-##  3:   OTU_18 Bacteria        Proteobacteria         Gammaproteobacteria
-##  4:   OTU_20 Bacteria        Proteobacteria         Gammaproteobacteria
-##  5:   OTU_21 Bacteria        Proteobacteria         Alphaproteobacteria
-##  6:   OTU_45 Bacteria        Proteobacteria          Betaproteobacteria
-##  7:  OTU_233 Bacteria unclassified_Bacteria       unclassified_Bacteria
-##  8:  OTU_336 Bacteria        Proteobacteria         Gammaproteobacteria
-##  9:  OTU_395 Bacteria        Proteobacteria         Alphaproteobacteria
-## 10:  OTU_446 Bacteria        Actinobacteria              Actinobacteria
-## 11: OTU_1035 Bacteria        Proteobacteria         Deltaproteobacteria
-## 12: OTU_1076 Bacteria            Firmicutes                  Clostridia
-## 13: OTU_2168 Bacteria       Verrucomicrobia                    Opitutae
-## 14: OTU_3492 Bacteria        Proteobacteria unclassified_Proteobacteria
-## 15: OTU_3950 Bacteria        Proteobacteria         Alphaproteobacteria
-## 16: OTU_4222 Bacteria        Proteobacteria         Gammaproteobacteria
-## 17: OTU_4227 Bacteria        Proteobacteria          Betaproteobacteria
-## 18: OTU_4387 Bacteria        Actinobacteria              Actinobacteria
-##                                order                           family
-##  1:                  Pseudomonadales                 Pseudomonadaceae
-##  2:                    Rhodocyclales                   Rhodocyclaceae
-##  3:                  Pseudomonadales                    Moraxellaceae
-##  4:                  Xanthomonadales                 Xanthomonadaceae
-##  5:                 Sphingomonadales               Erythrobacteraceae
-##  6:                  Burkholderiales                 Burkholderiaceae
-##  7:            unclassified_Bacteria            unclassified_Bacteria
-##  8: unclassified_Gammaproteobacteria unclassified_Gammaproteobacteria
-##  9:                      Rhizobiales                Bradyrhizobiaceae
-## 10:                  Actinomycetales                  Nocardioidaceae
-## 11:               Desulfovibrionales              Desulfovibrionaceae
-## 12:                    Clostridiales                  Lachnospiraceae
-## 13:                       Opitutales                      Opitutaceae
-## 14:      unclassified_Proteobacteria      unclassified_Proteobacteria
-## 15:                 Rhodospirillales                Rhodospirillaceae
-## 16:                Enterobacteriales               Enterobacteriaceae
-## 17:                  Burkholderiales                   Comamonadaceae
-## 18:                  Actinomycetales                 Actinomycetaceae
-##                                genus
-##  1:                      Pseudomonas
-##  2:                    Dechloromonas
-##  3:                    Enhydrobacter
-##  4:                      Xanthomonas
-##  5:  unclassified_Erythrobacteraceae
-##  6:                      Cupriavidus
-##  7:            unclassified_Bacteria
-##  8: unclassified_Gammaproteobacteria
-##  9:   unclassified_Bradyrhizobiaceae
-## 10:                     Nocardioides
-## 11:                    Desulfovibrio
-## 12:                 Clostridium XlVa
-## 13:                         Opitutus
-## 14:      unclassified_Proteobacteria
-## 15:   unclassified_Rhodospirillaceae
-## 16:  unclassified_Enterobacteriaceae
-## 17:      unclassified_Comamonadaceae
-## 18:                      Actinomyces</code></pre>
+<pre><code>##          OTU   domain         phylum               class             order
+##  1: OTU_4337 Bacteria Proteobacteria Gammaproteobacteria   Pseudomonadales
+##  2:   OTU_44 Bacteria Proteobacteria Gammaproteobacteria   Pseudomonadales
+##  3: OTU_5778 Bacteria Proteobacteria Gammaproteobacteria   Pseudomonadales
+##  4: OTU_5776 Bacteria Proteobacteria Gammaproteobacteria   Pseudomonadales
+##  5: OTU_3492 Bacteria Proteobacteria Gammaproteobacteria Enterobacteriales
+##  6:    OTU_5 Bacteria Proteobacteria Alphaproteobacteria     Rickettsiales
+##  7: OTU_4191 Bacteria Proteobacteria Gammaproteobacteria   Pseudomonadales
+##  8: OTU_5806 Bacteria Proteobacteria Gammaproteobacteria Enterobacteriales
+##  9: OTU_4036 Bacteria Proteobacteria Gammaproteobacteria   Pseudomonadales
+## 10: OTU_3986 Bacteria Proteobacteria Gammaproteobacteria   Pseudomonadales
+## 11: OTU_5324 Bacteria Proteobacteria Gammaproteobacteria   Pseudomonadales
+## 12: OTU_5834 Bacteria Proteobacteria Gammaproteobacteria   Pseudomonadales
+## 13:   OTU_43 Bacteria Proteobacteria  Betaproteobacteria   Burkholderiales
+## 14: OTU_5701 Bacteria Proteobacteria  Betaproteobacteria   Burkholderiales
+## 15: OTU_4345 Bacteria Proteobacteria Gammaproteobacteria   Pseudomonadales
+##                 family         genus
+##  1:      Moraxellaceae Acinetobacter
+##  2:   Pseudomonadaceae   Pseudomonas
+##  3:      Moraxellaceae Acinetobacter
+##  4:      Moraxellaceae Acinetobacter
+##  5: Enterobacteriaceae       Erwinia
+##  6:       mitochondria              
+##  7:      Moraxellaceae Acinetobacter
+##  8: Enterobacteriaceae              
+##  9:      Moraxellaceae Acinetobacter
+## 10:      Moraxellaceae Acinetobacter
+## 11:      Moraxellaceae Acinetobacter
+## 12:      Moraxellaceae Acinetobacter
+## 13:   Oxalobacteraceae   Cupriavidus
+## 14:     Comamonadaceae              
+## 15:      Moraxellaceae Acinetobacter</code></pre>
 <p>Modularity score:</p>
 <pre class="r"><code>tan.mod &lt;- modularity(gr_trimmed_all_negative, membership(trimmed_all_negative_communities))</code></pre>
 </div>
@@ -1034,61 +1091,60 @@ plot(complete_caged_negative_communities, gr_complete_caged_negative,
 <pre class="r"><code>ccn.mod &lt;- modularity(gr_complete_caged_negative, membership(complete_caged_negative_communities))</code></pre>
 <p>Again, the familiar pattern. However, <code>OTU_6</code> has lower centrality in its cluster while <code>OTU_5</code> remains highly central. The OTUs in the <code>OTU_6</code> cluster are:</p>
 <pre class="r"><code>taxa[OTU %in% communities(complete_caged_negative_communities)[[1]]]</code></pre>
-<pre><code>##         OTU   domain                phylum                 class
-## 1:    OTU_6 Bacteria        Proteobacteria   Gammaproteobacteria
-## 2:    OTU_7 Bacteria        Proteobacteria   Gammaproteobacteria
-## 3:    OTU_8 Bacteria         Bacteroidetes        Flavobacteriia
-## 4:    OTU_9 Bacteria            Firmicutes               Bacilli
-## 5:  OTU_233 Bacteria unclassified_Bacteria unclassified_Bacteria
-## 6: OTU_4227 Bacteria        Proteobacteria    Betaproteobacteria
-##                    order                family                       genus
-## 1:       Pseudomonadales      Pseudomonadaceae                 Pseudomonas
-## 2:     Enterobacteriales    Enterobacteriaceae                     Pantoea
-## 3:      Flavobacteriales     Flavobacteriaceae                    Soonwooa
-## 4:            Bacillales     Staphylococcaceae              Staphylococcus
-## 5: unclassified_Bacteria unclassified_Bacteria       unclassified_Bacteria
-## 6:       Burkholderiales        Comamonadaceae unclassified_Comamonadaceae</code></pre>
+<pre><code>##         OTU   domain         phylum               class            order
+## 1: OTU_5302 Bacteria Proteobacteria Alphaproteobacteria    Rickettsiales
+## 2: OTU_4227 Bacteria Proteobacteria Alphaproteobacteria    Rickettsiales
+## 3: OTU_5702 Bacteria Proteobacteria  Betaproteobacteria    Rhodocyclales
+## 4:  OTU_233 Bacteria     Firmicutes             Bacilli       Bacillales
+## 5:    OTU_8 Bacteria Proteobacteria Alphaproteobacteria Rhodospirillales
+## 6:    OTU_9 Bacteria Proteobacteria Gammaproteobacteria  Pseudomonadales
+## 7:    OTU_6 Bacteria Proteobacteria Gammaproteobacteria  Pseudomonadales
+## 8:    OTU_7 Bacteria  Bacteroidetes      Flavobacteriia Flavobacteriales
+##              family           genus
+## 1:     mitochondria                
+## 2:     mitochondria                
+## 3:   Rhodocyclaceae   Dechloromonas
+## 4: Paenibacillaceae   Paenibacillus
+## 5: Acetobacteraceae   Gluconobacter
+## 6: Pseudomonadaceae     Pseudomonas
+## 7:    Moraxellaceae   Acinetobacter
+## 8:  [Weeksellaceae] Cloacibacterium</code></pre>
 <p>In the <code>OTU_5</code> cluster:</p>
 <pre class="r"><code>taxa[OTU %in% communities(complete_caged_negative_communities)[[3]]]</code></pre>
-<pre><code>##          OTU   domain                    phylum                      class
-##  1:    OTU_3 Bacteria            Proteobacteria        Alphaproteobacteria
-##  2:    OTU_5 Bacteria            Proteobacteria         Betaproteobacteria
-##  3:   OTU_42 Bacteria                Firmicutes                    Bacilli
-##  4:   OTU_43 Bacteria            Actinobacteria             Actinobacteria
-##  5:  OTU_110 Bacteria Cyanobacteria/Chloroplast                Chloroplast
-##  6:  OTU_148 Bacteria             Bacteroidetes           Sphingobacteriia
-##  7:  OTU_156 Bacteria     unclassified_Bacteria      unclassified_Bacteria
-##  8:  OTU_260 Bacteria            Proteobacteria        Alphaproteobacteria
-##  9: OTU_1205 Bacteria             Bacteroidetes                 Cytophagia
-## 10: OTU_3505 Bacteria             Parcubacteria unclassified_Parcubacteria
-## 11: OTU_3733 Bacteria Cyanobacteria/Chloroplast                Chloroplast
-## 12: OTU_3986 Bacteria             Parcubacteria unclassified_Parcubacteria
-##                          order                       family
-##  1:           Rhodospirillales             Acetobacteraceae
-##  2:            Burkholderiales             Burkholderiaceae
-##  3:                 Bacillales           Paenibacillaceae 1
-##  4:            Actinomycetales unclassified_Actinomycetales
-##  5:   unclassified_Chloroplast                  Chloroplast
-##  6:         Sphingobacteriales               Saprospiraceae
-##  7:      unclassified_Bacteria        unclassified_Bacteria
-##  8:                Rhizobiales             Beijerinckiaceae
-##  9:               Cytophagales    unclassified_Cytophagales
-## 10: unclassified_Parcubacteria   unclassified_Parcubacteria
-## 11:   unclassified_Chloroplast                  Chloroplast
-## 12: unclassified_Parcubacteria   unclassified_Parcubacteria
-##                                   genus
-##  1:                       Neokomagataea
-##  2:                        Burkholderia
-##  3:                       Paenibacillus
-##  4:        unclassified_Actinomycetales
-##  5:                     Bacillariophyta
-##  6:         unclassified_Saprospiraceae
-##  7:               unclassified_Bacteria
-##  8:       unclassified_Beijerinckiaceae
-##  9:           unclassified_Cytophagales
-## 10: Parcubacteria_genera_incertae_sedis
-## 11:                        Streptophyta
-## 12: Parcubacteria_genera_incertae_sedis</code></pre>
+<pre><code>##          OTU   domain          phylum               class
+##  1:   OTU_42 Bacteria   Bacteroidetes          Cytophagia
+##  2: OTU_1205 Bacteria Verrucomicrobia    [Spartobacteria]
+##  3: OTU_3733 Bacteria  Proteobacteria Alphaproteobacteria
+##  4:    OTU_5 Bacteria  Proteobacteria Alphaproteobacteria
+##  5: OTU_3505 Bacteria  Proteobacteria Gammaproteobacteria
+##  6:  OTU_110 Bacteria  Proteobacteria Alphaproteobacteria
+##  7: OTU_5838 Bacteria  Proteobacteria Alphaproteobacteria
+##  8: OTU_3986 Bacteria  Proteobacteria Gammaproteobacteria
+##  9: OTU_5616 Bacteria  Proteobacteria  Betaproteobacteria
+## 10: OTU_5834 Bacteria  Proteobacteria Gammaproteobacteria
+## 11:  OTU_148 Bacteria Verrucomicrobia      [Pedosphaerae]
+## 12:  OTU_156 Bacteria  Proteobacteria  Betaproteobacteria
+## 13:   OTU_43 Bacteria  Proteobacteria  Betaproteobacteria
+## 14:  OTU_260 Bacteria  Proteobacteria Gammaproteobacteria
+## 15: OTU_5939 Bacteria  Proteobacteria Gammaproteobacteria
+## 16:    OTU_3 Bacteria  Proteobacteria Gammaproteobacteria
+##                    order                family            genus
+##  1:         Cytophagales         Cytophagaceae                 
+##  2: [Chthoniobacterales] [Chthoniobacteraceae]                 
+##  3:     Sphingomonadales     Sphingomonadaceae     Sphingomonas
+##  4:        Rickettsiales          mitochondria                 
+##  5:    Enterobacteriales    Enterobacteriaceae          Erwinia
+##  6:          Rhizobiales    Phyllobacteriaceae                 
+##  7:     Sphingomonadales     Sphingomonadaceae     Sphingomonas
+##  8:      Pseudomonadales         Moraxellaceae    Acinetobacter
+##  9:      Burkholderiales        Comamonadaceae        Comamonas
+## 10:      Pseudomonadales         Moraxellaceae    Acinetobacter
+## 11:     [Pedosphaerales]             auto67_4W                 
+## 12:      Burkholderiales      Oxalobacteraceae Polynucleobacter
+## 13:      Burkholderiales      Oxalobacteraceae      Cupriavidus
+## 14:    Oceanospirillales        Halomonadaceae        Kushneria
+## 15:    Enterobacteriales    Enterobacteriaceae       Klebsiella
+## 16:    Enterobacteriales    Enterobacteriaceae          Erwinia</code></pre>
 </div>
 </div>
 <div id="bagged-communities-1" class="section level2">
@@ -1129,68 +1185,62 @@ plot(complete_bagged_negative_communities, gr_complete_bagged_negative,
 <pre class="r"><code>cbn.mod &lt;- modularity(gr_complete_bagged_negative, membership(complete_bagged_negative_communities))</code></pre>
 <p>Same story as in the caged samples for the complete data. The <code>OTU_6</code> cluster:</p>
 <pre class="r"><code>taxa[OTU %in% communities(complete_bagged_negative_communities)[[1]]]</code></pre>
-<pre><code>##         OTU   domain                phylum                       class
-## 1:    OTU_6 Bacteria        Proteobacteria         Gammaproteobacteria
-## 2:   OTU_21 Bacteria        Proteobacteria         Alphaproteobacteria
-## 3:   OTU_51 Bacteria         Parcubacteria  unclassified_Parcubacteria
-## 4:  OTU_131 Bacteria unclassified_Bacteria       unclassified_Bacteria
-## 5:  OTU_510 Bacteria unclassified_Bacteria       unclassified_Bacteria
-## 6: OTU_3492 Bacteria        Proteobacteria unclassified_Proteobacteria
-## 7: OTU_4036 Bacteria        Proteobacteria         Deltaproteobacteria
-##                          order                      family
-## 1:             Pseudomonadales            Pseudomonadaceae
-## 2:            Sphingomonadales          Erythrobacteraceae
-## 3:  unclassified_Parcubacteria  unclassified_Parcubacteria
-## 4:       unclassified_Bacteria       unclassified_Bacteria
-## 5:       unclassified_Bacteria       unclassified_Bacteria
-## 6: unclassified_Proteobacteria unclassified_Proteobacteria
-## 7:                Myxococcales   unclassified_Myxococcales
-##                                  genus
-## 1:                         Pseudomonas
-## 2:     unclassified_Erythrobacteraceae
-## 3: Parcubacteria_genera_incertae_sedis
-## 4:               unclassified_Bacteria
-## 5:               unclassified_Bacteria
-## 6:         unclassified_Proteobacteria
-## 7:           unclassified_Myxococcales</code></pre>
+<pre><code>##         OTU   domain         phylum               class             order
+## 1:   OTU_21 Bacteria Proteobacteria Gammaproteobacteria   Pseudomonadales
+## 2:   OTU_51 Bacteria Actinobacteria      Actinobacteria   Actinomycetales
+## 3: OTU_3492 Bacteria Proteobacteria Gammaproteobacteria Enterobacteriales
+## 4: OTU_4036 Bacteria Proteobacteria Gammaproteobacteria   Pseudomonadales
+## 5:  OTU_510 Bacteria Proteobacteria  Betaproteobacteria     Rhodocyclales
+## 6:    OTU_6 Bacteria Proteobacteria Gammaproteobacteria   Pseudomonadales
+## 7:  OTU_131 Bacteria Proteobacteria Gammaproteobacteria   Pseudomonadales
+##                family         genus
+## 1:   Pseudomonadaceae   Pseudomonas
+## 2:  Microbacteriaceae    Candidatus
+## 3: Enterobacteriaceae       Erwinia
+## 4:      Moraxellaceae Acinetobacter
+## 5:     Rhodocyclaceae Dechloromonas
+## 6:      Moraxellaceae Acinetobacter
+## 7:      Moraxellaceae</code></pre>
 <p>The <code>OTU_5</code> cluster:</p>
 <pre class="r"><code>taxa[OTU %in% communities(complete_bagged_negative_communities)[[2]]]</code></pre>
-<pre><code>##          OTU   domain                    phylum                 class
-##  1:    OTU_5 Bacteria            Proteobacteria    Betaproteobacteria
-##  2:   OTU_27 Bacteria                Firmicutes               Bacilli
-##  3:   OTU_28 Bacteria                Firmicutes               Bacilli
-##  4:  OTU_233 Bacteria     unclassified_Bacteria unclassified_Bacteria
-##  5: OTU_3181 Bacteria     unclassified_Bacteria unclassified_Bacteria
-##  6: OTU_3509 Bacteria            Proteobacteria   Gammaproteobacteria
-##  7: OTU_3603 Bacteria            Proteobacteria   Deltaproteobacteria
-##  8: OTU_3646 Bacteria            Proteobacteria    Betaproteobacteria
-##  9: OTU_4385 Bacteria     unclassified_Bacteria unclassified_Bacteria
-## 10: OTU_4598 Bacteria Cyanobacteria/Chloroplast           Chloroplast
-## 11: OTU_4616 Bacteria     unclassified_Bacteria unclassified_Bacteria
-##                               order                          family
-##  1:                 Burkholderiales                Burkholderiaceae
-##  2:                 Lactobacillales                Lactobacillaceae
-##  3:                      Bacillales              Paenibacillaceae 1
-##  4:           unclassified_Bacteria           unclassified_Bacteria
-##  5:           unclassified_Bacteria           unclassified_Bacteria
-##  6:               Oceanospirillales                  Halomonadaceae
-##  7:               Bdellovibrionales              Bdellovibrionaceae
-##  8: unclassified_Betaproteobacteria unclassified_Betaproteobacteria
-##  9:           unclassified_Bacteria           unclassified_Bacteria
-## 10:        unclassified_Chloroplast                     Chloroplast
-## 11:           unclassified_Bacteria           unclassified_Bacteria
-##                               genus
-##  1:                    Burkholderia
-##  2:                   Lactobacillus
-##  3:                   Paenibacillus
-##  4:           unclassified_Bacteria
-##  5:           unclassified_Bacteria
-##  6:     unclassified_Halomonadaceae
-##  7:                   Vampirovibrio
-##  8: unclassified_Betaproteobacteria
-##  9:           unclassified_Bacteria
-## 10:                    Streptophyta
-## 11:           unclassified_Bacteria</code></pre>
+<pre><code>##          OTU   domain         phylum               class             order
+##  1:   OTU_28 Bacteria  Bacteroidetes      Flavobacteriia  Flavobacteriales
+##  2: OTU_4616 Bacteria Proteobacteria Gammaproteobacteria Enterobacteriales
+##  3: OTU_3646 Bacteria Proteobacteria Gammaproteobacteria Enterobacteriales
+##  4:    OTU_5 Bacteria Proteobacteria Alphaproteobacteria     Rickettsiales
+##  5: OTU_3509 Bacteria Proteobacteria  Betaproteobacteria   Burkholderiales
+##  6: OTU_5629 Bacteria Proteobacteria Gammaproteobacteria Enterobacteriales
+##  7: OTU_5795 Bacteria Proteobacteria Gammaproteobacteria Enterobacteriales
+##  8: OTU_5667 Bacteria Proteobacteria  Betaproteobacteria   Burkholderiales
+##  9: OTU_5247 Bacteria Proteobacteria Gammaproteobacteria Enterobacteriales
+## 10: OTU_4598 Bacteria     Firmicutes             Bacilli        Bacillales
+## 11: OTU_5939 Bacteria Proteobacteria Gammaproteobacteria Enterobacteriales
+## 12:  OTU_233 Bacteria     Firmicutes             Bacilli        Bacillales
+## 13: OTU_3603 Bacteria Actinobacteria      Actinobacteria   Actinomycetales
+## 14: OTU_5745 Bacteria Proteobacteria  Betaproteobacteria   Burkholderiales
+## 15:   OTU_27 Bacteria     Firmicutes             Bacilli   Lactobacillales
+## 16: OTU_4759 Bacteria Proteobacteria  Betaproteobacteria   Burkholderiales
+## 17: OTU_5443 Bacteria Proteobacteria  Betaproteobacteria   Burkholderiales
+## 18: OTU_3181 Bacteria Actinobacteria      Actinobacteria   Actinomycetales
+##                 family            genus
+##  1:    [Weeksellaceae] Chryseobacterium
+##  2: Enterobacteriaceae       Klebsiella
+##  3: Enterobacteriaceae                 
+##  4:       mitochondria                 
+##  5:   Oxalobacteraceae                 
+##  6: Enterobacteriaceae                 
+##  7: Enterobacteriaceae                 
+##  8:     Comamonadaceae                 
+##  9: Enterobacteriaceae                 
+## 10:        Bacillaceae    Anoxybacillus
+## 11: Enterobacteriaceae       Klebsiella
+## 12:   Paenibacillaceae    Paenibacillus
+## 13:  Microbacteriaceae                 
+## 14:     Comamonadaceae                 
+## 15:   Streptococcaceae    Streptococcus
+## 16:     Comamonadaceae                 
+## 17:   Oxalobacteraceae                 
+## 18: Corynebacteriaceae  Corynebacterium</code></pre>
 </div>
 </div>
 <div id="all-treatments-1" class="section level2">
@@ -1232,106 +1282,89 @@ plot(complete_all_negative_communities, gr_complete_all_negative,
 <p>Modularity score:</p>
 <pre class="r"><code>can.mod &lt;- modularity(gr_complete_all_negative, membership(complete_all_negative_communities))</code></pre>
 <pre class="r"><code>taxa[OTU %in% communities(complete_all_negative_communities)[[2]]]</code></pre>
-<pre><code>##          OTU   domain                phylum                       class
-##  1:   OTU_18 Bacteria        Proteobacteria         Gammaproteobacteria
-##  2:   OTU_21 Bacteria        Proteobacteria         Alphaproteobacteria
-##  3:   OTU_22 Bacteria        Actinobacteria              Actinobacteria
-##  4:   OTU_44 Bacteria        Actinobacteria              Actinobacteria
-##  5:   OTU_88 Bacteria        Proteobacteria         Gammaproteobacteria
-##  6:  OTU_131 Bacteria unclassified_Bacteria       unclassified_Bacteria
-##  7:  OTU_164 Bacteria   Deinococcus-Thermus                  Deinococci
-##  8:  OTU_172 Bacteria unclassified_Bacteria       unclassified_Bacteria
-##  9:  OTU_256 Bacteria        Actinobacteria              Actinobacteria
-## 10:  OTU_510 Bacteria unclassified_Bacteria       unclassified_Bacteria
-## 11:  OTU_669 Bacteria            Firmicutes                     Bacilli
-## 12: OTU_1934  Archaea        Diapherotrites unclassified_Diapherotrites
-## 13: OTU_4004  Archaea        Diapherotrites unclassified_Diapherotrites
-## 14: OTU_4153 Bacteria        Proteobacteria         Gammaproteobacteria
-## 15: OTU_4191 Bacteria unclassified_Bacteria       unclassified_Bacteria
-## 16: OTU_4218 Bacteria        Actinobacteria              Actinobacteria
-##                           order                       family
-##  1:             Pseudomonadales                Moraxellaceae
-##  2:            Sphingomonadales           Erythrobacteraceae
-##  3:             Actinomycetales unclassified_Actinomycetales
-##  4:             Actinomycetales               Micrococcaceae
-##  5:             Xanthomonadales              Sinobacteraceae
-##  6:       unclassified_Bacteria        unclassified_Bacteria
-##  7:               Deinococcales               Deinococcaceae
-##  8:       unclassified_Bacteria        unclassified_Bacteria
-##  9:             Actinomycetales               Micrococcaceae
-## 10:       unclassified_Bacteria        unclassified_Bacteria
-## 11:                  Bacillales          Alicyclobacillaceae
-## 12: unclassified_Diapherotrites  unclassified_Diapherotrites
-## 13: unclassified_Diapherotrites  unclassified_Diapherotrites
-## 14:               Legionellales                 Coxiellaceae
-## 15:       unclassified_Bacteria        unclassified_Bacteria
-## 16:             Actinomycetales              Nocardioidaceae
-##                               genus
-##  1:                   Enhydrobacter
-##  2: unclassified_Erythrobacteraceae
-##  3:    unclassified_Actinomycetales
-##  4:                     Micrococcus
-##  5:    unclassified_Sinobacteraceae
-##  6:           unclassified_Bacteria
-##  7:                     Deinococcus
-##  8:           unclassified_Bacteria
-##  9:                          Rothia
-## 10:           unclassified_Bacteria
-## 11:                Alicyclobacillus
-## 12:         Candidatus Iainarchaeum
-## 13:         Candidatus Iainarchaeum
-## 14:                       Aquicella
-## 15:           unclassified_Bacteria
-## 16:                     Marmoricola</code></pre>
+<pre><code>##          OTU   domain         phylum               class             order
+##  1:   OTU_21 Bacteria Proteobacteria Gammaproteobacteria   Pseudomonadales
+##  2:   OTU_22 Bacteria Proteobacteria  Betaproteobacteria   Burkholderiales
+##  3:   OTU_44 Bacteria Proteobacteria Gammaproteobacteria   Pseudomonadales
+##  4:   OTU_18 Bacteria     Firmicutes             Bacilli   Lactobacillales
+##  5: OTU_5289 Bacteria Proteobacteria Alphaproteobacteria     Rickettsiales
+##  6:  OTU_669 Bacteria  Bacteroidetes          Cytophagia      Cytophagales
+##  7: OTU_4153 Bacteria Proteobacteria Gammaproteobacteria Enterobacteriales
+##  8:  OTU_256 Bacteria Proteobacteria  Betaproteobacteria   Burkholderiales
+##  9:  OTU_164 Bacteria     Firmicutes             Bacilli        Bacillales
+## 10: OTU_4191 Bacteria Proteobacteria Gammaproteobacteria   Pseudomonadales
+## 11: OTU_4004 Bacteria  Bacteroidetes       [Saprospirae]   [Saprospirales]
+## 12: OTU_5806 Bacteria Proteobacteria Gammaproteobacteria Enterobacteriales
+## 13:  OTU_172 Bacteria Proteobacteria  Betaproteobacteria   Burkholderiales
+## 14: OTU_4218 Bacteria Proteobacteria  Betaproteobacteria   Burkholderiales
+## 15:  OTU_510 Bacteria Proteobacteria  Betaproteobacteria     Rhodocyclales
+## 16: OTU_5098 Bacteria Proteobacteria  Betaproteobacteria   Burkholderiales
+## 17:   OTU_88 Bacteria Proteobacteria  Betaproteobacteria   Burkholderiales
+## 18: OTU_5970 Bacteria Proteobacteria Gammaproteobacteria Enterobacteriales
+## 19:  OTU_131 Bacteria Proteobacteria Gammaproteobacteria   Pseudomonadales
+## 20: OTU_1934 Bacteria Proteobacteria Alphaproteobacteria     Rickettsiales
+##                 family             genus
+##  1:   Pseudomonadaceae       Pseudomonas
+##  2:     Comamonadaceae        Variovorax
+##  3:   Pseudomonadaceae       Pseudomonas
+##  4:   Lactobacillaceae     Lactobacillus
+##  5:       mitochondria                  
+##  6:      Cytophagaceae    Flectobacillus
+##  7: Enterobacteriaceae           Erwinia
+##  8:   Oxalobacteraceae Janthinobacterium
+##  9:   Paenibacillaceae     Paenibacillus
+## 10:      Moraxellaceae     Acinetobacter
+## 11:   Chitinophagaceae Sediminibacterium
+## 12: Enterobacteriaceae                  
+## 13:     Comamonadaceae        Rhodoferax
+## 14:     Comamonadaceae        Rhodoferax
+## 15:     Rhodocyclaceae     Dechloromonas
+## 16:     Comamonadaceae         Comamonas
+## 17:   Oxalobacteraceae                  
+## 18: Enterobacteriaceae                  
+## 19:      Moraxellaceae                  
+## 20:       mitochondria</code></pre>
 <pre class="r"><code>taxa[OTU %in% communities(complete_all_negative_communities)[[4]]]</code></pre>
-<pre><code>##          OTU   domain                    phylum                      class
-##  1:   OTU_23 Bacteria            Proteobacteria        Alphaproteobacteria
-##  2:   OTU_28 Bacteria                Firmicutes                    Bacilli
-##  3:   OTU_51 Bacteria             Parcubacteria unclassified_Parcubacteria
-##  4:   OTU_60 Bacteria            Proteobacteria        Gammaproteobacteria
-##  5:   OTU_94 Bacteria Cyanobacteria/Chloroplast              Cyanobacteria
-##  6:  OTU_214 Bacteria            Actinobacteria             Actinobacteria
-##  7:  OTU_225 Bacteria               Chloroflexi             Thermomicrobia
-##  8:  OTU_253 Bacteria                Firmicutes                 Clostridia
-##  9:  OTU_267 Bacteria             Bacteroidetes           Sphingobacteriia
-## 10:  OTU_345 Bacteria                Firmicutes                 Clostridia
-## 11: OTU_1300  Archaea             Pacearchaeota unclassified_Pacearchaeota
-## 12: OTU_2079 Bacteria             Bacteroidetes unclassified_Bacteroidetes
-## 13: OTU_2168 Bacteria           Verrucomicrobia                   Opitutae
-## 14: OTU_3913 Bacteria     unclassified_Bacteria      unclassified_Bacteria
-## 15: OTU_4508 Bacteria            Proteobacteria        Alphaproteobacteria
-##                          order                     family
-##  1:           Sphingomonadales          Sphingomonadaceae
-##  2:                 Bacillales         Paenibacillaceae 1
-##  3: unclassified_Parcubacteria unclassified_Parcubacteria
-##  4:          Oceanospirillales             Halomonadaceae
-##  5: unclassified_Cyanobacteria                   Family I
-##  6:            Actinomycetales          Cellulomonadaceae
-##  7:          Sphaerobacterales         Sphaerobacteraceae
-##  8:              Clostridiales         Gracilibacteraceae
-##  9:         Sphingobacteriales        Sphingobacteriaceae
-## 10:              Clostridiales           Clostridiaceae 1
-## 11: unclassified_Pacearchaeota unclassified_Pacearchaeota
-## 12: unclassified_Bacteroidetes unclassified_Bacteroidetes
-## 13:                 Opitutales                Opitutaceae
-## 14:      unclassified_Bacteria      unclassified_Bacteria
-## 15:              Rickettsiales             Rickettsiaceae
-##                                   genus
-##  1:                        Sphingomonas
-##  2:                       Paenibacillus
-##  3: Parcubacteria_genera_incertae_sedis
-##  4:                           Kushneria
-##  5:                                 GpI
-##  6:                        Cellulomonas
-##  7:                         Nitrolancea
-##  8:                       Gracilibacter
-##  9:    unclassified_Sphingobacteriaceae
-## 10:           Clostridium sensu stricto
-## 11:   Pacearchaeota Incertae Sedis AR13
-## 12:          unclassified_Bacteroidetes
-## 13:                            Opitutus
-## 14:               unclassified_Bacteria
-## 15:                          Rickettsia</code></pre>
+<pre><code>##          OTU   domain         phylum               class             order
+##  1:   OTU_60 Bacteria  Bacteroidetes      Flavobacteriia  Flavobacteriales
+##  2:   OTU_23 Bacteria Proteobacteria  Betaproteobacteria   Burkholderiales
+##  3:   OTU_51 Bacteria Actinobacteria      Actinobacteria   Actinomycetales
+##  4: OTU_3913 Bacteria Proteobacteria  Betaproteobacteria   Burkholderiales
+##  5:   OTU_28 Bacteria  Bacteroidetes      Flavobacteriia  Flavobacteriales
+##  6:  OTU_345 Bacteria Proteobacteria Gammaproteobacteria Oceanospirillales
+##  7: OTU_5298 Bacteria Proteobacteria  Betaproteobacteria     Rhodocyclales
+##  8: OTU_2168 Bacteria Proteobacteria Gammaproteobacteria Enterobacteriales
+##  9: OTU_3559 Bacteria Proteobacteria  Betaproteobacteria   Burkholderiales
+## 10: OTU_1300 Bacteria Proteobacteria Alphaproteobacteria     Rickettsiales
+## 11:  OTU_267 Bacteria     Firmicutes             Bacilli        Bacillales
+## 12:  OTU_253 Bacteria     Firmicutes             Bacilli        Bacillales
+## 13: OTU_2079 Bacteria Actinobacteria      Actinobacteria   Actinomycetales
+## 14: OTU_5976 Bacteria Proteobacteria  Betaproteobacteria   Burkholderiales
+## 15:  OTU_225 Bacteria Proteobacteria Gammaproteobacteria   Pseudomonadales
+## 16:  OTU_214 Bacteria Proteobacteria Gammaproteobacteria   Xanthomonadales
+## 17:   OTU_94 Bacteria Proteobacteria                TA18         PHOS-HD29
+## 18: OTU_4508 Bacteria Proteobacteria Alphaproteobacteria     Rickettsiales
+## 19: OTU_5257 Bacteria Proteobacteria  Betaproteobacteria   Burkholderiales
+##                 family             genus
+##  1:  Flavobacteriaceae    Flavobacterium
+##  2:     Comamonadaceae       Tepidimonas
+##  3:  Microbacteriaceae        Candidatus
+##  4:     Comamonadaceae                  
+##  5:    [Weeksellaceae]  Chryseobacterium
+##  6:     Halomonadaceae Haererehalobacter
+##  7:     Rhodocyclaceae               C39
+##  8: Enterobacteriaceae      Enterobacter
+##  9:     Comamonadaceae         Comamonas
+## 10:       mitochondria                  
+## 11:   Paenibacillaceae     Paenibacillus
+## 12:        Bacillaceae   Natronobacillus
+## 13:    Nocardioidaceae                  
+## 14:     Comamonadaceae         Comamonas
+## 15:      Moraxellaceae     Acinetobacter
+## 16:   Xanthomonadaceae  Stenotrophomonas
+## 17:                                     
+## 18:       mitochondria                  
+## 19:     Comamonadaceae         Pelomonas</code></pre>
 </div>
 </div>
 <div id="patristic-distance-analysis" class="section level2">
@@ -1351,16 +1384,16 @@ head(otu_6.matrix)</code></pre>
 <div id="modularity" class="section level1">
 <h1>Modularity</h1>
 <p>Collecting all modularity scores:</p>
-<pre class="r"><code>treatment &lt;- c(&quot;tep&quot;, &quot;ten&quot;, &quot;tcp&quot;, &quot;tcn&quot;, &quot;tbp&quot;, &quot;tbn&quot;, &quot;tap&quot;, &quot;tan&quot;,
+<pre class="r"><code>treatments &lt;- c(&quot;tep&quot;, &quot;ten&quot;, &quot;tcp&quot;, &quot;tcn&quot;, &quot;tbp&quot;, &quot;tbn&quot;, &quot;tap&quot;, &quot;tan&quot;,
                         &quot;cep&quot;, &quot;cen&quot;, &quot;ccp&quot;, &quot;ccn&quot;, &quot;cbp&quot;, &quot;cbn&quot;, &quot;cap&quot;, &quot;can&quot;)
 scores &lt;- c(tep.mod, ten.mod, tcp.mod, tcn.mod, tbp.mod, tbn.mod, tap.mod, tan.mod,
             cep.mod, cen.mod, ccp.mod, ccn.mod, cbp.mod, cbn.mod, cap.mod, can.mod)
-mod.scores &lt;- data.table(treatment.networks, scores)
+mod.scores &lt;- data.table(treatments, scores)
 
 
 library(ggplot2, warn.conflicts = FALSE)
 ggplot(mod.scores, aes(x = &quot;&quot;, y = scores)) + geom_boxplot() + 
-    geom_jitter(shape = 16, aes(color = treatment))</code></pre>
+    geom_jitter(shape = 16, aes(color = treatments))</code></pre>
 <p><img src="bacteria_community_analysis_files/figure-html/mod.1-1.png" width="672" /></p>
 </div>
 <div id="birds" class="section level1">
@@ -1397,11 +1430,14 @@ plot(trimmed_bird_positive_communities, gr_trimmed_bird_positive,
 <p><img src="bacteria_community_analysis_files/figure-html/tbdp.1-2.png" width="672" /></p>
 <pre class="r"><code>adjacent_vertices(gr_trimmed_bird_positive, &quot;OTU_6&quot;)</code></pre>
 <pre><code>## $OTU_6
-## + 2/401 vertices, named, from 0842ace:
-## [1] OTU_5931 OTU_442</code></pre>
+## + 22/508 vertices, named, from ea8ba65:
+##  [1] OTU_5778 OTU_5682 OTU_5324 OTU_4036 OTU_4191 OTU_4337 OTU_5213
+##  [8] OTU_5834 OTU_3986 OTU_3906 OTU_4887 OTU_4570 OTU_4796 OTU_8   
+## [15] OTU_5    OTU_28   OTU_4227 OTU_303  OTU_3464 OTU_3280 OTU_442 
+## [22] OTU_928</code></pre>
 <pre class="r"><code>degree(gr_trimmed_bird_positive, &quot;OTU_6&quot;)</code></pre>
 <pre><code>## OTU_6 
-##     2</code></pre>
+##    22</code></pre>
 </div>
 <div id="negative-weights-8" class="section level3">
 <h3>Negative Weights</h3>
@@ -1420,15 +1456,21 @@ plot(trimmed_bird_negative_communities, gr_trimmed_bird_negative,
 )</code></pre>
 <p><img src="bacteria_community_analysis_files/figure-html/tbdn.1-1.png" width="672" /></p>
 <pre class="r"><code>gr_trimmed_bird_negative</code></pre>
-<pre><code>## IGRAPH 27b6c8d UN-- 2 1 -- 
+<pre><code>## IGRAPH f6781c1 UN-- 27 20 -- 
 ## + attr: name (v/c), rho (e/n)
-## + edge from 27b6c8d (vertex names):
-## [1] OTU_4898--OTU_9</code></pre>
+## + edges from f6781c1 (vertex names):
+##  [1] OTU_1   --OTU_3225 OTU_17  --OTU_5629 OTU_5776--OTU_13  
+##  [4] OTU_4036--OTU_13   OTU_4036--OTU_293  OTU_4191--OTU_172 
+##  [7] OTU_3986--OTU_9    OTU_6   --OTU_338  OTU_6   --OTU_52  
+## [10] OTU_6   --OTU_5755 OTU_20  --OTU_5629 OTU_20  --OTU_3   
+## [13] OTU_20  --OTU_5917 OTU_20  --OTU_3505 OTU_5867--OTU_293 
+## [16] OTU_4898--OTU_13   OTU_5806--OTU_23   OTU_5806--OTU_16  
+## [19] OTU_338 --OTU_15   OTU_9   --OTU_8</code></pre>
 <pre class="r"><code>taxa[OTU %in% c(&quot;OTU_4898&quot;, &quot;OTU_9&quot;)]</code></pre>
-<pre><code>##      OTU   domain     phylum   class      order            family
-## 1: OTU_9 Bacteria Firmicutes Bacilli Bacillales Staphylococcaceae
-##             genus
-## 1: Staphylococcus</code></pre>
+<pre><code>##      OTU   domain         phylum               class           order
+## 1: OTU_9 Bacteria Proteobacteria Gammaproteobacteria Pseudomonadales
+##              family       genus
+## 1: Pseudomonadaceae Pseudomonas</code></pre>
 </div>
 </div>
 <div id="complete-data-1" class="section level2">

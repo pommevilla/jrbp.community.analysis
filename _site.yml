@@ -1,22 +1,23 @@
-name: "JRBP Community Analysis"
-output_dir: "docs"
+name: JRBP Community Analysis
+output_dir: docs
 navbar:
-  title: ""
+  title: ''
   left:
-  - text: "Home"
+  - text: Home
     href: index.html
-  - text: "Bacteria Only"
+  - text: Bacteria Only
     href: bacteria_community_analysis.html
-  - text: "Yeast Only"
+  - text: Yeast Only
     href: yeast_community_analysis.html
-  - text: "Bacteria and Yeast"
+  - text: Bacteria and Yeast
     href: bacteria_yeast_community_analysis.html
-    
 output:
   html_document:
     theme: cerulean
-    toc: true
-    toc_float: 
-      smooth_scroll: true
-      collapsed: false
-      
+    toc: yes
+    toc_float:
+      smooth_scroll: yes
+      collapsed: no
+    lib_dir: site_libs
+    self_contained: no
+
