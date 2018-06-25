@@ -24,7 +24,7 @@ library(igraph, warn.conflicts = FALSE)
 `taxa` is the look-up table for the OTUs.  `cooccurrence_data` contains pairwise Spearman correlation ranks for pairs of OTUs.
 
 ```{r read_data}
-taxa <- data.table(read.delim("./data/bacteria/bacteria_classified_otus_UPDATED", 
+taxa <- data.table(read.delim("./data/bacteria/bacteria_classified_otus", 
                               sep = "", header = TRUE))
 
 head(taxa)
