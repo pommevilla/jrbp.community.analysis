@@ -83,7 +83,7 @@ exposed_data_positive <- trimmed_positive_weights[treatment == "Exposed"]
 exposed_data_positive <- exposed_data_positive[, -1]
 gr_exposed_positive <- graph.data.frame(exposed_data_positive, directed = FALSE)
 plot(gr_exposed_positive, vertex.size = 3,
-     vertex.label.cex = 0.25)
+     vertex.label = NA)
 ```
 
 To determine communities, we use `cluster_fast_greedy`, which does greedy (local) optimization of the graph's modularity score.
@@ -94,7 +94,7 @@ plot(exposed_communities_greedy_positive, gr_exposed_positive,
      layout = layout.fruchterman.reingold(gr_exposed_positive),
      rescaled = TRUE,
      vertex.size = 2, 
-     vertex.label.cex = 0.25
+     vertex.label = NA
      )
 ```
 The modularity of the community structure is:
@@ -125,15 +125,14 @@ exposed_data_negative <- exposed_data_negative[, -1]
 exposed_data_negative[[3]] <- abs(exposed_data_negative[[3]])
 gr_exposed_negative <- graph.data.frame(exposed_data_negative, directed = FALSE)
 plot(gr_exposed_negative, vertex.size = 3,
-     vertex.label.cex = 0.25)
+     vertex.label = NA)
 ```
 
 ```{r ten.2}
 exposed_communities_greedy_negative <- cluster_fast_greedy(gr_exposed_negative, weights = E(gr_exposed_negative)$rho)
 plot(exposed_communities_greedy_negative, gr_exposed_negative, 
      layout = layout.fruchterman.reingold(gr_exposed_negative),
-     rescaled = TRUE,
-     vertex.size = 2, vertex.label.cex = 0.75)
+     vertex.size = 2, vertex.label = NA)
 ```
 
 The modularity of the community structure is:
@@ -171,7 +170,7 @@ plot(caged_communities_greedy_positive, gr_caged_positive,
      layout = layout.fruchterman.reingold(gr_caged_positive),
      rescaled = TRUE,
      vertex.size = 2, 
-     vertex.label.cex = 0.5
+     vertex.label = NA
       )
 ```
 
@@ -196,8 +195,8 @@ gr_caged_negative <- graph.data.frame(caged_data_negative, directed = FALSE)
 caged_communities_greedy_negative <- cluster_fast_greedy(gr_caged_negative, weights = E(gr_caged_negative)$rho)
 plot(caged_communities_greedy_negative, gr_caged_negative, 
      layout = layout.fruchterman.reingold(gr_caged_negative),
-     rescaled = TRUE,
-     vertex.size = 2, vertex.label.cex = 0.75)
+     vertex.size = 2, 
+     vertex.label = NA)
 ```
 
 The modularity of the community structure is:
@@ -229,7 +228,7 @@ plot(bagged_communities_greedy_positive, gr_bagged_positive,
      layout = layout.fruchterman.reingold(gr_bagged_positive),
      rescaled = TRUE,
      vertex.size = 2, 
-     vertex.label.cex = 0.25
+     vertex.label = NA
 )
 ```
 
@@ -262,7 +261,8 @@ bagged_communities_greedy_negative <- cluster_fast_greedy(gr_bagged_negative, we
 plot(bagged_communities_greedy_negative, gr_bagged_negative, 
      layout = layout.fruchterman.reingold(gr_bagged_negative),
      rescaled = TRUE,
-     vertex.size = 2, vertex.label.cex = 0.75)
+     vertex.size = 2, 
+     vertex.label = NA)
 ```
 
 Modularity score:
@@ -302,7 +302,7 @@ plot(trimmed_all_positive_communities, gr_trimmed_all_positive,
      layout = layout.fruchterman.reingold(gr_trimmed_all_positive),
      rescaled = TRUE,
      vertex.size = 2, 
-     vertex.label.cex = 0.25
+     vertex.label = NA
 )
 ```
 
@@ -328,7 +328,7 @@ plot(trimmed_all_negative_communities, gr_trimmed_all_negative,
      layout = layout.fruchterman.reingold(gr_trimmed_all_negative),
      rescaled = TRUE,
      vertex.size = 2, 
-     vertex.label.cex = 0.25
+     vertex.label = NA
 )
 ```
 
@@ -441,7 +441,7 @@ plot(complete_caged_negative_communities, gr_complete_caged_negative,
      layout = layout.fruchterman.reingold(gr_complete_caged_negative),
      rescaled = TRUE,
      vertex.size = 2, 
-     vertex.label.cex = 0.5
+     vertex.label = NA
      )
 ```
 
@@ -473,7 +473,7 @@ plot(complete_bagged_positive_communities, gr_complete_bagged_positive,
      layout = layout.fruchterman.reingold(gr_complete_bagged_positive),
      rescaled = TRUE,
      vertex.size = 2, 
-     vertex.label.cex = 0.25
+     vertex.label = NA
      )
 ```
 
@@ -494,7 +494,7 @@ plot(complete_bagged_negative_communities, gr_complete_bagged_negative,
      layout = layout.fruchterman.reingold(gr_complete_bagged_negative),
      rescaled = TRUE,
      vertex.size = 2, 
-     vertex.label.cex = 0.5
+     vertex.label = NA
      )
 ```
 
@@ -529,7 +529,7 @@ plot(complete_all_positive_communities, gr_complete_all_positive,
      layout = layout.fruchterman.reingold(gr_complete_all_positive),
      rescaled = TRUE,
      vertex.size = 2, 
-     vertex.label.cex = 0.25
+     vertex.label = NA
 )
 ```
 
@@ -555,7 +555,7 @@ plot(complete_all_negative_communities, gr_complete_all_negative,
      layout = layout.fruchterman.reingold(gr_complete_all_negative),
      rescaled = TRUE,
      vertex.size = 2, 
-     vertex.label.cex = 0.65
+     vertex.label = NA
 )
 ```
 Same story, but the communities aren't as distinct.  The OTUs in the `OTU_6` cluster:
@@ -633,7 +633,7 @@ plot(trimmed_bird_positive_communities, gr_trimmed_bird_positive,
      layout = layout.fruchterman.reingold(gr_trimmed_bird_positive),
      rescaled = TRUE,
      vertex.size = 2, 
-     vertex.label.cex = 0.25
+     vertex.label = NA
 )
 
 plot(trimmed_bird_positive_communities, gr_trimmed_bird_positive, 
@@ -687,7 +687,7 @@ plot(bird_positive_communities, gr_bird_positive,
      layout = layout.fruchterman.reingold(gr_bird_positive),
      rescaled = TRUE,
      vertex.size = 2, 
-     vertex.label.cex = 0.25
+     vertex.label = NA
 )
 ```
 
@@ -705,6 +705,6 @@ plot(bird_negative_communities, gr_bird_negative,
      layout = layout.fruchterman.reingold(gr_bird_negative),
      rescaled = TRUE,
      vertex.size = 2, 
-     vertex.label.cex = 0.25
+     vertex.label = NA
 )
 ```

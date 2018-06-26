@@ -90,7 +90,7 @@ plot(by_complete_exposed_positive_communities, gr_by_complete_exposed_positive,
      layout = layout.fruchterman.reingold(gr_by_complete_exposed_positive),
      rescaled = TRUE,
      vertex.size = 2, 
-     vertex.label.cex = 0.25
+     vertex.label = NA
      )
 ```
 
@@ -107,7 +107,7 @@ plot(by_complete_exposed_negative_communities, gr_by_complete_exposed_negative,
      layout = layout.fruchterman.reingold(gr_by_complete_exposed_negative),
      rescaled = TRUE,
      vertex.size = 2, 
-     vertex.label.cex = 0.50
+     vertex.label = NA
      )
 ```
 
@@ -124,7 +124,7 @@ plot(by_complete_caged_positive_communities, gr_by_complete_caged_positive,
      layout = layout.fruchterman.reingold(gr_by_complete_caged_positive),
      rescaled = TRUE,
      vertex.size = 2, 
-     vertex.label.cex = 0.25
+     vertex.label = NA
      )
 ```
 
@@ -141,7 +141,7 @@ plot(by_complete_caged_negative_communities, gr_by_complete_caged_negative,
      layout = layout.fruchterman.reingold(gr_by_complete_caged_negative),
      rescaled = TRUE,
      vertex.size = 2, 
-     vertex.label.cex = 0.5
+     vertex.label = NA
      )
 ```
 
@@ -158,7 +158,7 @@ plot(by_complete_bagged_positive_communities, gr_by_complete_bagged_positive,
      layout = layout.fruchterman.reingold(gr_by_complete_bagged_positive),
      rescaled = TRUE,
      vertex.size = 2, 
-     vertex.label.cex = 0.25
+     vertex.label = NA
      )
 ```
 
@@ -174,7 +174,7 @@ plot(by_complete_bagged_negative_communities, gr_by_complete_bagged_negative,
      layout = layout.fruchterman.reingold(gr_by_complete_bagged_negative),
      rescaled = TRUE,
      vertex.size = 2, 
-     vertex.label.cex = 0.5
+     vertex.label = NA
      )
 ```
 
@@ -210,7 +210,7 @@ plot(by_complete_all_positive_communities, gr_by_complete_all_positive,
      layout = layout.fruchterman.reingold(gr_by_complete_all_positive),
      rescaled = TRUE,
      vertex.size = 2, 
-     vertex.label.cex = 0.25
+     vertex.label = NA
 )
 ```
 
@@ -231,6 +231,6 @@ plot(by_complete_all_negative_communities, gr_by_complete_all_negative,
      layout = layout.fruchterman.reingold(gr_by_complete_all_negative),
      rescaled = TRUE,
      vertex.size = 2, 
-     vertex.label.cex = 0.65
+     vertex.label = NA
 )
 ```

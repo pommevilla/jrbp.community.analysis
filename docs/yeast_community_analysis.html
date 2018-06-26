@@ -328,7 +328,7 @@ taxa &lt;- taxa[, -1]
 colnames(taxa)&lt;-c(&quot;OTU&quot;,colnames(taxa[,-1]))
 nrow(taxa)</code></pre>
 <pre><code>## [1] 5521</code></pre>
-<pre class="r"><code>remove &lt;- taxa[which(taxa[[4]] %in% c(&quot;Cyanobacteria&quot;,&quot;Chloroplast&quot;)),]$OTU
+<pre class="r"><code>remove &lt;- taxa[which(taxa[[4]] %in% c(&quot;Cyanobacteria&quot;, &quot;Chloroplast&quot;)),]$OTU
 taxa &lt;- taxa[-c(remove),]</code></pre>
 <p>Reading in the data set and separating out the yeast data. Yeast OTUs are labeled <code>Y_OTU_xxx</code>:</p>
 <pre class="r"><code>cooccurrence_data &lt;- data.table(read.table(&quot;./data/bacteria-yeast/bacteria_yeast_cooccurrence&quot;, 
@@ -436,7 +436,7 @@ plot(yeast_positive_all_communities, gr_yeast_positive_all,
      layout = layout.fruchterman.reingold(gr_yeast_positive_all),
      rescaled = TRUE,
      vertex.size = 2, 
-     vertex.label.cex = 0.25
+     vertex.label = NA
 )</code></pre>
 <p><img src="yeast_community_analysis_files/figure-html/yp.1-1.png" width="672" /></p>
 <p>Modularity:</p>
