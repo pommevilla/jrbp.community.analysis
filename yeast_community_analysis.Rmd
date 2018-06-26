@@ -27,7 +27,7 @@ taxa <- data.table(read.delim("./data/bacteria-yeast/bacteria_yeast_classified_o
 taxa <- taxa[, -1]
 colnames(taxa)<-c("OTU",colnames(taxa[,-1]))
 nrow(taxa)
-remove <- taxa[which(taxa[[4]] %in% c("Cyanobacteria","Chloroplast")),]$OTU
+remove <- taxa[which(taxa[[4]] %in% c("Cyanobacteria", "Chloroplast")),]$OTU
 taxa <- taxa[-c(remove),]
 ```
 
@@ -139,7 +139,7 @@ plot(yeast_positive_all_communities, gr_yeast_positive_all,
      layout = layout.fruchterman.reingold(gr_yeast_positive_all),
      rescaled = TRUE,
      vertex.size = 2, 
-     vertex.label.cex = 0.25
+     vertex.label = NA
 )
 ```
 

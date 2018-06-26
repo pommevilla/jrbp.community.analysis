@@ -404,7 +404,7 @@ head(trimmed_negative_weights)</code></pre>
 exposed_data_positive &lt;- exposed_data_positive[, -1]
 gr_exposed_positive &lt;- graph.data.frame(exposed_data_positive, directed = FALSE)
 plot(gr_exposed_positive, vertex.size = 3,
-     vertex.label.cex = 0.25)</code></pre>
+     vertex.label = NA)</code></pre>
 <p><img src="bacteria_community_analysis_files/figure-html/tep.1-1.png" width="672" /></p>
 <p>To determine communities, we use <code>cluster_fast_greedy</code>, which does greedy (local) optimization of the graph’s modularity score.</p>
 <pre class="r"><code>exposed_communities_greedy_positive &lt;- cluster_fast_greedy(gr_exposed_positive, weights = E(gr_exposed_positive)$rho)
@@ -412,7 +412,7 @@ plot(exposed_communities_greedy_positive, gr_exposed_positive,
      layout = layout.fruchterman.reingold(gr_exposed_positive),
      rescaled = TRUE,
      vertex.size = 2, 
-     vertex.label.cex = 0.25
+     vertex.label = NA
      )</code></pre>
 <p><img src="bacteria_community_analysis_files/figure-html/tep.2-1.png" width="672" /> The modularity of the community structure is:</p>
 <pre class="r"><code>tep.mod &lt;- modularity(gr_exposed_positive, membership(exposed_communities_greedy_positive))</code></pre>
@@ -527,13 +527,12 @@ exposed_data_negative &lt;- exposed_data_negative[, -1]
 exposed_data_negative[[3]] &lt;- abs(exposed_data_negative[[3]])
 gr_exposed_negative &lt;- graph.data.frame(exposed_data_negative, directed = FALSE)
 plot(gr_exposed_negative, vertex.size = 3,
-     vertex.label.cex = 0.25)</code></pre>
+     vertex.label = NA)</code></pre>
 <p><img src="bacteria_community_analysis_files/figure-html/ten.1-1.png" width="672" /></p>
 <pre class="r"><code>exposed_communities_greedy_negative &lt;- cluster_fast_greedy(gr_exposed_negative, weights = E(gr_exposed_negative)$rho)
 plot(exposed_communities_greedy_negative, gr_exposed_negative, 
      layout = layout.fruchterman.reingold(gr_exposed_negative),
-     rescaled = TRUE,
-     vertex.size = 2, vertex.label.cex = 0.75)</code></pre>
+     vertex.size = 2, vertex.label = NA)</code></pre>
 <p><img src="bacteria_community_analysis_files/figure-html/ten.2-1.png" width="672" /></p>
 <p>The modularity of the community structure is:</p>
 <pre class="r"><code>ten.mod &lt;- modularity(gr_exposed_negative, membership(exposed_communities_greedy_negative))</code></pre>
@@ -582,7 +581,7 @@ plot(exposed_communities_greedy_negative, gr_exposed_negative,
      layout = layout.fruchterman.reingold(gr_caged_positive),
      rescaled = TRUE,
      vertex.size = 2, 
-     vertex.label.cex = 0.5
+     vertex.label = NA
       )</code></pre>
 <p><img src="bacteria_community_analysis_files/figure-html/tcp.2-1.png" width="672" /></p>
 <p>The modularity of the community structure is:</p>
@@ -617,8 +616,8 @@ gr_caged_negative &lt;- graph.data.frame(caged_data_negative, directed = FALSE)
 caged_communities_greedy_negative &lt;- cluster_fast_greedy(gr_caged_negative, weights = E(gr_caged_negative)$rho)
 plot(caged_communities_greedy_negative, gr_caged_negative, 
      layout = layout.fruchterman.reingold(gr_caged_negative),
-     rescaled = TRUE,
-     vertex.size = 2, vertex.label.cex = 0.75)</code></pre>
+     vertex.size = 2, 
+     vertex.label = NA)</code></pre>
 <p><img src="bacteria_community_analysis_files/figure-html/tcn.1-1.png" width="672" /></p>
 <p>The modularity of the community structure is:</p>
 <pre class="r"><code>tcn.mod &lt;- modularity(gr_caged_negative, membership(caged_communities_greedy_negative))</code></pre>
@@ -660,7 +659,7 @@ plot(bagged_communities_greedy_positive, gr_bagged_positive,
      layout = layout.fruchterman.reingold(gr_bagged_positive),
      rescaled = TRUE,
      vertex.size = 2, 
-     vertex.label.cex = 0.25
+     vertex.label = NA
 )</code></pre>
 <p><img src="bacteria_community_analysis_files/figure-html/tbp.1-1.png" width="672" /></p>
 <p>The modularity score of the community structure is:</p>
@@ -845,7 +844,8 @@ bagged_communities_greedy_negative &lt;- cluster_fast_greedy(gr_bagged_negative,
 plot(bagged_communities_greedy_negative, gr_bagged_negative, 
      layout = layout.fruchterman.reingold(gr_bagged_negative),
      rescaled = TRUE,
-     vertex.size = 2, vertex.label.cex = 0.75)</code></pre>
+     vertex.size = 2, 
+     vertex.label = NA)</code></pre>
 <p><img src="bacteria_community_analysis_files/figure-html/tbn.1-1.png" width="672" /></p>
 <p>Modularity score:</p>
 <pre class="r"><code>tbn.mod &lt;- modularity(gr_bagged_negative, membership(bagged_communities_greedy_negative))</code></pre>
@@ -894,7 +894,7 @@ plot(trimmed_all_positive_communities, gr_trimmed_all_positive,
      layout = layout.fruchterman.reingold(gr_trimmed_all_positive),
      rescaled = TRUE,
      vertex.size = 2, 
-     vertex.label.cex = 0.25
+     vertex.label = NA
 )</code></pre>
 <p><img src="bacteria_community_analysis_files/figure-html/tap.2-1.png" width="672" /></p>
 <p>What’s interesting here is that the graph has a lot of “spokes,” which hints at important OTUs.</p>
@@ -914,7 +914,7 @@ plot(trimmed_all_negative_communities, gr_trimmed_all_negative,
      layout = layout.fruchterman.reingold(gr_trimmed_all_negative),
      rescaled = TRUE,
      vertex.size = 2, 
-     vertex.label.cex = 0.25
+     vertex.label = NA
 )</code></pre>
 <p><img src="bacteria_community_analysis_files/figure-html/tan.1-1.png" width="672" /></p>
 <p><code>OTU_6</code> is again in the center of a community. The members of that community are:</p>
@@ -1084,7 +1084,7 @@ plot(complete_caged_negative_communities, gr_complete_caged_negative,
      layout = layout.fruchterman.reingold(gr_complete_caged_negative),
      rescaled = TRUE,
      vertex.size = 2, 
-     vertex.label.cex = 0.5
+     vertex.label = NA
      )</code></pre>
 <p><img src="bacteria_community_analysis_files/figure-html/ccn.1-1.png" width="672" /></p>
 <p>Modularity:</p>
@@ -1160,7 +1160,7 @@ plot(complete_bagged_positive_communities, gr_complete_bagged_positive,
      layout = layout.fruchterman.reingold(gr_complete_bagged_positive),
      rescaled = TRUE,
      vertex.size = 2, 
-     vertex.label.cex = 0.25
+     vertex.label = NA
      )</code></pre>
 <p><img src="bacteria_community_analysis_files/figure-html/cbp.1-1.png" width="672" /></p>
 <p>Modularity:</p>
@@ -1178,7 +1178,7 @@ plot(complete_bagged_negative_communities, gr_complete_bagged_negative,
      layout = layout.fruchterman.reingold(gr_complete_bagged_negative),
      rescaled = TRUE,
      vertex.size = 2, 
-     vertex.label.cex = 0.5
+     vertex.label = NA
      )</code></pre>
 <p><img src="bacteria_community_analysis_files/figure-html/cbn.1-1.png" width="672" /></p>
 <p>Modularity:</p>
@@ -1257,7 +1257,7 @@ plot(complete_all_positive_communities, gr_complete_all_positive,
      layout = layout.fruchterman.reingold(gr_complete_all_positive),
      rescaled = TRUE,
      vertex.size = 2, 
-     vertex.label.cex = 0.25
+     vertex.label = NA
 )</code></pre>
 <p><img src="bacteria_community_analysis_files/figure-html/cap.1-1.png" width="672" /></p>
 <p>Modularity score:</p>
@@ -1276,7 +1276,7 @@ plot(complete_all_negative_communities, gr_complete_all_negative,
      layout = layout.fruchterman.reingold(gr_complete_all_negative),
      rescaled = TRUE,
      vertex.size = 2, 
-     vertex.label.cex = 0.65
+     vertex.label = NA
 )</code></pre>
 <p><img src="bacteria_community_analysis_files/figure-html/can.1-1.png" width="672" /> Same story, but the communities aren’t as distinct. The OTUs in the <code>OTU_6</code> cluster:</p>
 <p>Modularity score:</p>
@@ -1416,7 +1416,7 @@ plot(trimmed_bird_positive_communities, gr_trimmed_bird_positive,
      layout = layout.fruchterman.reingold(gr_trimmed_bird_positive),
      rescaled = TRUE,
      vertex.size = 2, 
-     vertex.label.cex = 0.25
+     vertex.label = NA
 )</code></pre>
 <p><img src="bacteria_community_analysis_files/figure-html/tbdp.1-1.png" width="672" /></p>
 <pre class="r"><code>plot(trimmed_bird_positive_communities, gr_trimmed_bird_positive, 
@@ -1430,7 +1430,7 @@ plot(trimmed_bird_positive_communities, gr_trimmed_bird_positive,
 <p><img src="bacteria_community_analysis_files/figure-html/tbdp.1-2.png" width="672" /></p>
 <pre class="r"><code>adjacent_vertices(gr_trimmed_bird_positive, &quot;OTU_6&quot;)</code></pre>
 <pre><code>## $OTU_6
-## + 22/508 vertices, named, from 4f1f120:
+## + 22/508 vertices, named, from da8f8fb:
 ##  [1] OTU_5778 OTU_5682 OTU_5324 OTU_4036 OTU_4191 OTU_4337 OTU_5213
 ##  [8] OTU_5834 OTU_3986 OTU_3906 OTU_4887 OTU_4570 OTU_4796 OTU_8   
 ## [15] OTU_5    OTU_28   OTU_4227 OTU_303  OTU_3464 OTU_3280 OTU_442 
@@ -1456,9 +1456,9 @@ plot(trimmed_bird_negative_communities, gr_trimmed_bird_negative,
 )</code></pre>
 <p><img src="bacteria_community_analysis_files/figure-html/tbdn.1-1.png" width="672" /></p>
 <pre class="r"><code>gr_trimmed_bird_negative</code></pre>
-<pre><code>## IGRAPH 6aeb0a6 UN-- 27 20 -- 
+<pre><code>## IGRAPH be4a39f UN-- 27 20 -- 
 ## + attr: name (v/c), rho (e/n)
-## + edges from 6aeb0a6 (vertex names):
+## + edges from be4a39f (vertex names):
 ##  [1] OTU_1   --OTU_3225 OTU_17  --OTU_5629 OTU_5776--OTU_13  
 ##  [4] OTU_4036--OTU_13   OTU_4036--OTU_293  OTU_4191--OTU_172 
 ##  [7] OTU_3986--OTU_9    OTU_6   --OTU_338  OTU_6   --OTU_52  
@@ -1487,7 +1487,7 @@ plot(bird_positive_communities, gr_bird_positive,
      layout = layout.fruchterman.reingold(gr_bird_positive),
      rescaled = TRUE,
      vertex.size = 2, 
-     vertex.label.cex = 0.25
+     vertex.label = NA
 )</code></pre>
 <p><img src="bacteria_community_analysis_files/figure-html/cbdp.1-1.png" width="672" /></p>
 </div>
@@ -1504,7 +1504,7 @@ plot(bird_negative_communities, gr_bird_negative,
      layout = layout.fruchterman.reingold(gr_bird_negative),
      rescaled = TRUE,
      vertex.size = 2, 
-     vertex.label.cex = 0.25
+     vertex.label = NA
 )</code></pre>
 <p><img src="bacteria_community_analysis_files/figure-html/cbdn.1-1.png" width="672" /></p>
 </div>
