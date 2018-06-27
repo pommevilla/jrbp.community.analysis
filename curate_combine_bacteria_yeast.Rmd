@@ -1,0 +1,72 @@
+---
+title: "Curating and Combining Bacteria and Yeast"
+---
+
+```{r setup, include=FALSE}
+set.seed(1390)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load_packages, message = FALSE, warning = FALSE}
+library(phyloseq, warn.conflicts = FALSE)
+```
+
+##Loading the Data
+
+We load in our OTU tables constructed for both the bacteria 16S and fungal ITS sequence processing, then merged them together based on samples. Missing data is read merged as `NA` that we then set equal to $0$. Setting it to $0$ may not be the correct choice, we will revisit this in a later time. Rownames for the merged OTUs are the OTU names.
+
+```{r load_data}
+bacteria_otus <- read.table("data/bacteria/germs_otus/bac_cdhit_otu_table_wide.txt", header = TRUE)
+yeast_otus <- read.table("data/yeast/fun_cdhit_otu_table_wide.txt", header=TRUE)
+
+merged_otus <- merge(yeast_otus, bacteria_otus, all=TRUE)
+rownames(merged_otus) <- merged_otus$OTUS
+merged_otus <- merged_otus[,-1]
+merged_otus[is.na(merged_otus)] <- 0
+```
+
+## Combining OTU data with Taxonomy and Sample Data
+
+Next we read in the taxonim classifications for each OTU, as well as the sample metadata. The taxonomic data is merged with `rbind` so that it is asingle file with OTUs as the rownames and domain through genus as the columns.
+
+```{r add_info}
+tax_bac <- read.delim("data/bacteria/germs_otus/bac_cdhit_taxa_table_w_repseq.txt")[,-1]
+row.names(tax_bac) <- as.character(tax_bac$OTUS)
+tax_bac <- tax_bac[,-1]
+tax_yeast <- read.delim("data/yeast/fun_cdhit_taxa_table_w_repseq.txt")[,-1]
+row.names(tax_yeast) <- as.character(tax_yeast$OTUS)
+tax_yeast <- tax_yeast[,c(-1,-8)]
+merged_tax <- rbind(tax_bac, tax_yeast)
+
+si <- read.csv("data/bacteria/Data_for_bacterial_OTUs.csv")
+colnames(si) <- c("sample", "Flower", "Treatment", "sample.name")
+rownames(si) <- paste("X", si$sample, sep="")
+si <- si[,-1]
+```
+
+## Creating Phyloseq Objects
+OTU tables need to be read in as matrices, so only the counts, with taxa(OTUs) as rownames.
+<br>
+Taxa need to be read in as matrix, with taxa as rownames.
+<br>
+Sample data is read as a data frame with sample names as rownames.
+
+```{r phyloseq}
+data.phy <- phyloseq(otu_table(as.matrix(merged_otus), taxa_are_rows=T), tax_table(as.matrix(merged_tax)), sample_data(si))
+```
+
+### Rarefy
+
+```{r rarefy}
+data.phy <- rarefy_even_depth(data.phy, sample.size = 500)
+data.mintax5.phy <- filter_taxa(data.phy, function(x) sum(x) >= 5, T)
+```
+
+## Co-Ocurrence
+
+```{r co_ocurrence}
+trt <- as.character(sample_data(data.mintax5.phy)$Set)
+f_table <- cbind(trt, t(otu_table(data.mintax5.phy)))
+write.csv(f_table, "sample_input_file.csv")
+```
+
