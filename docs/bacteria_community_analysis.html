@@ -415,7 +415,8 @@ plot(exposed_communities_greedy_positive, gr_exposed_positive,
      vertex.label = NA
      )</code></pre>
 <p><img src="bacteria_community_analysis_files/figure-html/tep.2-1.png" width="672" /> The modularity of the community structure is:</p>
-<pre class="r"><code>tep.mod &lt;- modularity(gr_exposed_positive, membership(exposed_communities_greedy_positive))</code></pre>
+<pre class="r"><code>(tep.mod &lt;- modularity(gr_exposed_positive, membership(exposed_communities_greedy_positive)))</code></pre>
+<pre><code>## [1] 0.5247227</code></pre>
 <p>Note the community by itself. The members of this community are:</p>
 <pre class="r"><code>communities(exposed_communities_greedy_positive)[[6]]</code></pre>
 <pre><code>##  [1] &quot;OTU_3609&quot; &quot;OTU_345&quot;  &quot;OTU_5917&quot; &quot;OTU_4224&quot; &quot;OTU_304&quot;  &quot;OTU_86&quot;  
@@ -535,7 +536,8 @@ plot(exposed_communities_greedy_negative, gr_exposed_negative,
      vertex.size = 2, vertex.label = NA)</code></pre>
 <p><img src="bacteria_community_analysis_files/figure-html/ten.2-1.png" width="672" /></p>
 <p>The modularity of the community structure is:</p>
-<pre class="r"><code>ten.mod &lt;- modularity(gr_exposed_negative, membership(exposed_communities_greedy_negative))</code></pre>
+<pre class="r"><code>(ten.mod &lt;- modularity(gr_exposed_negative, membership(exposed_communities_greedy_negative)))</code></pre>
+<pre><code>## [1] 0.5118228</code></pre>
 <p>We again find <code>OTU_6</code> as the center of a community. Below are the OTUs in this community. Notice that they are mostly $:</p>
 <pre class="r"><code>taxa[OTU %in% communities(exposed_communities_greedy_negative)[[1]]]</code></pre>
 <pre><code>##          OTU   domain         phylum               class             order
@@ -585,7 +587,8 @@ plot(exposed_communities_greedy_negative, gr_exposed_negative,
       )</code></pre>
 <p><img src="bacteria_community_analysis_files/figure-html/tcp.2-1.png" width="672" /></p>
 <p>The modularity of the community structure is:</p>
-<pre class="r"><code>tcp.mod &lt;- modularity(gr_caged_positive, membership(caged_communities_greedy_positive))</code></pre>
+<pre class="r"><code>(tcp.mod &lt;- modularity(gr_caged_positive, membership(caged_communities_greedy_positive)))</code></pre>
+<pre><code>## [1] 0.5346598</code></pre>
 <p>We again find <code>OTU_6</code> as the central member of a cluster that is well-separated from the rest of the community. The OTUs in this cluster are:</p>
 <pre class="r"><code>taxa[OTU %in% communities(caged_communities_greedy_positive)[[7]]]</code></pre>
 <pre><code>##         OTU   domain         phylum               class            order
@@ -620,7 +623,8 @@ plot(caged_communities_greedy_negative, gr_caged_negative,
      vertex.label = NA)</code></pre>
 <p><img src="bacteria_community_analysis_files/figure-html/tcn.1-1.png" width="672" /></p>
 <p>The modularity of the community structure is:</p>
-<pre class="r"><code>tcn.mod &lt;- modularity(gr_caged_negative, membership(caged_communities_greedy_negative))</code></pre>
+<pre class="r"><code>(tcn.mod &lt;- modularity(gr_caged_negative, membership(caged_communities_greedy_negative)))</code></pre>
+<pre><code>## [1] 0.5193906</code></pre>
 <p>The OTUs in the same community of <code>OTU_6</code> are:</p>
 <pre class="r"><code>taxa[OTU %in% communities(caged_communities_greedy_negative)[[2]]]</code></pre>
 <pre><code>##         OTU   domain         phylum               class            order
@@ -663,7 +667,8 @@ plot(bagged_communities_greedy_positive, gr_bagged_positive,
 )</code></pre>
 <p><img src="bacteria_community_analysis_files/figure-html/tbp.1-1.png" width="672" /></p>
 <p>The modularity score of the community structure is:</p>
-<pre class="r"><code>tbp.mod &lt;- modularity(gr_bagged_positive, membership(bagged_communities_greedy_positive))</code></pre>
+<pre class="r"><code>(tbp.mod &lt;- modularity(gr_bagged_positive, membership(bagged_communities_greedy_positive)))</code></pre>
+<pre><code>## [1] 0.4762388</code></pre>
 <p>For completeness, here are the OTUs in the same community as <code>OTU_6</code>:</p>
 <pre class="r"><code>taxa[OTU %in% communities(bagged_communities_greedy_positive)[[1]]]</code></pre>
 <pre><code>##          OTU   domain         phylum                 class
@@ -848,7 +853,8 @@ plot(bagged_communities_greedy_negative, gr_bagged_negative,
      vertex.label = NA)</code></pre>
 <p><img src="bacteria_community_analysis_files/figure-html/tbn.1-1.png" width="672" /></p>
 <p>Modularity score:</p>
-<pre class="r"><code>tbn.mod &lt;- modularity(gr_bagged_negative, membership(bagged_communities_greedy_negative))</code></pre>
+<pre class="r"><code>(tbn.mod &lt;- modularity(gr_bagged_negative, membership(bagged_communities_greedy_negative)))</code></pre>
+<pre><code>## [1] 0.505102</code></pre>
 <pre class="r"><code>taxa[OTU %in% communities(bagged_communities_greedy_negative)[[1]]]</code></pre>
 <pre><code>##         OTU   domain         phylum               class           order
 ## 1:    OTU_5 Bacteria Proteobacteria Alphaproteobacteria   Rickettsiales
@@ -899,7 +905,8 @@ plot(trimmed_all_positive_communities, gr_trimmed_all_positive,
 <p><img src="bacteria_community_analysis_files/figure-html/tap.2-1.png" width="672" /></p>
 <p>What’s interesting here is that the graph has a lot of “spokes,” which hints at important OTUs.</p>
 <p>Modularity score:</p>
-<pre class="r"><code>tap.mod &lt;- modularity(gr_trimmed_all_positive, membership(trimmed_all_positive_communities))</code></pre>
+<pre class="r"><code>(tap.mod &lt;- modularity(gr_trimmed_all_positive, membership(trimmed_all_positive_communities)))</code></pre>
+<pre><code>## [1] 0.3170833</code></pre>
 </div>
 <div id="negative-weights-3" class="section level3">
 <h3>Negative Weights</h3>
@@ -992,7 +999,8 @@ plot(trimmed_all_negative_communities, gr_trimmed_all_negative,
 ## 14:     Comamonadaceae              
 ## 15:      Moraxellaceae Acinetobacter</code></pre>
 <p>Modularity score:</p>
-<pre class="r"><code>tan.mod &lt;- modularity(gr_trimmed_all_negative, membership(trimmed_all_negative_communities))</code></pre>
+<pre class="r"><code>(tan.mod &lt;- modularity(gr_trimmed_all_negative, membership(trimmed_all_negative_communities)))</code></pre>
+<pre><code>## [1] 0.4991163</code></pre>
 </div>
 </div>
 </div>
@@ -1032,8 +1040,10 @@ plot(complete_exposed_positive_communities, gr_complete_exposed_positive,
      vertex.size = 2, 
      vertex.label = NA
      )</code></pre>
-<p><img src="bacteria_community_analysis_files/figure-html/cep.1-1.png" width="672" /> Modularity:</p>
-<pre class="r"><code>cep.mod &lt;- modularity(gr_complete_exposed_positive, membership(complete_exposed_positive_communities))</code></pre>
+<p><img src="bacteria_community_analysis_files/figure-html/cep.1-1.png" width="672" /></p>
+<p>Modularity:</p>
+<pre class="r"><code>(cep.mod &lt;- modularity(gr_complete_exposed_positive, membership(complete_exposed_positive_communities)))</code></pre>
+<pre><code>## [1] 0.2599933</code></pre>
 </div>
 <div id="negative-weights-4" class="section level3">
 <h3>Negative Weights</h3>
@@ -1049,8 +1059,10 @@ plot(complete_exposed_negative_communities, gr_complete_exposed_negative,
      vertex.size = 2, 
      vertex.label = NA
      )</code></pre>
-<p><img src="bacteria_community_analysis_files/figure-html/cen.1-1.png" width="672" /> Modularity:</p>
-<pre class="r"><code>cen.mod &lt;- modularity(gr_complete_exposed_negative, membership(complete_exposed_negative_communities))</code></pre>
+<p><img src="bacteria_community_analysis_files/figure-html/cen.1-1.png" width="672" /></p>
+<p>Modularity:</p>
+<pre class="r"><code>(cen.mod &lt;- modularity(gr_complete_exposed_negative, membership(complete_exposed_negative_communities)))</code></pre>
+<pre><code>## [1] 0.6004959</code></pre>
 </div>
 </div>
 <div id="caged-communities-1" class="section level2">
@@ -1070,7 +1082,8 @@ plot(complete_caged_positive_communities, gr_complete_caged_positive,
      )</code></pre>
 <p><img src="bacteria_community_analysis_files/figure-html/ccp.1-1.png" width="672" /></p>
 <p>Modularity:</p>
-<pre class="r"><code>ccp.mod &lt;- modularity(gr_complete_caged_positive, membership(complete_caged_positive_communities))</code></pre>
+<pre class="r"><code>(ccp.mod &lt;- modularity(gr_complete_caged_positive, membership(complete_caged_positive_communities)))</code></pre>
+<pre><code>## [1] 0.3400958</code></pre>
 </div>
 <div id="negative-weights-5" class="section level3">
 <h3>Negative Weights</h3>
@@ -1088,7 +1101,8 @@ plot(complete_caged_negative_communities, gr_complete_caged_negative,
      )</code></pre>
 <p><img src="bacteria_community_analysis_files/figure-html/ccn.1-1.png" width="672" /></p>
 <p>Modularity:</p>
-<pre class="r"><code>ccn.mod &lt;- modularity(gr_complete_caged_negative, membership(complete_caged_negative_communities))</code></pre>
+<pre class="r"><code>(ccn.mod &lt;- modularity(gr_complete_caged_negative, membership(complete_caged_negative_communities)))</code></pre>
+<pre><code>## [1] 0.5346</code></pre>
 <p>Again, the familiar pattern. However, <code>OTU_6</code> has lower centrality in its cluster while <code>OTU_5</code> remains highly central. The OTUs in the <code>OTU_6</code> cluster are:</p>
 <pre class="r"><code>taxa[OTU %in% communities(complete_caged_negative_communities)[[1]]]</code></pre>
 <pre><code>##         OTU   domain         phylum               class            order
@@ -1164,7 +1178,8 @@ plot(complete_bagged_positive_communities, gr_complete_bagged_positive,
      )</code></pre>
 <p><img src="bacteria_community_analysis_files/figure-html/cbp.1-1.png" width="672" /></p>
 <p>Modularity:</p>
-<pre class="r"><code>cbp.mod &lt;- modularity(gr_complete_bagged_positive, membership(complete_bagged_positive_communities))</code></pre>
+<pre class="r"><code>(cbp.mod &lt;- modularity(gr_complete_bagged_positive, membership(complete_bagged_positive_communities)))</code></pre>
+<pre><code>## [1] 0.3677833</code></pre>
 </div>
 <div id="negative-weights-6" class="section level3">
 <h3>Negative Weights</h3>
@@ -1182,7 +1197,8 @@ plot(complete_bagged_negative_communities, gr_complete_bagged_negative,
      )</code></pre>
 <p><img src="bacteria_community_analysis_files/figure-html/cbn.1-1.png" width="672" /></p>
 <p>Modularity:</p>
-<pre class="r"><code>cbn.mod &lt;- modularity(gr_complete_bagged_negative, membership(complete_bagged_negative_communities))</code></pre>
+<pre class="r"><code>(cbn.mod &lt;- modularity(gr_complete_bagged_negative, membership(complete_bagged_negative_communities)))</code></pre>
+<pre><code>## [1] 0.6176386</code></pre>
 <p>Same story as in the caged samples for the complete data. The <code>OTU_6</code> cluster:</p>
 <pre class="r"><code>taxa[OTU %in% communities(complete_bagged_negative_communities)[[1]]]</code></pre>
 <pre><code>##         OTU   domain         phylum               class             order
@@ -1261,7 +1277,8 @@ plot(complete_all_positive_communities, gr_complete_all_positive,
 )</code></pre>
 <p><img src="bacteria_community_analysis_files/figure-html/cap.1-1.png" width="672" /></p>
 <p>Modularity score:</p>
-<pre class="r"><code>cap.mod &lt;- modularity(gr_complete_all_positive, membership(complete_all_positive_communities))</code></pre>
+<pre class="r"><code>(cap.mod &lt;- modularity(gr_complete_all_positive, membership(complete_all_positive_communities)))</code></pre>
+<pre><code>## [1] 0.182264</code></pre>
 </div>
 <div id="negative-weights-7" class="section level3">
 <h3>Negative Weights</h3>
@@ -1280,7 +1297,8 @@ plot(complete_all_negative_communities, gr_complete_all_negative,
 )</code></pre>
 <p><img src="bacteria_community_analysis_files/figure-html/can.1-1.png" width="672" /> Same story, but the communities aren’t as distinct. The OTUs in the <code>OTU_6</code> cluster:</p>
 <p>Modularity score:</p>
-<pre class="r"><code>can.mod &lt;- modularity(gr_complete_all_negative, membership(complete_all_negative_communities))</code></pre>
+<pre class="r"><code>(can.mod &lt;- modularity(gr_complete_all_negative, membership(complete_all_negative_communities)))</code></pre>
+<pre><code>## [1] 0.4837875</code></pre>
 <pre class="r"><code>taxa[OTU %in% communities(complete_all_negative_communities)[[2]]]</code></pre>
 <pre><code>##          OTU   domain         phylum               class             order
 ##  1:   OTU_21 Bacteria Proteobacteria Gammaproteobacteria   Pseudomonadales
@@ -1430,7 +1448,7 @@ plot(trimmed_bird_positive_communities, gr_trimmed_bird_positive,
 <p><img src="bacteria_community_analysis_files/figure-html/tbdp.1-2.png" width="672" /></p>
 <pre class="r"><code>adjacent_vertices(gr_trimmed_bird_positive, &quot;OTU_6&quot;)</code></pre>
 <pre><code>## $OTU_6
-## + 22/508 vertices, named, from da8f8fb:
+## + 22/508 vertices, named, from da37da3:
 ##  [1] OTU_5778 OTU_5682 OTU_5324 OTU_4036 OTU_4191 OTU_4337 OTU_5213
 ##  [8] OTU_5834 OTU_3986 OTU_3906 OTU_4887 OTU_4570 OTU_4796 OTU_8   
 ## [15] OTU_5    OTU_28   OTU_4227 OTU_303  OTU_3464 OTU_3280 OTU_442 
@@ -1456,9 +1474,9 @@ plot(trimmed_bird_negative_communities, gr_trimmed_bird_negative,
 )</code></pre>
 <p><img src="bacteria_community_analysis_files/figure-html/tbdn.1-1.png" width="672" /></p>
 <pre class="r"><code>gr_trimmed_bird_negative</code></pre>
-<pre><code>## IGRAPH be4a39f UN-- 27 20 -- 
+<pre><code>## IGRAPH a782e2c UN-- 27 20 -- 
 ## + attr: name (v/c), rho (e/n)
-## + edges from be4a39f (vertex names):
+## + edges from a782e2c (vertex names):
 ##  [1] OTU_1   --OTU_3225 OTU_17  --OTU_5629 OTU_5776--OTU_13  
 ##  [4] OTU_4036--OTU_13   OTU_4036--OTU_293  OTU_4191--OTU_172 
 ##  [7] OTU_3986--OTU_9    OTU_6   --OTU_338  OTU_6   --OTU_52  
