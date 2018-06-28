@@ -319,7 +319,7 @@ div.tocify {
 <pre class="r"><code>library(phyloseq, warn.conflicts = FALSE)</code></pre>
 <div id="loading-the-data" class="section level2">
 <h2>Loading the Data</h2>
-<p>We load in our OTU tables constructed for both the bacteria 16S and fungal ITS sequence processing, then merged them together based on samples. Missing data is read merged as <code>NA</code> that we then set equal to <span class="math inline">\(0\)</span>. Setting it to <span class="math inline">\(0\)</span> may not be the correct choice, we will revisit this in a later time. Rownames for the merged OTUs are the OTU names.</p>
+<p>We load in our OTU tables constructed for both the bacteria 16S and fungal ITS sequence processing, then merged them together based on samples. Missing data is read merged as <code>NA</code> that we then set equal to <span class="math inline">\(0\)</span>. Setting it to <span class="math inline">\(0\)</span> may not be the correct choice; we will revisit this in a later time. Row names for the merged OTUs are the OTU names.</p>
 <pre class="r"><code>bacteria_otus &lt;- read.table(&quot;data/bacteria/germs_otus/bac_cdhit_otu_table_wide.txt&quot;, header = TRUE)
 yeast_otus &lt;- read.table(&quot;data/yeast/fun_cdhit_otu_table_wide.txt&quot;, header=TRUE)
 
@@ -330,7 +330,7 @@ merged_otus[is.na(merged_otus)] &lt;- 0</code></pre>
 </div>
 <div id="combining-otu-data-with-taxonomy-and-sample-data" class="section level2">
 <h2>Combining OTU data with Taxonomy and Sample Data</h2>
-<p>Next we read in the taxonim classifications for each OTU, as well as the sample metadata. The taxonomic data is merged with <code>rbind</code> so that it is asingle file with OTUs as the rownames and domain through genus as the columns.</p>
+<p>Next we read in the taxonimical classifications for each OTU, as well as the sample metadata. The taxonomic data is merged with <code>rbind</code> so that it is a single file with OTUs as the rownames and domain through genus as the columns.</p>
 <pre class="r"><code>tax_bac &lt;- read.delim(&quot;data/bacteria/germs_otus/bac_cdhit_taxa_table_w_repseq.txt&quot;)[,-1]
 row.names(tax_bac) &lt;- as.character(tax_bac$OTUS)
 tax_bac &lt;- tax_bac[,-1]
