@@ -11,7 +11,7 @@
 
 
 
-<title>JRBP Community Analysis</title>
+<title>Curating and Combining Bacteria and Yeast</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -311,20 +311,65 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">JRBP Community Analysis</h1>
+<h1 class="title toc-ignore">Curating and Combining Bacteria and Yeast</h1>
 
 </div>
 
 
-<p>Network analysis based on work done in the paper <em>Dispersal enhances beta diversity in nectar microbes</em> by Rachel L. Vannette and Tadashi Fukami (paper <a href="https://doi.org/10.1111/ele.12787">here</a>). Done in collaboration with <a href="https://github.com/sdsmith1390">Schuyler Smith</a>.</p>
-<div id="about" class="section level2">
-<h2>About</h2>
-<p><em>Under construction</em></p>
-<p>The analysis is broken into two parts. The first analysis considers only bacterial data, while the second is done with both bacterial and yeast data.</p>
+<pre class="r"><code>library(phyloseq, warn.conflicts = FALSE)</code></pre>
+<div id="loading-the-data" class="section level2">
+<h2>Loading the Data</h2>
+<p>We load in our OTU tables constructed for both the bacteria 16S and fungal ITS sequence processing, then merged them together based on samples. Missing data is read merged as <code>NA</code> that we then set equal to <span class="math inline">\(0\)</span>. Setting it to <span class="math inline">\(0\)</span> may not be the correct choice, we will revisit this in a later time. Rownames for the merged OTUs are the OTU names.</p>
+<pre class="r"><code>bacteria_otus &lt;- read.table(&quot;data/bacteria/germs_otus/bac_cdhit_otu_table_wide.txt&quot;, header = TRUE)
+yeast_otus &lt;- read.table(&quot;data/yeast/fun_cdhit_otu_table_wide.txt&quot;, header=TRUE)
+
+merged_otus &lt;- merge(yeast_otus, bacteria_otus, all=TRUE)
+rownames(merged_otus) &lt;- merged_otus$OTUS
+merged_otus &lt;- merged_otus[,-1]
+merged_otus[is.na(merged_otus)] &lt;- 0</code></pre>
 </div>
-<div id="contact" class="section level2">
-<h2>Contact</h2>
-<p>Send questions, comments, and feedback to pev at iastate dot edu.</p>
+<div id="combining-otu-data-with-taxonomy-and-sample-data" class="section level2">
+<h2>Combining OTU data with Taxonomy and Sample Data</h2>
+<p>Next we read in the taxonim classifications for each OTU, as well as the sample metadata. The taxonomic data is merged with <code>rbind</code> so that it is asingle file with OTUs as the rownames and domain through genus as the columns.</p>
+<pre class="r"><code>tax_bac &lt;- read.delim(&quot;data/bacteria/germs_otus/bac_cdhit_taxa_table_w_repseq.txt&quot;)[,-1]
+row.names(tax_bac) &lt;- as.character(tax_bac$OTUS)
+tax_bac &lt;- tax_bac[,-1]
+tax_yeast &lt;- read.delim(&quot;data/yeast/fun_cdhit_taxa_table_w_repseq.txt&quot;)[,-1]
+row.names(tax_yeast) &lt;- as.character(tax_yeast$OTUS)
+tax_yeast &lt;- tax_yeast[,c(-1,-8)]
+merged_tax &lt;- rbind(tax_bac, tax_yeast)
+
+si &lt;- read.csv(&quot;data/bacteria/Data_for_bacterial_OTUs.csv&quot;)
+colnames(si) &lt;- c(&quot;sample&quot;, &quot;Flower&quot;, &quot;Treatment&quot;, &quot;sample.name&quot;)
+rownames(si) &lt;- paste(&quot;X&quot;, si$sample, sep=&quot;&quot;)
+si &lt;- si[,-1]</code></pre>
+</div>
+<div id="creating-phyloseq-objects" class="section level2">
+<h2>Creating Phyloseq Objects</h2>
+<p>OTU tables need to be read in as matrices, so only the counts, with taxa(OTUs) as rownames. <br> Taxa need to be read in as matrix, with taxa as rownames. <br> Sample data is read as a data frame with sample names as rownames.</p>
+<pre class="r"><code>data.phy &lt;- phyloseq(otu_table(as.matrix(merged_otus), taxa_are_rows=T), tax_table(as.matrix(merged_tax)), sample_data(si))</code></pre>
+<div id="rarefy" class="section level3">
+<h3>Rarefy</h3>
+<pre class="r"><code>data.phy &lt;- rarefy_even_depth(data.phy, sample.size = 500)</code></pre>
+<pre><code>## You set `rngseed` to FALSE. Make sure you&#39;ve set &amp; recorded
+##  the random seed of your session for reproducibility.
+## See `?set.seed`</code></pre>
+<pre><code>## ...</code></pre>
+<pre><code>## 21 samples removedbecause they contained fewer reads than `sample.size`.</code></pre>
+<pre><code>## Up to first five removed samples are:</code></pre>
+<pre><code>## X156X194X268X36X380  </code></pre>
+<pre><code>## ...</code></pre>
+<pre><code>## 3016OTUs were removed because they are no longer 
+## present in any sample after random subsampling</code></pre>
+<pre><code>## ...</code></pre>
+<pre class="r"><code>data.mintax5.phy &lt;- filter_taxa(data.phy, function(x) sum(x) &gt;= 5, T)</code></pre>
+</div>
+</div>
+<div id="co-ocurrence" class="section level2">
+<h2>Co-Ocurrence</h2>
+<pre class="r"><code>trt &lt;- as.character(sample_data(data.mintax5.phy)$Set)
+f_table &lt;- cbind(trt, t(otu_table(data.mintax5.phy)))
+write.csv(f_table, &quot;sample_input_file.csv&quot;)</code></pre>
 </div>
 
 

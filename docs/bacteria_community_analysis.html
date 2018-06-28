@@ -93,6 +93,9 @@ img {
 .tabbed-pane {
   padding-top: 12px;
 }
+.html-widget {
+  margin-bottom: 20px;
+}
 button.code-folding-btn:focus {
   outline: none;
 }
@@ -293,6 +296,9 @@ div.tocify {
 <li>
   <a href="bacteria_yeast_community_analysis.html">Bacteria and Yeast</a>
 </li>
+<li>
+  <a href="curate_combine_bacteria_yeast.html">Combine Bac. and Yeast</a>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         
@@ -414,7 +420,8 @@ plot(exposed_communities_greedy_positive, gr_exposed_positive,
      vertex.size = 2, 
      vertex.label = NA
      )</code></pre>
-<p><img src="bacteria_community_analysis_files/figure-html/tep.2-1.png" width="672" /> The modularity of the community structure is:</p>
+<p><img src="bacteria_community_analysis_files/figure-html/tep.2-1.png" width="672" /></p>
+<p>The modularity of the community structure is:</p>
 <pre class="r"><code>(tep.mod &lt;- modularity(gr_exposed_positive, membership(exposed_communities_greedy_positive)))</code></pre>
 <pre><code>## [1] 0.5247227</code></pre>
 <p>Note the community by itself. The members of this community are:</p>
@@ -1448,7 +1455,7 @@ plot(trimmed_bird_positive_communities, gr_trimmed_bird_positive,
 <p><img src="bacteria_community_analysis_files/figure-html/tbdp.1-2.png" width="672" /></p>
 <pre class="r"><code>adjacent_vertices(gr_trimmed_bird_positive, &quot;OTU_6&quot;)</code></pre>
 <pre><code>## $OTU_6
-## + 22/508 vertices, named, from da37da3:
+## + 22/508 vertices, named, from 6827756:
 ##  [1] OTU_5778 OTU_5682 OTU_5324 OTU_4036 OTU_4191 OTU_4337 OTU_5213
 ##  [8] OTU_5834 OTU_3986 OTU_3906 OTU_4887 OTU_4570 OTU_4796 OTU_8   
 ## [15] OTU_5    OTU_28   OTU_4227 OTU_303  OTU_3464 OTU_3280 OTU_442 
@@ -1474,9 +1481,9 @@ plot(trimmed_bird_negative_communities, gr_trimmed_bird_negative,
 )</code></pre>
 <p><img src="bacteria_community_analysis_files/figure-html/tbdn.1-1.png" width="672" /></p>
 <pre class="r"><code>gr_trimmed_bird_negative</code></pre>
-<pre><code>## IGRAPH a782e2c UN-- 27 20 -- 
+<pre><code>## IGRAPH b532e17 UN-- 27 20 -- 
 ## + attr: name (v/c), rho (e/n)
-## + edges from a782e2c (vertex names):
+## + edges from b532e17 (vertex names):
 ##  [1] OTU_1   --OTU_3225 OTU_17  --OTU_5629 OTU_5776--OTU_13  
 ##  [4] OTU_4036--OTU_13   OTU_4036--OTU_293  OTU_4191--OTU_172 
 ##  [7] OTU_3986--OTU_9    OTU_6   --OTU_338  OTU_6   --OTU_52  
