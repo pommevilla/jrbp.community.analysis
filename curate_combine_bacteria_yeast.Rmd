@@ -54,7 +54,7 @@ Taxa need to be read in as matrix, with taxa as rownames.
 <br>
 Sample data is read as a data frame with sample names as rownames.
 
-```{r phyloseq}
+```{r phyloseq, message=FALSE}
 rownames(yeast_otus) <- yeast_otus$OTUS
 yeast_otus <- yeast_otus[,-1]
 yeast_phylo <- phyloseq(otu_table(as.matrix(yeast_otus), taxa_are_rows=T), tax_table(as.matrix(tax_yeast)), sample_data(si))
@@ -63,23 +63,20 @@ yeast_phylo <- rarefy_even_depth(yeast_phylo, sample.size = 500)
 rownames(bacteria_otus) <- bacteria_otus$OTUS
 bacteria_otus <- bacteria_otus[,-1]
 bacteria_phylo <- phyloseq(otu_table(as.matrix(bacteria_otus), taxa_are_rows=T), tax_table(as.matrix(tax_bac)), sample_data(si))
-
-data.phy <- phyloseq(otu_table(as.matrix(merged_otus), taxa_are_rows=T), tax_table(as.matrix(merged_tax)), sample_data(si))
-saveRDS(data.phy,"data/bacteria-yeast/RVbacteria_yeast_raw_phyloseq.rds")
-
 ```
 
 ## Merge the Bacteria and Yeast Together
 
 ```{r phyloseq_merging}
 merged_bac_yeast <- merge_phyloseq(yeast_phylo, bacteria_phylo)
+saveRDS(merged_bac_yeast,"data/bacteria-yeast/RVbacteria_yeast_raw_phyloseq.rds")
 ```
 
 ## Co-Ocurrence
 
 ```{r co_ocurrence}
-trt <- as.character(sample_data(data.mintax5.phy)$Set)
-f_table <- cbind(trt, t(otu_table(data.mintax5.phy)))
+trt <- as.character(sample_data(merged_bac_yeast)$Set)
+f_table <- cbind(trt, t(otu_table(merged_bac_yeast)))
 write.csv(f_table, "sample_input_file.csv")
 ```
 
