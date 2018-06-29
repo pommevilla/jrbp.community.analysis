@@ -9,8 +9,8 @@ navbar:
     href: bacteria_community_analysis.html
   - text: Yeast Only
     href: yeast_community_analysis.html
-  - text: Bacteria and Yeast
-    href: bacteria_yeast_community_analysis.html
+#  - text: Bacteria and Yeast
+#    href: bacteria_yeast_community_analysis.html
   - text: Combine Bac. and Yeast
     href: curate_combine_bacteria_yeast.html
     
