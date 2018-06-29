@@ -113,20 +113,40 @@ plot(gr_exposed_positive, vertex.size = 3,
      vertex.label = NA)
 ```
 
-To determine communities, we use `cluster_fast_greedy`, which does greedy (local) optimization of the graph's modularity score.
+To determine communities, we use `cluster_fast_greedy`, which does greedy (local) optimization of the graph's modularity score.  For each of the communities, we list the highest degree OTU within that community, as well as the other OTUs within it.
 
-```{r tep.2}
+```{r tep.2, hide = TRUE}
 exposed_communities_greedy_positive <- cluster_fast_greedy(gr_exposed_positive, weights = E(gr_exposed_positive)$rho)
+
+hot_otus <- vector()
+for (community in communities(exposed_communities_greedy_positive))
+{
+  sub_graph <- induced.subgraph(graph = gr_exposed_positive, 
+                                    v = community, impl = "auto")
+  highest_degree_otu <- V(sub_graph)[which.max(degree(sub_graph))]$name
+  hot_otus <- c(hot_otus, highest_degree_otu)
+  print(paste("Highest degree OTU was", highest_degree_otu, "(degree =",  
+              degree(sub_graph, highest_degree_otu), "):"))
+  print(taxa[OTU == highest_degree_otu])
+        
+  print(paste("Other OTUs in the same community as", highest_degree_otu, ":"))
+  print(taxa[OTU %in% community])
+}
+```
+
+```{r tep.3}
+
 plot(exposed_communities_greedy_positive, gr_exposed_positive, 
      layout = layout.fruchterman.reingold(gr_exposed_positive),
      rescaled = TRUE,
-     vertex.size = 2, 
-     vertex.label = NA
+     vertex.size = ifelse(V(gr_exposed_positive) %in% hot_otus, 5, 1), 
+     vertex.label = ifelse(V(gr_exposed_positive) %in% hot_otus, V(gr_exposed_positive)$id, NA),
+     vertex.label.cex = 2
      )
 ```
 
 The modularity of the community structure is:
-```{r tep.3}
+```{r tep.4}
 (tep.mod <- modularity(gr_exposed_positive, membership(exposed_communities_greedy_positive)))
 ```
 
@@ -146,9 +166,27 @@ plot(gr_exposed_negative, vertex.size = 3,
 
 ```{r ten.2}
 exposed_communities_greedy_negative <- cluster_fast_greedy(gr_exposed_negative, weights = E(gr_exposed_negative)$rho)
+
+hot_otus <- vector()
+for (community in communities(exposed_communities_greedy_negative))
+{
+  sub_graph <- induced.subgraph(graph = gr_exposed_negative, 
+                                    v = community, impl = "auto")
+  highest_degree_otu <- V(sub_graph)[which.max(degree(sub_graph))]$name
+  hot_otus <- c(hot_otus, highest_degree_otu)
+  print(paste("Highest degree OTU was", highest_degree_otu, "(degree =",  
+              degree(sub_graph, highest_degree_otu), "):"))
+  print(taxa[OTU == highest_degree_otu])
+        
+  print(paste("Other OTUs in the same community as", highest_degree_otu, ":"))
+  print(taxa[OTU %in% community])
+}
+
 plot(exposed_communities_greedy_negative, gr_exposed_negative, 
-     layout = layout.fruchterman.reingold(gr_exposed_negative),
-     vertex.size = 2, vertex.label = NA)
+      layout = layout.fruchterman.reingold(gr_exposed_negative),
+      vertex.size = ifelse(V(gr_exposed_negative) %in% hot_otus, 5, 1), 
+      vertex.label = ifelse(V(gr_exposed_negative) %in% hot_otus, V(gr_exposed_negative)$id, NA),
+      vertex.label.cex = 2)
 ```
 
 The modularity of the community structure is:
@@ -165,6 +203,21 @@ caged_data_positive <- trimmed_positive_weights[treatment == "Caged"]
 caged_data_positive <- caged_data_positive[, -1]
 gr_caged_positive <- graph.data.frame(caged_data_positive, directed = FALSE)
 caged_communities_greedy_positive <- cluster_fast_greedy(gr_caged_positive, weights = E(gr_caged_positive)$rho)
+
+hot_otus <- vector()
+for (community in communities(caged_communities_greedy_positive))
+{
+  sub_graph <- induced.subgraph(graph = gr_caged_positive, 
+                                    v = community, impl = "auto")
+  highest_degree_otu <- V(sub_graph)[which.max(degree(sub_graph))]$name
+  hot_otus <- c(hot_otus, highest_degree_otu)
+  print(paste("Highest degree OTU was", highest_degree_otu, "(degree =",  
+              degree(sub_graph, highest_degree_otu), "):"))
+  print(taxa[OTU == highest_degree_otu])
+        
+  print(paste("Other OTUs in the same community as", highest_degree_otu, ":"))
+  print(taxa[OTU %in% community])
+}
 ```
 
 ```{r tcp.2}
@@ -189,6 +242,22 @@ caged_data_negative <- caged_data_negative[, -1]
 caged_data_negative[[3]] <- abs(caged_data_negative[[3]])
 gr_caged_negative <- graph.data.frame(caged_data_negative, directed = FALSE)
 caged_communities_greedy_negative <- cluster_fast_greedy(gr_caged_negative, weights = E(gr_caged_negative)$rho)
+
+hot_otus <- vector()
+for (community in communities(caged_communities_greedy_negative))
+{
+  sub_graph <- induced.subgraph(graph = gr_caged_negative, 
+                                    v = community, impl = "auto")
+  highest_degree_otu <- V(sub_graph)[which.max(degree(sub_graph))]$name
+  hot_otus <- c(hot_otus, highest_degree_otu)
+  print(paste("Highest degree OTU was", highest_degree_otu, "(degree =",  
+              degree(sub_graph, highest_degree_otu), "):"))
+  print(taxa[OTU == highest_degree_otu])
+        
+  print(paste("Other OTUs in the same community as", highest_degree_otu, ":"))
+  print(taxa[OTU %in% community])
+}
+
 plot(caged_communities_greedy_negative, gr_caged_negative, 
      layout = layout.fruchterman.reingold(gr_caged_negative),
      vertex.size = 2, 
@@ -210,6 +279,22 @@ bagged_data_positive <- trimmed_positive_weights[treatment == "Bagged"]
 bagged_data_positive <- bagged_data_positive[, -1]
 gr_bagged_positive <- graph.data.frame(bagged_data_positive, directed = FALSE)
 bagged_communities_greedy_positive <- cluster_fast_greedy(gr_bagged_positive, weights = E(gr_bagged_positive)$rho)
+
+hot_otus <- vector()
+for (community in communities(bagged_communities_greedy_positive))
+{
+  sub_graph <- induced.subgraph(graph = gr_bagged_positive, 
+                                    v = community, impl = "auto")
+  highest_degree_otu <- V(sub_graph)[which.max(degree(sub_graph))]$name
+  hot_otus <- c(hot_otus, highest_degree_otu)
+  print(paste("Highest degree OTU was", highest_degree_otu, "(degree =",  
+              degree(sub_graph, highest_degree_otu), "):"))
+  print(taxa[OTU == highest_degree_otu])
+        
+  print(paste("Other OTUs in the same community as", highest_degree_otu, ":"))
+  print(taxa[OTU %in% community])
+}
+
 plot(bagged_communities_greedy_positive, gr_bagged_positive, 
      layout = layout.fruchterman.reingold(gr_bagged_positive),
      rescaled = TRUE,
@@ -233,6 +318,22 @@ bagged_data_negative <- bagged_data_negative[, -1]
 bagged_data_negative[[3]] <- abs(bagged_data_negative[[3]])
 gr_bagged_negative <- graph.data.frame(bagged_data_negative, directed = FALSE)
 bagged_communities_greedy_negative <- cluster_fast_greedy(gr_bagged_negative, weights = E(gr_bagged_negative)$rho)
+
+hot_otus <- vector()
+for (community in communities(bagged_communities_greedy_negative))
+{
+  sub_graph <- induced.subgraph(graph = gr_bagged_negative, 
+                                    v = community, impl = "auto")
+  highest_degree_otu <- V(sub_graph)[which.max(degree(sub_graph))]$name
+  hot_otus <- c(hot_otus, highest_degree_otu)
+  print(paste("Highest degree OTU was", highest_degree_otu, "(degree =",  
+              degree(sub_graph, highest_degree_otu), "):"))
+  print(taxa[OTU == highest_degree_otu])
+        
+  print(paste("Other OTUs in the same community as", highest_degree_otu, ":"))
+  print(taxa[OTU %in% community])
+}
+
 plot(bagged_communities_greedy_negative, gr_bagged_negative, 
      layout = layout.fruchterman.reingold(gr_bagged_negative),
      rescaled = TRUE,
@@ -266,6 +367,22 @@ gr_trimmed_all_positive <- simplify(gr_trimmed_all_positive,
                                     edge.attr.comb = "mean")
 trimmed_all_positive_communities <- cluster_fast_greedy(gr_trimmed_all_positive, 
                                     weights = E(gr_trimmed_all_positive)$rho)
+
+hot_otus <- vector()
+for (community in communities(trimmed_all_positive_communities))
+{
+  sub_graph <- induced.subgraph(graph = gr_trimmed_all_positive, 
+                                    v = community, impl = "auto")
+  highest_degree_otu <- V(sub_graph)[which.max(degree(sub_graph))]$name
+  hot_otus <- c(hot_otus, highest_degree_otu)
+  print(paste("Highest degree OTU was", highest_degree_otu, "(degree =",  
+              degree(sub_graph, highest_degree_otu), "):"))
+  print(taxa[OTU == highest_degree_otu])
+        
+  print(paste("Other OTUs in the same community as", highest_degree_otu, ":"))
+  print(taxa[OTU %in% community])
+}
+
 plot(trimmed_all_positive_communities, gr_trimmed_all_positive, 
      layout = layout.fruchterman.reingold(gr_trimmed_all_positive),
      rescaled = TRUE,
@@ -292,6 +409,22 @@ gr_trimmed_all_negative <- simplify(gr_trimmed_all_negative,
                                     edge.attr.comb = "mean")
 trimmed_all_negative_communities <- cluster_fast_greedy(gr_trimmed_all_negative, 
                                     weights = E(gr_trimmed_all_negative)$rho)
+
+hot_otus <- vector()
+for (community in communities(trimmed_all_negative_communities))
+{
+  sub_graph <- induced.subgraph(graph = gr_trimmed_all_negative, 
+                                    v = community, impl = "auto")
+  highest_degree_otu <- V(sub_graph)[which.max(degree(sub_graph))]$name
+  hot_otus <- c(hot_otus, highest_degree_otu)
+  print(paste("Highest degree OTU was", highest_degree_otu, "(degree =",  
+              degree(sub_graph, highest_degree_otu), "):"))
+  print(taxa[OTU == highest_degree_otu])
+        
+  print(paste("Other OTUs in the same community as", highest_degree_otu, ":"))
+  print(taxa[OTU %in% community])
+}
+
 plot(trimmed_all_negative_communities, gr_trimmed_all_negative, 
      layout = layout.fruchterman.reingold(gr_trimmed_all_negative),
      rescaled = TRUE,
@@ -329,6 +462,22 @@ complete_exposed_positive <- complete_exposed_positive[, -1]
 gr_complete_exposed_positive <- graph.data.frame(complete_exposed_positive, directed = FALSE)
 complete_exposed_positive_communities <- cluster_fast_greedy(gr_complete_exposed_positive, 
                                                            weights = E(gr_complete_exposed_positive)$rho)
+
+hot_otus <- vector()
+for (community in communities(complete_exposed_positive_communities))
+{
+  sub_graph <- induced.subgraph(graph = gr_complete_exposed_positive, 
+                                    v = community, impl = "auto")
+  highest_degree_otu <- V(sub_graph)[which.max(degree(sub_graph))]$name
+  hot_otus <- c(hot_otus, highest_degree_otu)
+  print(paste("Highest degree OTU was", highest_degree_otu, "(degree =",  
+              degree(sub_graph, highest_degree_otu), "):"))
+  print(taxa[OTU == highest_degree_otu])
+        
+  print(paste("Other OTUs in the same community as", highest_degree_otu, ":"))
+  print(taxa[OTU %in% community])
+}
+
 plot(complete_exposed_positive_communities, gr_complete_exposed_positive, 
      layout = layout.fruchterman.reingold(gr_complete_exposed_positive),
      rescaled = TRUE,
@@ -351,6 +500,23 @@ complete_exposed_negative[[3]] <- abs(complete_exposed_negative[[3]])
 gr_complete_exposed_negative <- graph.data.frame(complete_exposed_negative, directed = FALSE)
 complete_exposed_negative_communities <- cluster_fast_greedy(gr_complete_exposed_negative, 
                                                            weights = E(gr_complete_exposed_negative)$rho)
+
+
+hot_otus <- vector()
+for (community in communities(complete_exposed_negative_communities))
+{
+  sub_graph <- induced.subgraph(graph = gr_complete_exposed_negative, 
+                                    v = community, impl = "auto")
+  highest_degree_otu <- V(sub_graph)[which.max(degree(sub_graph))]$name
+  hot_otus <- c(hot_otus, highest_degree_otu)
+  print(paste("Highest degree OTU was", highest_degree_otu, "(degree =",  
+              degree(sub_graph, highest_degree_otu), "):"))
+  print(taxa[OTU == highest_degree_otu])
+        
+  print(paste("Other OTUs in the same community as", highest_degree_otu, ":"))
+  print(taxa[OTU %in% community])
+}
+
 plot(complete_exposed_negative_communities, gr_complete_exposed_negative, 
      layout = layout.fruchterman.reingold(gr_complete_exposed_negative),
      rescaled = TRUE,
@@ -374,6 +540,22 @@ complete_caged_positive <- complete_caged_positive[, -1]
 gr_complete_caged_positive <- graph.data.frame(complete_caged_positive, directed = FALSE)
 complete_caged_positive_communities <- cluster_fast_greedy(gr_complete_caged_positive, 
                                                            weights = E(gr_complete_caged_positive)$rho)
+
+hot_otus <- vector()
+for (community in communities(complete_caged_positive_communities))
+{
+  sub_graph <- induced.subgraph(graph = gr_complete_caged_positive, 
+                                    v = community, impl = "auto")
+  highest_degree_otu <- V(sub_graph)[which.max(degree(sub_graph))]$name
+  hot_otus <- c(hot_otus, highest_degree_otu)
+  print(paste("Highest degree OTU was", highest_degree_otu, "(degree =",  
+              degree(sub_graph, highest_degree_otu), "):"))
+  print(taxa[OTU == highest_degree_otu])
+        
+  print(paste("Other OTUs in the same community as", highest_degree_otu, ":"))
+  print(taxa[OTU %in% community])
+}
+
 plot(complete_caged_positive_communities, gr_complete_caged_positive, 
      layout = layout.fruchterman.reingold(gr_complete_caged_positive),
      rescaled = TRUE,
@@ -395,6 +577,22 @@ complete_caged_negative[[3]] <- abs(complete_caged_negative[[3]])
 gr_complete_caged_negative <- graph.data.frame(complete_caged_negative, directed = FALSE)
 complete_caged_negative_communities <- cluster_fast_greedy(gr_complete_caged_negative, 
                                                            weights = E(gr_complete_caged_negative)$rho)
+
+hot_otus <- vector()
+for (community in communities(complete_caged_negative_communities))
+{
+  sub_graph <- induced.subgraph(graph = gr_complete_caged_negative, 
+                                    v = community, impl = "auto")
+  highest_degree_otu <- V(sub_graph)[which.max(degree(sub_graph))]$name
+  hot_otus <- c(hot_otus, highest_degree_otu)
+  print(paste("Highest degree OTU was", highest_degree_otu, "(degree =",  
+              degree(sub_graph, highest_degree_otu), "):"))
+  print(taxa[OTU == highest_degree_otu])
+        
+  print(paste("Other OTUs in the same community as", highest_degree_otu, ":"))
+  print(taxa[OTU %in% community])
+}
+
 plot(complete_caged_negative_communities, gr_complete_caged_negative, 
      layout = layout.fruchterman.reingold(gr_complete_caged_negative),
      rescaled = TRUE,
@@ -417,6 +615,22 @@ complete_bagged_positive <- complete_bagged_positive[, -1]
 gr_complete_bagged_positive <- graph.data.frame(complete_bagged_positive, directed = FALSE)
 complete_bagged_positive_communities <- cluster_fast_greedy(gr_complete_bagged_positive, 
                                                            weights = E(gr_complete_bagged_positive)$rho)
+
+hot_otus <- vector()
+for (community in communities(complete_bagged_positive_communities))
+{
+  sub_graph <- induced.subgraph(graph = gr_complete_bagged_positive, 
+                                    v = community, impl = "auto")
+  highest_degree_otu <- V(sub_graph)[which.max(degree(sub_graph))]$name
+  hot_otus <- c(hot_otus, highest_degree_otu)
+  print(paste("Highest degree OTU was", highest_degree_otu, "(degree =",  
+              degree(sub_graph, highest_degree_otu), "):"))
+  print(taxa[OTU == highest_degree_otu])
+        
+  print(paste("Other OTUs in the same community as", highest_degree_otu, ":"))
+  print(taxa[OTU %in% community])
+}
+
 plot(complete_bagged_positive_communities, gr_complete_bagged_positive, 
      layout = layout.fruchterman.reingold(gr_complete_bagged_positive),
      rescaled = TRUE,
@@ -438,6 +652,22 @@ complete_bagged_negative[[3]] <- abs(complete_bagged_negative[[3]])
 gr_complete_bagged_negative <- graph.data.frame(complete_bagged_negative, directed = FALSE)
 complete_bagged_negative_communities <- cluster_fast_greedy(gr_complete_bagged_negative, 
                                                            weights = E(gr_complete_bagged_negative)$rho)
+
+hot_otus <- vector()
+for (community in communities(complete_bagged_negative_communities))
+{
+  sub_graph <- induced.subgraph(graph = gr_complete_bagged_negative, 
+                                    v = community, impl = "auto")
+  highest_degree_otu <- V(sub_graph)[which.max(degree(sub_graph))]$name
+  hot_otus <- c(hot_otus, highest_degree_otu)
+  print(paste("Highest degree OTU was", highest_degree_otu, "(degree =",  
+              degree(sub_graph, highest_degree_otu), "):"))
+  print(taxa[OTU == highest_degree_otu])
+        
+  print(paste("Other OTUs in the same community as", highest_degree_otu, ":"))
+  print(taxa[OTU %in% community])
+}
+
 plot(complete_bagged_negative_communities, gr_complete_bagged_negative, 
      layout = layout.fruchterman.reingold(gr_complete_bagged_negative),
      rescaled = TRUE,
@@ -463,6 +693,22 @@ gr_complete_all_positive <- simplify(gr_complete_all_positive,
                                     edge.attr.comb = "mean")
 complete_all_positive_communities <- cluster_fast_greedy(gr_complete_all_positive, 
                                     weights = E(gr_complete_all_positive)$rho)
+
+hot_otus <- vector()
+for (community in communities(complete_all_positive_communities))
+{
+  sub_graph <- induced.subgraph(graph = gr_complete_all_positive, 
+                                    v = community, impl = "auto")
+  highest_degree_otu <- V(sub_graph)[which.max(degree(sub_graph))]$name
+  hot_otus <- c(hot_otus, highest_degree_otu)
+  print(paste("Highest degree OTU was", highest_degree_otu, "(degree =",  
+              degree(sub_graph, highest_degree_otu), "):"))
+  print(taxa[OTU == highest_degree_otu])
+        
+  print(paste("Other OTUs in the same community as", highest_degree_otu, ":"))
+  print(taxa[OTU %in% community])
+}
+
 plot(complete_all_positive_communities, gr_complete_all_positive, 
      layout = layout.fruchterman.reingold(gr_complete_all_positive),
      rescaled = TRUE,
@@ -489,6 +735,22 @@ gr_complete_all_negative <- simplify(gr_complete_all_negative,
                                     edge.attr.comb = "mean")
 complete_all_negative_communities <- cluster_fast_greedy(gr_complete_all_negative, 
                                     weights = E(gr_complete_all_negative)$rho)
+
+hot_otus <- vector()
+for (community in communities(complete_all_negative_communities))
+{
+  sub_graph <- induced.subgraph(graph = gr_complete_all_negative, 
+                                    v = community, impl = "auto")
+  highest_degree_otu <- V(sub_graph)[which.max(degree(sub_graph))]$name
+  hot_otus <- c(hot_otus, highest_degree_otu)
+  print(paste("Highest degree OTU was", highest_degree_otu, "(degree =",  
+              degree(sub_graph, highest_degree_otu), "):"))
+  print(taxa[OTU == highest_degree_otu])
+        
+  print(paste("Other OTUs in the same community as", highest_degree_otu, ":"))
+  print(taxa[OTU %in% community])
+}
+
 plot(complete_all_negative_communities, gr_complete_all_negative, 
      layout = layout.fruchterman.reingold(gr_complete_all_negative),
      rescaled = TRUE,
