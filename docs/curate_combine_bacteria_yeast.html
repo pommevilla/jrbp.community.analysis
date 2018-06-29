@@ -359,9 +359,9 @@ saveRDS(merged_bac_yeast,&quot;data/bacteria-yeast/RVbacteria_yeast_raw_phyloseq
 </div>
 <div id="co-ocurrence" class="section level2">
 <h2>Co-Ocurrence</h2>
-<pre class="r"><code>trt &lt;- as.character(sample_data(merged_bac_yeast)$Set)
+<pre class="r"><code>trt &lt;- as.character(sample_data(merged_bac_yeast)$Treatment)
 f_table &lt;- cbind(trt, t(otu_table(merged_bac_yeast)))
-write.csv(f_table, &quot;sample_input_file.csv&quot;)</code></pre>
+write.csv(f_table, &quot;data/bacteria-yeast/RVbac_yeast_fcoocurr_input.csv&quot;)</code></pre>
 </div>
 
 
