@@ -93,9 +93,6 @@ img {
 .tabbed-pane {
   padding-top: 12px;
 }
-.html-widget {
-  margin-bottom: 20px;
-}
 button.code-folding-btn:focus {
   outline: none;
 }
@@ -317,26 +314,28 @@ div.tocify {
 <div id="loading-the-data" class="section level2">
 <h2>Loading the Data</h2>
 <p>We load in our OTU tables constructed for both the bacteria 16S and fungal ITS sequence processing, then merged them together based on samples. Missing data is read merged as <code>NA</code> that we then set equal to <span class="math inline">\(0\)</span>. Setting it to <span class="math inline">\(0\)</span> may not be the correct choice; we will revisit this in a later time. Row names for the merged OTUs are the OTU names.</p>
-<pre class="r"><code>bacteria_otus &lt;- read.table(&quot;data/bacteria/germs_otus/bac_cdhit_otu_table_wide.txt&quot;, header = TRUE)
+<pre class="r"><code># bacteria_otus &lt;- read.table(&quot;data/bacteria/germs_otus/bac_cdhit_otu_table_wide.txt&quot;, header = TRUE)
+bacteria_otus &lt;- read.table(&quot;data/bacteria/Bacterial_OTU_table.csv&quot;, header = TRUE, sep = &quot;,&quot;); colnames(bacteria_otus)[1] &lt;- &quot;OTUS&quot;
 yeast_otus &lt;- read.table(&quot;data/yeast/fun_cdhit_otu_table_wide.txt&quot;, header=TRUE)
 
-merged_otus &lt;- merge(yeast_otus, bacteria_otus, all=TRUE)
-rownames(merged_otus) &lt;- merged_otus$OTUS
-merged_otus &lt;- merged_otus[,-1]
-merged_otus[is.na(merged_otus)] &lt;- 0</code></pre>
+# merged_otus &lt;- merge(yeast_otus, bacteria_otus, all=TRUE)
+# rownames(merged_otus) &lt;- merged_otus$OTUS
+# merged_otus &lt;- merged_otus[,-1]
+# merged_otus[is.na(merged_otus)] &lt;- 0</code></pre>
 </div>
-<div id="combining-otu-data-with-taxonomy-and-sample-data" class="section level2">
-<h2>Combining OTU data with Taxonomy and Sample Data</h2>
+<div id="combining-otu-data-with-taxonomy" class="section level2">
+<h2>Combining OTU data with Taxonomy</h2>
 <p>Next we read in the taxonimical classifications for each OTU, as well as the sample metadata. The taxonomic data is merged with <code>rbind</code> so that it is a single file with OTUs as the rownames and domain through genus as the columns.</p>
 <pre class="r"><code>tax_bac &lt;- read.delim(&quot;data/bacteria/germs_otus/bac_cdhit_taxa_table_w_repseq.txt&quot;)[,-1]
 row.names(tax_bac) &lt;- as.character(tax_bac$OTUS)
 tax_bac &lt;- tax_bac[,-1]
 tax_yeast &lt;- read.delim(&quot;data/yeast/fun_cdhit_taxa_table_w_repseq.txt&quot;)[,-1]
-row.names(tax_yeast) &lt;- as.character(tax_yeast$OTUS)
-tax_yeast &lt;- tax_yeast[,c(-1,-8)]
-merged_tax &lt;- rbind(tax_bac, tax_yeast)
-
-si &lt;- read.csv(&quot;data/bacteria/Data_for_bacterial_OTUs.csv&quot;)
+row.names(tax_yeast) &lt;- as.character(tax_yeast$OTUS)[]
+tax_yeast &lt;- tax_yeast[,c(-1,-8)]</code></pre>
+</div>
+<div id="sample-data" class="section level2">
+<h2>Sample Data</h2>
+<pre class="r"><code>si &lt;- read.csv(&quot;data/bacteria/Data_for_bacterial_OTUs.csv&quot;)
 colnames(si) &lt;- c(&quot;sample&quot;, &quot;Flower&quot;, &quot;Treatment&quot;, &quot;sample.name&quot;)
 rownames(si) &lt;- paste(&quot;X&quot;, si$sample, sep=&quot;&quot;)
 si &lt;- si[,-1]</code></pre>
@@ -344,28 +343,24 @@ si &lt;- si[,-1]</code></pre>
 <div id="creating-phyloseq-objects" class="section level2">
 <h2>Creating Phyloseq Objects</h2>
 <p>OTU tables need to be read in as matrices, so only the counts, with taxa(OTUs) as rownames. <br> Taxa need to be read in as matrix, with taxa as rownames. <br> Sample data is read as a data frame with sample names as rownames.</p>
-<pre class="r"><code>data.phy &lt;- phyloseq(otu_table(as.matrix(merged_otus), taxa_are_rows=T), tax_table(as.matrix(merged_tax)), sample_data(si))</code></pre>
-<div id="rarefy" class="section level3">
-<h3>Rarefy</h3>
-<pre class="r"><code>data.phy &lt;- rarefy_even_depth(data.phy, sample.size = 500)</code></pre>
-<pre><code>## You set `rngseed` to FALSE. Make sure you&#39;ve set &amp; recorded
-##  the random seed of your session for reproducibility.
-## See `?set.seed`</code></pre>
-<pre><code>## ...</code></pre>
-<pre><code>## 21 samples removedbecause they contained fewer reads than `sample.size`.</code></pre>
-<pre><code>## Up to first five removed samples are:</code></pre>
-<pre><code>## X156X194X268X36X380  </code></pre>
-<pre><code>## ...</code></pre>
-<pre><code>## 3016OTUs were removed because they are no longer 
-## present in any sample after random subsampling</code></pre>
-<pre><code>## ...</code></pre>
-<pre class="r"><code>data.mintax5.phy &lt;- filter_taxa(data.phy, function(x) sum(x) &gt;= 5, T)</code></pre>
+<pre class="r"><code>rownames(yeast_otus) &lt;- yeast_otus$OTUS
+yeast_otus &lt;- yeast_otus[,-1]
+yeast_phylo &lt;- phyloseq(otu_table(as.matrix(yeast_otus), taxa_are_rows=T), tax_table(as.matrix(tax_yeast)), sample_data(si))
+yeast_phylo &lt;- rarefy_even_depth(yeast_phylo, sample.size = 500)
+
+rownames(bacteria_otus) &lt;- bacteria_otus$OTUS
+bacteria_otus &lt;- bacteria_otus[,-1]
+bacteria_phylo &lt;- phyloseq(otu_table(as.matrix(bacteria_otus), taxa_are_rows=T), tax_table(as.matrix(tax_bac)), sample_data(si))</code></pre>
 </div>
+<div id="merge-the-bacteria-and-yeast-together" class="section level2">
+<h2>Merge the Bacteria and Yeast Together</h2>
+<pre class="r"><code>merged_bac_yeast &lt;- merge_phyloseq(yeast_phylo, bacteria_phylo)
+saveRDS(merged_bac_yeast,&quot;data/bacteria-yeast/RVbacteria_yeast_raw_phyloseq.rds&quot;)</code></pre>
 </div>
 <div id="co-ocurrence" class="section level2">
 <h2>Co-Ocurrence</h2>
-<pre class="r"><code>trt &lt;- as.character(sample_data(data.mintax5.phy)$Set)
-f_table &lt;- cbind(trt, t(otu_table(data.mintax5.phy)))
+<pre class="r"><code>trt &lt;- as.character(sample_data(merged_bac_yeast)$Set)
+f_table &lt;- cbind(trt, t(otu_table(merged_bac_yeast)))
 write.csv(f_table, &quot;sample_input_file.csv&quot;)</code></pre>
 </div>
 
