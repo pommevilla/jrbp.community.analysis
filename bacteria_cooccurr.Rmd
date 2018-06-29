@@ -1,5 +1,5 @@
 ---
-title: "Creating Cooccurrence for RV Bacteria OTUs""
+title: "Creating Cooccurrence for our Bacteria OTUs""
 ---
 
 ```{r setup, include=FALSE}
@@ -12,7 +12,19 @@ library(phyloseq, warn.conflicts = FALSE)
 ```
 
 ```{r load_data}
-bacteria_otus <- read.table("data/bacteria/Bacterial_OTU_table.csv", header = TRUE, sep = ","); colnames(bacteria_otus)[1] <- "OTUS"
+otus <- read.table("data/bacteria/germs_otus/bac_cdhit_otu_table_wide.txt", header=TRUE)
+rownames(otus) <- otus$OTUS
+otus <- otus[,-1]
+```
+
+## Combining OTU data with Taxonomy
+
+Next we read in the taxonimical classifications for each OTU, as well as the sample metadata. The taxonomic data is merged with `rbind` so that it is a single file with OTUs as the rownames and domain through genus as the columns.
+
+```{r add_info}
+tax <- read.delim("data/bacteria/germs_otus/bac_cdhit_taxa_table_w_repseq.txt")[,-1]
+row.names(tax) <- as.character(tax$OTUS)
+tax <- tax[,-1]
 ```
 
 ## Sample Data
@@ -23,20 +35,24 @@ rownames(si) <- paste("X", si$sample, sep="")
 si <- si[,-1]
 ```
 
-```{r taxonomy}
-tax_bac <- read.delim("data/bacteria/bacteria_classified_otus",sep = " ", header = TRUE)
-colnames(tax_bac) <- colnames(tax_bac)[-1]
-tax_bac <- tax_bac[,-7]
+## Creating Phyloseq Objects
+OTU tables need to be read in as matrices, so only the counts, with taxa(OTUs) as rownames.
+<br>
+Taxa need to be read in as matrix, with taxa as rownames.
+<br>
+Sample data is read as a data frame with sample names as rownames.
+
+```{r phyloseq, message=FALSE}
+phylo <- phyloseq(otu_table(as.matrix(otus), taxa_are_rows=T), tax_table(as.matrix(tax)), sample_data(si))
+rarefied_phylo <- rarefy_even_depth(phylo, sample.size = 500)
+saveRDS(rarefied_phylo,"data/bacteria/germs_otus/bacteria_phyloseq.rds")
 ```
 
-```{r phyloseq}
-rownames(bacteria_otus) <- bacteria_otus$OTUS
-bacteria_otus <- bacteria_otus[,-1]
-bacteria_phylo <- phyloseq(otu_table(as.matrix(bacteria_otus), taxa_are_rows=T), tax_table(as.matrix(tax_bac)), sample_data(si))
+## Co-Ocurrence
+
+```{r co_ocurrence}
+trt <- as.character(sample_data(rarefied_phylo)$Treatment)
+f_table <- cbind(trt, t(otu_table(rarefied_phylo)))
+write.csv(f_table, "data/bacteria/germs_otus/bac_fcoocurr_input.csv")
 ```
 
-```{r prep-cooccurr}
-trt <- as.character(sample_data(bacteria_phylo)$Treatment)
-f_table <- cbind(trt, t(otu_table(bacteria_phylo)))
-write.csv(f_table, "data/bacteria/RVbac_fcoocurr_input.csv")
-```
