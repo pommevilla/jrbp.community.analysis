@@ -16,6 +16,8 @@ $(document).ready(function() {
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+# Data Preparation
+
 ```{r, message = FALSE, warning = FALSE}
 library(data.table, warn.conflicts = FALSE)
 library(igraph, warn.conflicts = FALSE)
@@ -30,7 +32,7 @@ taxa <- data.table(read.delim("./data/bacteria/bacteria_classified_otus",
 head(taxa)
 
 cooccurrence_data <- data.table(read.table("./data/bacteria/bacteria_cooccurrence", 
-                                    col.names = c("treatment", "OTU_1", "OTU_2", "rho", "p")))
+                                           col.names = c("treatment", "OTU_1", "OTU_2", "rho", "p")))
 
 head(cooccurrence_data)
 ```
@@ -39,6 +41,7 @@ We process `coocurrence_data` by removing OTU interactions non-significant $\rho
 
 ```{r complete_data}
 cooccurrence_data <- cooccurrence_data[p <= 0.05, -5]      # Remove p-values from table
+cooccurrence_data <- cooccurrence_data[order(treatment, OTU_1, OTU_2)]
 remove <- taxa[which(taxa[[4]] %in% c("Cyanobacteria","Chloroplast")),]$OTU
 taxa <- taxa[-c(remove),]
 complete_data <- cooccurrence_data[-c(which(apply(cooccurrence_data, 1, function(x) any(remove %in% x)))),]
@@ -69,6 +72,30 @@ head(trimmed_negative_weights)
 ```
 
 We'll look at the positive and negative networks for each of the three treatments, as well as when all the treatments are combined together.
+
+# Patristic Distance Matrix
+
+```{r pda.1, message = FALSE, warning = FALSE}
+library(ape, warn.conflicts = FALSE)
+```
+
+`bacteria_phylo_tree` is a guide tree returned by MAFFT for the bacterial sequences [(info)][mafft_rough_guide_tree].  We read it into a `phylo` object.
+
+[mafft_rough_guide_tree]: https://mafft.cbrc.jp/alignment/software/treeout.html
+
+```{r pda.2}
+rough_tree <- read.tree("./data/bacteria/bacteria_phylo_tree")
+```
+
+We use `cophenetic.phylo` to generate the patristic distances between each OTU.  The patristic distance will be used as a measure of similarity as in the paper ["Phylogenetic relatedness predicts priority effects in nectar yeast communities"][phylo_dist_paper].
+
+[phylo_dist_paper]: https://www.ncbi.nlm.nih.gov/pubmed/21775330
+```{r pda.3}
+pd_matrix <- cophenetic.phylo(rough_tree)
+rownames(pd_matrix) <- sub("^[^_]*_", "", rownames(pd_matrix)) 
+colnames(pd_matrix) <- sub("^[^_]*_", "", colnames(pd_matrix))
+pd_matrix[1:5, 1:5]
+```
 
 # Trimmed Data
 
@@ -573,25 +600,6 @@ taxa[OTU %in% communities(complete_all_negative_communities)[[2]]]
 
 ```{r can.4}
 taxa[OTU %in% communities(complete_all_negative_communities)[[4]]]
-```
-
-## Patristic Distance Analysis
-
-```{r pda.1, message = FALSE, warning = FALSE}
-library(ape, warn.conflicts = FALSE)
-```
-
-```{r pda.2}
-rough_tree <- read.tree("./data/bacteria/bacteria_phylo_tree")
-```
-
-Generate patristic distances from `OTU_6` to use as in the paper "Phylogenetic relatedness predicts priority effects in nectar yeast communities"
-```{r pda.3}
-pd_matrix <- cophenetic.phylo(rough_tree)
-rownames(pd_matrix) <- sub("^[^_]*_", "", rownames(pd_matrix)) 
-colnames(pd_matrix) <- sub("^[^_]*_", "", colnames(pd_matrix))
-otu_6.matrix <- pd_matrix["OTU_6", ]
-head(otu_6.matrix)
 ```
 
 # Modularity

@@ -326,6 +326,8 @@ $(document).ready(function() {
 
 });
 </script>
+<div id="data-preparation" class="section level1">
+<h1>Data Preparation</h1>
 <pre class="r"><code>library(data.table, warn.conflicts = FALSE)
 library(igraph, warn.conflicts = FALSE)</code></pre>
 <p><code>taxa</code> is the look-up table for the OTUs. <code>cooccurrence_data</code> contains pairwise Spearman correlation ranks for pairs of OTUs.</p>
@@ -348,7 +350,7 @@ head(taxa)</code></pre>
 ## 5:                                 
 ## 6:</code></pre>
 <pre class="r"><code>cooccurrence_data &lt;- data.table(read.table(&quot;./data/bacteria/bacteria_cooccurrence&quot;, 
-                                    col.names = c(&quot;treatment&quot;, &quot;OTU_1&quot;, &quot;OTU_2&quot;, &quot;rho&quot;, &quot;p&quot;)))
+                                           col.names = c(&quot;treatment&quot;, &quot;OTU_1&quot;, &quot;OTU_2&quot;, &quot;rho&quot;, &quot;p&quot;)))
 
 head(cooccurrence_data)</code></pre>
 <pre><code>##    treatment    OTU_1    OTU_2      rho           p
@@ -360,6 +362,7 @@ head(cooccurrence_data)</code></pre>
 ## 6:    Bagged OTU_5142 OTU_4153 0.368088 3.51595e-03</code></pre>
 <p>We process <code>coocurrence_data</code> by removing OTU interactions non-significant <span class="math inline">\(\rho\)</span> values by filtering out those with a <span class="math inline">\(p\)</span>-value less than <span class="math inline">\(0.05\)</span>, then filtering out cyanobacteria and choloroplast data, as well as all observations from bird samples:</p>
 <pre class="r"><code>cooccurrence_data &lt;- cooccurrence_data[p &lt;= 0.05, -5]      # Remove p-values from table
+cooccurrence_data &lt;- cooccurrence_data[order(treatment, OTU_1, OTU_2)]
 remove &lt;- taxa[which(taxa[[4]] %in% c(&quot;Cyanobacteria&quot;,&quot;Chloroplast&quot;)),]$OTU
 taxa &lt;- taxa[-c(remove),]
 complete_data &lt;- cooccurrence_data[-c(which(apply(cooccurrence_data, 1, function(x) any(remove %in% x)))),]
@@ -372,32 +375,50 @@ otus_of_interest &lt;- taxa[which(apply(taxa, 1, function(x) any(otus_of_interes
 trimmed_data &lt;- complete_data[which(apply(complete_data, 1, function(x) any(otus_of_interest %in% x))), ]
 head(trimmed_data)</code></pre>
 <pre><code>##    treatment    OTU_1    OTU_2      rho
-## 1:    Bagged OTU_5142  OTU_162 0.449131
-## 2:    Bagged OTU_3559 OTU_4597 0.291322
-## 3:    Bagged OTU_3559 OTU_4570 0.291322
-## 4:    Bagged OTU_3559 OTU_4796 0.439302
-## 5:    Bagged OTU_3559 OTU_2323 0.285776
-## 6:    Bagged OTU_3559 OTU_5804 0.291322</code></pre>
+## 1:    Bagged OTU_1018 OTU_1741 1.000000
+## 2:    Bagged  OTU_105  OTU_153 0.269326
+## 3:    Bagged OTU_1084 OTU_1741 0.701189
+## 4:    Bagged OTU_1101  OTU_440 0.547866
+## 5:    Bagged OTU_1228  OTU_153 0.269326
+## 6:    Bagged OTU_1298 OTU_1385 0.416132</code></pre>
 <p>We seperate the coocurrence data into a positive and negative group.</p>
 <pre class="r"><code>trimmed_positive_weights &lt;- trimmed_data[trimmed_data[[&#39;rho&#39;]] &gt; 0]
 head(trimmed_positive_weights)</code></pre>
 <pre><code>##    treatment    OTU_1    OTU_2      rho
-## 1:    Bagged OTU_5142  OTU_162 0.449131
-## 2:    Bagged OTU_3559 OTU_4597 0.291322
-## 3:    Bagged OTU_3559 OTU_4570 0.291322
-## 4:    Bagged OTU_3559 OTU_4796 0.439302
-## 5:    Bagged OTU_3559 OTU_2323 0.285776
-## 6:    Bagged OTU_3559 OTU_5804 0.291322</code></pre>
+## 1:    Bagged OTU_1018 OTU_1741 1.000000
+## 2:    Bagged  OTU_105  OTU_153 0.269326
+## 3:    Bagged OTU_1084 OTU_1741 0.701189
+## 4:    Bagged OTU_1101  OTU_440 0.547866
+## 5:    Bagged OTU_1228  OTU_153 0.269326
+## 6:    Bagged OTU_1298 OTU_1385 0.416132</code></pre>
 <pre class="r"><code>trimmed_negative_weights &lt;- trimmed_data[trimmed_data[[&#39;rho&#39;]] &lt; 0]
 head(trimmed_negative_weights)</code></pre>
 <pre><code>##    treatment    OTU_1    OTU_2       rho
-## 1:    Bagged OTU_5257    OTU_8 -0.253046
-## 2:    Bagged OTU_4036 OTU_3492 -0.293861
-## 3:    Bagged    OTU_6 OTU_3492 -0.254160
-## 4:    Bagged    OTU_6 OTU_5398 -0.258791
-## 5:    Bagged    OTU_6   OTU_21 -0.316472
-## 6:    Bagged    OTU_6    OTU_5 -0.308091</code></pre>
+## 1:    Bagged  OTU_131   OTU_21 -0.287139
+## 2:    Bagged   OTU_21   OTU_51 -0.255057
+## 3:    Bagged   OTU_21  OTU_510 -0.311637
+## 4:    Bagged    OTU_3    OTU_8 -0.261619
+## 5:    Bagged OTU_4036 OTU_3492 -0.293861
+## 6:    Bagged OTU_5257    OTU_8 -0.253046</code></pre>
 <p>We’ll look at the positive and negative networks for each of the three treatments, as well as when all the treatments are combined together.</p>
+</div>
+<div id="patristic-distance-matrix" class="section level1">
+<h1>Patristic Distance Matrix</h1>
+<pre class="r"><code>library(ape, warn.conflicts = FALSE)</code></pre>
+<p><code>bacteria_phylo_tree</code> is a guide tree returned by MAFFT for the bacterial sequences <a href="https://mafft.cbrc.jp/alignment/software/treeout.html">(info)</a>. We read it into a <code>phylo</code> object.</p>
+<pre class="r"><code>rough_tree &lt;- read.tree(&quot;./data/bacteria/bacteria_phylo_tree&quot;)</code></pre>
+<p>We use <code>cophenetic.phylo</code> to generate the patristic distances between each OTU. The patristic distance will be used as a measure of similarity as in the paper <a href="https://www.ncbi.nlm.nih.gov/pubmed/21775330">“Phylogenetic relatedness predicts priority effects in nectar yeast communities”</a>.</p>
+<pre class="r"><code>pd_matrix &lt;- cophenetic.phylo(rough_tree)
+rownames(pd_matrix) &lt;- sub(&quot;^[^_]*_&quot;, &quot;&quot;, rownames(pd_matrix)) 
+colnames(pd_matrix) &lt;- sub(&quot;^[^_]*_&quot;, &quot;&quot;, colnames(pd_matrix))
+pd_matrix[1:5, 1:5]</code></pre>
+<pre><code>##            OTU_1 OTU_4369 OTU_4617 OTU_2588 OTU_4220
+## OTU_1    0.00000  0.05576  0.07054  0.07400  0.07734
+## OTU_4369 0.05576  0.00000  0.07054  0.07400  0.07734
+## OTU_4617 0.07054  0.07054  0.00000  0.07400  0.07734
+## OTU_2588 0.07400  0.07400  0.07400  0.00000  0.07734
+## OTU_4220 0.07734  0.07734  0.07734  0.07734  0.00000</code></pre>
+</div>
 <div id="trimmed-data" class="section level1">
 <h1>Trimmed Data</h1>
 <p>All the following analysis is performed on the trimmed data set. Specifically, this analysis only examines interactions between <em>Acinetobacter, Gluconobacter, Neokomagataea, erwinia, Pantoea, resenbergiella, Asaia, Lactobacillus, Pseudomonas</em></p>
@@ -426,13 +447,13 @@ plot(exposed_communities_greedy_positive, gr_exposed_positive,
 <pre><code>## [1] 0.5247227</code></pre>
 <p>Note the community by itself. The members of this community are:</p>
 <pre class="r"><code>communities(exposed_communities_greedy_positive)[[6]]</code></pre>
-<pre><code>##  [1] &quot;OTU_3609&quot; &quot;OTU_345&quot;  &quot;OTU_5917&quot; &quot;OTU_4224&quot; &quot;OTU_304&quot;  &quot;OTU_86&quot;  
-##  [7] &quot;OTU_609&quot;  &quot;OTU_556&quot;  &quot;OTU_965&quot;  &quot;OTU_2346&quot; &quot;OTU_736&quot;  &quot;OTU_678&quot; 
-## [13] &quot;OTU_1228&quot; &quot;OTU_847&quot;  &quot;OTU_168&quot;  &quot;OTU_67&quot;   &quot;OTU_1919&quot; &quot;OTU_3510&quot;
-## [19] &quot;OTU_231&quot;  &quot;OTU_186&quot;  &quot;OTU_3572&quot; &quot;OTU_5784&quot; &quot;OTU_1631&quot; &quot;OTU_5545&quot;
-## [25] &quot;OTU_394&quot;  &quot;OTU_5047&quot; &quot;OTU_4397&quot; &quot;OTU_1741&quot; &quot;OTU_130&quot;  &quot;OTU_4680&quot;
-## [31] &quot;OTU_1416&quot; &quot;OTU_571&quot;  &quot;OTU_591&quot;  &quot;OTU_287&quot;  &quot;OTU_3653&quot; &quot;OTU_4387&quot;
-## [37] &quot;OTU_980&quot;  &quot;OTU_1476&quot; &quot;OTU_359&quot;  &quot;OTU_1243&quot; &quot;OTU_126&quot;  &quot;OTU_1702&quot;</code></pre>
+<pre><code>##  [1] &quot;OTU_1228&quot; &quot;OTU_1631&quot; &quot;OTU_168&quot;  &quot;OTU_1741&quot; &quot;OTU_186&quot;  &quot;OTU_1919&quot;
+##  [7] &quot;OTU_231&quot;  &quot;OTU_2346&quot; &quot;OTU_304&quot;  &quot;OTU_345&quot;  &quot;OTU_3510&quot; &quot;OTU_3572&quot;
+## [13] &quot;OTU_3609&quot; &quot;OTU_394&quot;  &quot;OTU_4224&quot; &quot;OTU_4397&quot; &quot;OTU_5047&quot; &quot;OTU_5545&quot;
+## [19] &quot;OTU_556&quot;  &quot;OTU_5784&quot; &quot;OTU_5917&quot; &quot;OTU_609&quot;  &quot;OTU_67&quot;   &quot;OTU_678&quot; 
+## [25] &quot;OTU_736&quot;  &quot;OTU_847&quot;  &quot;OTU_86&quot;   &quot;OTU_965&quot;  &quot;OTU_130&quot;  &quot;OTU_1243&quot;
+## [31] &quot;OTU_126&quot;  &quot;OTU_1416&quot; &quot;OTU_1476&quot; &quot;OTU_1702&quot; &quot;OTU_287&quot;  &quot;OTU_359&quot; 
+## [37] &quot;OTU_3653&quot; &quot;OTU_4387&quot; &quot;OTU_4680&quot; &quot;OTU_571&quot;  &quot;OTU_591&quot;  &quot;OTU_980&quot;</code></pre>
 <pre class="r"><code>taxa[OTU %in% communities(exposed_communities_greedy_positive)[[6]]]</code></pre>
 <pre><code>##          OTU   domain         phylum                 class
 ##  1:   OTU_67 Bacteria Proteobacteria   Alphaproteobacteria
@@ -913,7 +934,7 @@ plot(trimmed_all_positive_communities, gr_trimmed_all_positive,
 <p>What’s interesting here is that the graph has a lot of “spokes,” which hints at important OTUs.</p>
 <p>Modularity score:</p>
 <pre class="r"><code>(tap.mod &lt;- modularity(gr_trimmed_all_positive, membership(trimmed_all_positive_communities)))</code></pre>
-<pre><code>## [1] 0.3170833</code></pre>
+<pre><code>## [1] 0.3177584</code></pre>
 </div>
 <div id="negative-weights-3" class="section level3">
 <h3>Negative Weights</h3>
@@ -1016,22 +1037,22 @@ plot(trimmed_all_negative_communities, gr_trimmed_all_negative,
 <p>We reproduce the above analysis on the complete data sat. Again, we separate the data into positive and negative networks:</p>
 <pre class="r"><code>complete_positive_weights &lt;- complete_data[complete_data[[&#39;rho&#39;]] &gt; 0]
 head(complete_positive_weights)</code></pre>
-<pre><code>##    treatment    OTU_1    OTU_2      rho
-## 1:    Bagged OTU_5142 OTU_5257 0.521706
-## 2:    Bagged OTU_5142 OTU_2529 0.430690
-## 3:    Bagged OTU_5142  OTU_162 0.449131
-## 4:    Bagged OTU_5142 OTU_4153 0.368088
-## 5:    Bagged OTU_5142 OTU_3496 0.374365
-## 6:    Bagged OTU_5142  OTU_304 0.310852</code></pre>
+<pre><code>##    treatment OTU_1    OTU_2      rho
+## 1:    Bagged OTU_1 OTU_1000 0.271310
+## 2:    Bagged OTU_1 OTU_1004 0.260951
+## 3:    Bagged OTU_1 OTU_1028 0.493684
+## 4:    Bagged OTU_1  OTU_105 0.404794
+## 5:    Bagged OTU_1 OTU_1054 0.567432
+## 6:    Bagged OTU_1 OTU_1071 0.390386</code></pre>
 <pre class="r"><code>complete_negative_weights &lt;- complete_data[complete_data[[&#39;rho&#39;]] &lt; 0]
 head(complete_negative_weights)</code></pre>
 <pre><code>##    treatment    OTU_1    OTU_2       rho
-## 1:    Bagged OTU_3559 OTU_2168 -0.265843
-## 2:    Bagged OTU_3559 OTU_5806 -0.253408
-## 3:    Bagged OTU_5257    OTU_8 -0.253046
-## 4:    Bagged OTU_5098 OTU_5970 -0.261365
-## 5:    Bagged OTU_5098 OTU_1934 -0.261263
-## 6:    Bagged OTU_2529 OTU_4227 -0.321220</code></pre>
+## 1:    Bagged  OTU_131   OTU_21 -0.287139
+## 2:    Bagged  OTU_131    OTU_5 -0.302685
+## 3:    Bagged  OTU_131 OTU_5806 -0.274100
+## 4:    Bagged   OTU_21   OTU_51 -0.255057
+## 5:    Bagged   OTU_21  OTU_510 -0.311637
+## 6:    Bagged OTU_2168 OTU_3913 -0.265874</code></pre>
 <div id="exposed-communities-1" class="section level2">
 <h2>Exposed Communities</h2>
 <div id="positive-weights-4" class="section level3">
@@ -1050,7 +1071,7 @@ plot(complete_exposed_positive_communities, gr_complete_exposed_positive,
 <p><img src="bacteria_community_analysis_files/figure-html/cep.1-1.png" width="672" /></p>
 <p>Modularity:</p>
 <pre class="r"><code>(cep.mod &lt;- modularity(gr_complete_exposed_positive, membership(complete_exposed_positive_communities)))</code></pre>
-<pre><code>## [1] 0.2599933</code></pre>
+<pre><code>## [1] 0.2484748</code></pre>
 </div>
 <div id="negative-weights-4" class="section level3">
 <h3>Negative Weights</h3>
@@ -1090,7 +1111,7 @@ plot(complete_caged_positive_communities, gr_complete_caged_positive,
 <p><img src="bacteria_community_analysis_files/figure-html/ccp.1-1.png" width="672" /></p>
 <p>Modularity:</p>
 <pre class="r"><code>(ccp.mod &lt;- modularity(gr_complete_caged_positive, membership(complete_caged_positive_communities)))</code></pre>
-<pre><code>## [1] 0.3400958</code></pre>
+<pre><code>## [1] 0.3459842</code></pre>
 </div>
 <div id="negative-weights-5" class="section level3">
 <h3>Negative Weights</h3>
@@ -1186,7 +1207,7 @@ plot(complete_bagged_positive_communities, gr_complete_bagged_positive,
 <p><img src="bacteria_community_analysis_files/figure-html/cbp.1-1.png" width="672" /></p>
 <p>Modularity:</p>
 <pre class="r"><code>(cbp.mod &lt;- modularity(gr_complete_bagged_positive, membership(complete_bagged_positive_communities)))</code></pre>
-<pre><code>## [1] 0.3677833</code></pre>
+<pre><code>## [1] 0.3653204</code></pre>
 </div>
 <div id="negative-weights-6" class="section level3">
 <h3>Negative Weights</h3>
@@ -1285,7 +1306,7 @@ plot(complete_all_positive_communities, gr_complete_all_positive,
 <p><img src="bacteria_community_analysis_files/figure-html/cap.1-1.png" width="672" /></p>
 <p>Modularity score:</p>
 <pre class="r"><code>(cap.mod &lt;- modularity(gr_complete_all_positive, membership(complete_all_positive_communities)))</code></pre>
-<pre><code>## [1] 0.182264</code></pre>
+<pre><code>## [1] 0.1754305</code></pre>
 </div>
 <div id="negative-weights-7" class="section level3">
 <h3>Negative Weights</h3>
@@ -1392,19 +1413,6 @@ plot(complete_all_negative_communities, gr_complete_all_negative,
 ## 19:     Comamonadaceae         Pelomonas</code></pre>
 </div>
 </div>
-<div id="patristic-distance-analysis" class="section level2">
-<h2>Patristic Distance Analysis</h2>
-<pre class="r"><code>library(ape, warn.conflicts = FALSE)</code></pre>
-<pre class="r"><code>rough_tree &lt;- read.tree(&quot;./data/bacteria/bacteria_phylo_tree&quot;)</code></pre>
-<p>Generate patristic distances from <code>OTU_6</code> to use as in the paper “Phylogenetic relatedness predicts priority effects in nectar yeast communities”</p>
-<pre class="r"><code>pd_matrix &lt;- cophenetic.phylo(rough_tree)
-rownames(pd_matrix) &lt;- sub(&quot;^[^_]*_&quot;, &quot;&quot;, rownames(pd_matrix)) 
-colnames(pd_matrix) &lt;- sub(&quot;^[^_]*_&quot;, &quot;&quot;, colnames(pd_matrix))
-otu_6.matrix &lt;- pd_matrix[&quot;OTU_6&quot;, ]
-head(otu_6.matrix)</code></pre>
-<pre><code>##    OTU_1 OTU_4369 OTU_4617 OTU_2588 OTU_4220 OTU_1527 
-##  0.73186  0.73186  0.73186  0.73186  0.73186  0.73186</code></pre>
-</div>
 </div>
 <div id="modularity" class="section level1">
 <h1>Modularity</h1>
@@ -1455,14 +1463,11 @@ plot(trimmed_bird_positive_communities, gr_trimmed_bird_positive,
 <p><img src="bacteria_community_analysis_files/figure-html/tbdp.1-2.png" width="672" /></p>
 <pre class="r"><code>adjacent_vertices(gr_trimmed_bird_positive, &quot;OTU_6&quot;)</code></pre>
 <pre><code>## $OTU_6
-## + 22/508 vertices, named, from 7af19a7:
-##  [1] OTU_5778 OTU_5682 OTU_5324 OTU_4036 OTU_4191 OTU_4337 OTU_5213
-##  [8] OTU_5834 OTU_3986 OTU_3906 OTU_4887 OTU_4570 OTU_4796 OTU_8   
-## [15] OTU_5    OTU_28   OTU_4227 OTU_303  OTU_3464 OTU_3280 OTU_442 
-## [22] OTU_928</code></pre>
+## + 2/527 vertices, named, from 2a8076c:
+## [1] OTU_28   OTU_5931</code></pre>
 <pre class="r"><code>degree(gr_trimmed_bird_positive, &quot;OTU_6&quot;)</code></pre>
 <pre><code>## OTU_6 
-##    22</code></pre>
+##     2</code></pre>
 </div>
 <div id="negative-weights-8" class="section level3">
 <h3>Negative Weights</h3>
@@ -1481,16 +1486,13 @@ plot(trimmed_bird_negative_communities, gr_trimmed_bird_negative,
 )</code></pre>
 <p><img src="bacteria_community_analysis_files/figure-html/tbdn.1-1.png" width="672" /></p>
 <pre class="r"><code>gr_trimmed_bird_negative</code></pre>
-<pre><code>## IGRAPH 91bff2c UN-- 27 20 -- 
+<pre><code>## IGRAPH 0735ffc UN-- 14 10 -- 
 ## + attr: name (v/c), rho (e/n)
-## + edges from 91bff2c (vertex names):
-##  [1] OTU_1   --OTU_3225 OTU_17  --OTU_5629 OTU_5776--OTU_13  
-##  [4] OTU_4036--OTU_13   OTU_4036--OTU_293  OTU_4191--OTU_172 
-##  [7] OTU_3986--OTU_9    OTU_6   --OTU_338  OTU_6   --OTU_52  
-## [10] OTU_6   --OTU_5755 OTU_20  --OTU_5629 OTU_20  --OTU_3   
-## [13] OTU_20  --OTU_5917 OTU_20  --OTU_3505 OTU_5867--OTU_293 
-## [16] OTU_4898--OTU_13   OTU_5806--OTU_23   OTU_5806--OTU_16  
-## [19] OTU_338 --OTU_15   OTU_9   --OTU_8</code></pre>
+## + edges from 0735ffc (vertex names):
+##  [1] OTU_20  --OTU_5917 OTU_3986--OTU_9    OTU_5776--OTU_9   
+##  [4] OTU_580 --OTU_23   OTU_5806--OTU_23   OTU_5806--OTU_19  
+##  [7] OTU_5806--OTU_25   OTU_5806--OTU_42   OTU_5806--OTU_43  
+## [10] OTU_8   --OTU_13</code></pre>
 <pre class="r"><code>taxa[OTU %in% c(&quot;OTU_4898&quot;, &quot;OTU_9&quot;)]</code></pre>
 <pre><code>##      OTU   domain         phylum               class           order
 ## 1: OTU_9 Bacteria Proteobacteria Gammaproteobacteria Pseudomonadales
