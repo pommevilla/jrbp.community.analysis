@@ -75,8 +75,8 @@ saveRDS(merged_bac_yeast,"data/bacteria-yeast/RVbacteria_yeast_raw_phyloseq.rds"
 ## Co-Ocurrence
 
 ```{r co_ocurrence}
-trt <- as.character(sample_data(merged_bac_yeast)$Set)
+trt <- as.character(sample_data(merged_bac_yeast)$Treatment)
 f_table <- cbind(trt, t(otu_table(merged_bac_yeast)))
-write.csv(f_table, "sample_input_file.csv")
+write.csv(f_table, "data/bacteria-yeast/RVbac_yeast_fcoocurr_input.csv")
 ```
 
