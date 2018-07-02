@@ -11,7 +11,7 @@
 
 
 
-<title>Creating Cooccurrence for our Bacteria OTUs</title>
+<title>Creating Cooccurrence for RV Bacteria OTUs</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -282,16 +282,13 @@ div.tocify {
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
-  <a href="index.html">Home</a>
+  <a href="index.html">Project Overview</a>
 </li>
 <li>
-  <a href="bacteria_community_analysis.html">Bacteria Only</a>
+  <a href="bacteria_cooccurr_prep.html">Bac Co-Occur Prep</a>
 </li>
 <li>
-  <a href="yeast_community_analysis.html">Yeast Only</a>
-</li>
-<li>
-  <a href="curate_combine_bacteria_yeast.html">Combine Bac. and Yeast</a>
+  <a href="bacteria_community_analysis.html">Bacteria Analysis</a>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -305,73 +302,38 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Creating Cooccurrence for our Bacteria OTUs</h1>
+<h1 class="title toc-ignore">Creating Cooccurrence for RV Bacteria OTUs</h1>
 
 </div>
 
 
 <pre class="r"><code>library(phyloseq, warn.conflicts = FALSE)</code></pre>
-<p>The otu tables were made in our pipeline using cd-hit to call clusters (OTUS) and custom scripts for formatting the table.</p>
-<pre class="r"><code>otus &lt;- read.table(&quot;data/bacteria/germs_otus/bac_cdhit_otu_table_wide.txt&quot;, header=TRUE, row.names=1)
-otus[1:5,1:5]</code></pre>
-<pre><code>##          X1000 X101 X102 X10C X10C2
-## OTU_0        0    0    0    0     0
-## OTU_1        0    0    0    0     0
-## OTU_10       0    0    0    0     0
-## OTU_100      0    0    0    0     0
-## OTU_1000     0    0    0    0     0</code></pre>
-<div id="combining-otu-data-with-taxonomy" class="section level2">
-<h2>Combining OTU data with Taxonomy</h2>
-<p>Taxonomy classifications were done using the rdp-classifier program.</p>
-<pre class="r"><code>tax &lt;- read.delim(&quot;data/bacteria/germs_otus/bac_cdhit_taxa_table_w_repseq.txt&quot;, row.names=2)[,-c(1,2)]
-tax[1:5,1:5]</code></pre>
-<pre><code>##                     phylum                        class
-## OTU_551    Verrucomicrobia unclassified_Verrucomicrobia
-## OTU_3608 unclassified_Root            unclassified_Root
-## OTU_554       acteroidetes               Flavobacteriia
-## OTU_549    Verrucomicrobia unclassified_Verrucomicrobia
-## OTU_543     Actinobacteria               Actinobacteria
-##                                 order                       family
-## OTU_551  unclassified_Verrucomicrobia unclassified_Verrucomicrobia
-## OTU_3608            unclassified_Root            unclassified_Root
-## OTU_554              Flavobacteriales            Flavobacteriaceae
-## OTU_549  unclassified_Verrucomicrobia unclassified_Verrucomicrobia
-## OTU_543               Actinomycetales            Microbacteriaceae
-##                                 genus
-## OTU_551  unclassified_Verrucomicrobia
-## OTU_3608            unclassified_Root
-## OTU_554                Flavobacterium
-## OTU_549  unclassified_Verrucomicrobia
-## OTU_543                     Rhodoluna</code></pre>
-</div>
+<pre class="r"><code>bacteria_otus &lt;- read.table(&quot;data/bacteria/Bacterial_OTU_table.csv&quot;, header = TRUE, sep = &quot;,&quot;); colnames(bacteria_otus)[1] &lt;- &quot;OTUS&quot;</code></pre>
 <div id="sample-data" class="section level2">
 <h2>Sample Data</h2>
-<p>Sample names were numerical, which R does not accept, and so an ‘X’ was prepended to each by R, and I kept that nomenclature.</p>
-<pre class="r"><code>si &lt;- read.csv(&quot;data/bacteria/Data_for_bacterial_OTUs.csv&quot;)[,-1]
-colnames(si) &lt;- c(&quot;Flower&quot;, &quot;Treatment&quot;, &quot;sample.name&quot;)
-rownames(si) &lt;- paste(&quot;X&quot;, si$Flower, sep=&quot;&quot;)</code></pre>
-</div>
-<div id="creating-phyloseq-objects" class="section level2">
-<h2>Creating Phyloseq Objects</h2>
-<p>OTU tables need to be read in as matrices, so only the counts, with taxa(OTUs) as rownames. <br> Taxa need to be read in as matrix, with otus as rownames. <br> Sample data is read as a data frame with sample names as rownames.</p>
-<pre class="r"><code>phylo &lt;- phyloseq(otu_table(as.matrix(otus), taxa_are_rows=T), tax_table(as.matrix(tax)), sample_data(si))
-phylo</code></pre>
-<pre><code>## phyloseq-class experiment-level object
-## otu_table()   OTU Table:         [ 3704 taxa and 193 samples ]
-## sample_data() Sample Data:       [ 193 samples by 3 sample variables ]
-## tax_table()   Taxonomy Table:    [ 3704 taxa by 5 taxonomic ranks ]</code></pre>
-<p>Whether or not rareficaiton is the correct choice, we may need to look at in the future.</p>
-<pre class="r"><code>rarefied_phylo &lt;- rarefy_even_depth(phylo, sample.size = 500)
-saveRDS(rarefied_phylo,&quot;data/bacteria/germs_otus/bacteria_phyloseq.rds&quot;)</code></pre>
-</div>
-<div id="co-ocurrence" class="section level2">
-<h2>Co-Ocurrence</h2>
-<p>Cooccurrence is run in and outside program, written in C++ by a member of out lab. It uses Spearman’s rank correlation and requires a specific input style created here.</p>
-<pre class="r"><code>trt &lt;- as.character(sample_data(rarefied_phylo)$Treatment)
-f_table &lt;- cbind(trt, t(otu_table(rarefied_phylo)))
-write.csv(f_table, &quot;data/bacteria/germs_otus/bac_fcoocurr_input.csv&quot;)</code></pre>
+<pre class="r"><code>si &lt;- read.csv(&quot;data/bacteria/Data_for_bacterial_OTUs.csv&quot;)
+colnames(si) &lt;- c(&quot;sample&quot;, &quot;Flower&quot;, &quot;Treatment&quot;, &quot;sample.name&quot;)
+rownames(si) &lt;- paste(&quot;X&quot;, si$sample, sep=&quot;&quot;)
+si &lt;- si[,-1]</code></pre>
+<pre class="r"><code>tax_bac &lt;- read.delim(&quot;data/bacteria/bacteria_classified_otus&quot;,sep = &quot; &quot;, header = TRUE)
+colnames(tax_bac) &lt;- colnames(tax_bac)[-1]
+tax_bac &lt;- tax_bac[,-7]</code></pre>
+<pre class="r"><code>rownames(bacteria_otus) &lt;- bacteria_otus$OTUS
+bacteria_otus &lt;- bacteria_otus[,-1]
+bacteria_phylo &lt;- phyloseq(otu_table(as.matrix(bacteria_otus), taxa_are_rows=T), tax_table(as.matrix(tax_bac)), sample_data(si))</code></pre>
+<pre class="r"><code>trt &lt;- as.character(sample_data(bacteria_phylo)$Treatment)
+f_table &lt;- cbind(trt, t(otu_table(bacteria_phylo)))
+write.csv(f_table, &quot;data/bacteria/RVbac_fcoocurr_input.csv&quot;)</code></pre>
 </div>
 
+<p><br>
+<br>
+
+<strong><a href="https://github.com/pommevilla">Paul Villanueva</a></strong> and 
+<strong><a href="https://github.com/sdsmith1390">Schuyler Smith</a></strong>
+<br>
+Ph.D. Students - Bioinformatics and Computational Biology<br>
+Iowa State University.  Ames, IA.</p>
 
 
 </div>

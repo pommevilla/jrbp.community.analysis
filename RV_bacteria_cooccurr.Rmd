@@ -1,5 +1,5 @@
 ---
-title: "Creating Cooccurrence for RV Bacteria OTUs""
+title: "Creating Cooccurrence for RV Bacteria OTUs"
 ---
 
 ```{r setup, include=FALSE}
