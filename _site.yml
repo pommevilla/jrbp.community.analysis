@@ -5,7 +5,9 @@ navbar:
   left:
   - text: Project Overview
     href: index.html
-  - text: Bac Co-Occur Prep
+#  - text: RV Bacteria Co-Occur Prep
+#    href: RV_bacteria_cooccurr_prep.html
+  - text: Bacteria Co-Occur Prep
     href: bacteria_cooccurr_prep.html
   - text: Bacteria Analysis
     href: bacteria_community_analysis.html
