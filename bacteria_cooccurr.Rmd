@@ -11,34 +11,34 @@ knitr::opts_chunk$set(echo = TRUE)
 library(phyloseq, warn.conflicts = FALSE)
 ```
 
+The otu tables were made in our pipeline using cd-hit to call clusters (OTUS) and custom scripts for formatting the table.
+
 ```{r load_data}
-otus <- read.table("data/bacteria/germs_otus/bac_cdhit_otu_table_wide.txt", header=TRUE)
-rownames(otus) <- otus$OTUS
-otus <- otus[,-1]
+otus <- read.table("data/bacteria/germs_otus/bac_cdhit_otu_table_wide.txt", header=TRUE, row.names=1)
 ```
 
 ## Combining OTU data with Taxonomy
 
-Next we read in the taxonimical classifications for each OTU, as well as the sample metadata. The taxonomic data is merged with `rbind` so that it is a single file with OTUs as the rownames and domain through genus as the columns.
+Taxonomy classifications were done using the rdp-classifier program.
 
 ```{r add_info}
-tax <- read.delim("data/bacteria/germs_otus/bac_cdhit_taxa_table_w_repseq.txt")[,-1]
-row.names(tax) <- as.character(tax$OTUS)
-tax <- tax[,-1]
+tax <- read.delim("data/bacteria/germs_otus/bac_cdhit_taxa_table_w_repseq.txt", row.names=2)[,-c(1,2)]
 ```
 
 ## Sample Data
+
+Sample names were numerical, which R does not accept, and so an 'X' was prepended to each by R, and I kept that nomenclature.
+
 ```{r}
-si <- read.csv("data/bacteria/Data_for_bacterial_OTUs.csv")
-colnames(si) <- c("sample", "Flower", "Treatment", "sample.name")
-rownames(si) <- paste("X", si$sample, sep="")
-si <- si[,-1]
+si <- read.csv("data/bacteria/Data_for_bacterial_OTUs.csv")[,-1]
+colnames(si) <- c("Flower", "Treatment", "sample.name")
+rownames(si) <- paste("X", si$Flower, sep="")
 ```
 
 ## Creating Phyloseq Objects
 OTU tables need to be read in as matrices, so only the counts, with taxa(OTUs) as rownames.
 <br>
-Taxa need to be read in as matrix, with taxa as rownames.
+Taxa need to be read in as matrix, with otus as rownames.
 <br>
 Sample data is read as a data frame with sample names as rownames.
 
@@ -49,6 +49,8 @@ saveRDS(rarefied_phylo,"data/bacteria/germs_otus/bacteria_phyloseq.rds")
 ```
 
 ## Co-Ocurrence
+
+Cooccurrence is run in and outside program, written in C++ by a member of out lab. It uses Spearman's rank correlation and requires a specific input style created here.
 
 ```{r co_ocurrence}
 trt <- as.character(sample_data(rarefied_phylo)$Treatment)

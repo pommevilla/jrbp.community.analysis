@@ -1,22 +1,27 @@
 name: JRBP Community Analysis
-output_dir: docs
+output_dir: "docs"
 navbar:
   title: ''
   left:
-  - text: Home
+  - text: Project Overview
     href: index.html
-  - text: Bacteria Only
+  - text: Bac Co-Occur Prep
+    href: bacteria_cooccurr_prep.html
+  - text: Bacteria Analysis
     href: bacteria_community_analysis.html
-  - text: Yeast Only
-    href: yeast_community_analysis.html
+#  - text: Yeast Analysis
+#    href: yeast_community_analysis.html
+#  - text: Combine Bac. and Yeast
+#    href: curate_combine_bacteria_yeast.html
 #  - text: Bacteria and Yeast
 #    href: bacteria_yeast_community_analysis.html
-  - text: Combine Bac. and Yeast
-    href: curate_combine_bacteria_yeast.html
+
     
 output:
   html_document:
     theme: cerulean
+    include:
+      after_body: footer.html
     toc: yes
     toc_float:
       smooth_scroll: yes
