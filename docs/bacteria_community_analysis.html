@@ -285,9 +285,6 @@ div.tocify {
   <a href="index.html">Project Overview</a>
 </li>
 <li>
-  <a href="bacteria_cooccurr_prep.html">Bac Co-Occur Prep</a>
-</li>
-<li>
   <a href="bacteria_community_analysis.html">Bacteria Analysis</a>
 </li>
       </ul>
@@ -6068,8 +6065,10 @@ scores &lt;- c(tep.mod, ten.mod, tcp.mod, tcn.mod, tbp.mod, tbn.mod, tap.mod, ta
 mod.scores &lt;- data.table(treatments, scores)
 
 
-library(ggplot2, warn.conflicts = FALSE)
-ggplot(mod.scores, aes(x = &quot;&quot;, y = scores)) + geom_boxplot() + 
+library(ggplot2, warn.conflicts = FALSE)</code></pre>
+<pre><code>## Want to understand how all the pieces fit together? Buy the
+## ggplot2 book: http://ggplot2.org/book/</code></pre>
+<pre class="r"><code>ggplot(mod.scores, aes(x = &quot;&quot;, y = scores)) + geom_boxplot() + 
     geom_jitter(shape = 16, aes(color = treatments))</code></pre>
 <p><img src="bacteria_community_analysis_files/figure-html/mod.1-1.png" width="672" /></p>
 </div>

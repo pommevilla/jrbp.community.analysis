@@ -1,0 +1,60 @@
+---
+title: "Creating Cooccurrence for our Bacteria OTUs""
+---
+
+```{r setup, include=FALSE}
+set.seed(1390)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load_packages, message = FALSE, warning = FALSE}
+library(phyloseq, warn.conflicts = FALSE)
+```
+
+The otu tables were made in our pipeline using cd-hit to call clusters (OTUS) and custom scripts for formatting the table.
+
+```{r load_data}
+otus <- read.table("../data/bacteria/germs_otus/bac_cdhit_otu_table_wide.txt", header=TRUE, row.names=1)
+```
+
+## Combining OTU data with Taxonomy
+
+Taxonomy classifications were done using the rdp-classifier program.
+
+```{r add_info}
+tax <- read.delim("../data/bacteria/germs_otus/bac_cdhit_taxa_table_w_repseq.txt", row.names=2)[,-c(1,2)]
+```
+
+## Sample Data
+
+Sample names were numerical, which R does not accept, and so an 'X' was prepended to each by R, and I kept that nomenclature.
+
+```{r}
+si <- read.csv("../data/bacteria/Data_for_bacterial_OTUs.csv")[,-1]
+colnames(si) <- c("Flower", "Treatment", "sample.name")
+rownames(si) <- paste("X", si$Flower, sep="")
+```
+
+## Creating Phyloseq Objects
+OTU tables need to be read in as matrices, so only the counts, with taxa(OTUs) as rownames.
+<br>
+Taxa need to be read in as matrix, with otus as rownames.
+<br>
+Sample data is read as a data frame with sample names as rownames.
+
+```{r phyloseq, message=FALSE}
+phylo <- phyloseq(otu_table(as.matrix(otus), taxa_are_rows=T), tax_table(as.matrix(tax)), sample_data(si))
+rarefied_phylo <- rarefy_even_depth(phylo, sample.size = 500)
+saveRDS(rarefied_phylo,"../data/bacteria/germs_otus/bacteria_phyloseq.rds")
+```
+
+## Co-Ocurrence
+
+Cooccurrence is run in and outside program, written in C++ by a member of out lab. It uses Spearman's rank correlation and requires a specific input style created here.
+
+```{r co_ocurrence}
+trt <- as.character(sample_data(rarefied_phylo)$Treatment)
+f_table <- cbind(trt, t(otu_table(rarefied_phylo)))
+write.csv(f_table, "../data/bacteria/germs_otus/bac_fcoocurr_input.csv")
+```
+
