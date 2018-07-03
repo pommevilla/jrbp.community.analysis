@@ -1,0 +1,42 @@
+---
+title: "Creating Cooccurrence for RV Bacteria OTUs"
+---
+
+```{r setup, include=FALSE}
+set.seed(1390)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load_packages, message = FALSE, warning = FALSE}
+library(phyloseq, warn.conflicts = FALSE)
+```
+
+```{r load_data}
+bacteria_otus <- read.table("../data/bacteria/Bacterial_OTU_table.csv", header = TRUE, sep = ","); colnames(bacteria_otus)[1] <- "OTUS"
+```
+
+## Sample Data
+```{r}
+si <- read.csv("../data/bacteria/Data_for_bacterial_OTUs.csv")
+colnames(si) <- c("sample", "Flower", "Treatment", "sample.name")
+rownames(si) <- paste("X", si$sample, sep="")
+si <- si[,-1]
+```
+
+```{r taxonomy}
+tax_bac <- read.delim("../data/bacteria/bacteria_classified_otus",sep = " ", header = TRUE)
+colnames(tax_bac) <- colnames(tax_bac)[-1]
+tax_bac <- tax_bac[,-7]
+```
+
+```{r phyloseq}
+rownames(bacteria_otus) <- bacteria_otus$OTUS
+bacteria_otus <- bacteria_otus[,-1]
+bacteria_phylo <- phyloseq(otu_table(as.matrix(bacteria_otus), taxa_are_rows=T), tax_table(as.matrix(tax_bac)), sample_data(si))
+```
+
+```{r prep-cooccurr}
+trt <- as.character(sample_data(bacteria_phylo)$Treatment)
+f_table <- cbind(trt, t(otu_table(bacteria_phylo)))
+write.csv(f_table, "../data/bacteria/RVbac_fcoocurr_input.csv")
+```

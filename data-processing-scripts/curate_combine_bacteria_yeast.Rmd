@@ -16,9 +16,9 @@ library(phyloseq, warn.conflicts = FALSE)
 We load in our OTU tables constructed for both the bacteria 16S and fungal ITS sequence processing, then merged them together based on samples. Missing data is read merged as `NA` that we then set equal to $0$. Setting it to $0$ may not be the correct choice; we will revisit this in a later time. Row names for the merged OTUs are the OTU names.
 
 ```{r load_data}
-# bacteria_otus <- read.table("data/bacteria/germs_otus/bac_cdhit_otu_table_wide.txt", header = TRUE)
-bacteria_otus <- read.table("data/bacteria/Bacterial_OTU_table.csv", header = TRUE, sep = ","); colnames(bacteria_otus)[1] <- "OTUS"
-yeast_otus <- read.table("data/yeast/fun_cdhit_otu_table_wide.txt", header=TRUE)
+# bacteria_otus <- read.table("../data/bacteria/germs_otus/bac_cdhit_otu_table_wide.txt", header = TRUE)
+bacteria_otus <- read.table("../data/bacteria/Bacterial_OTU_table.csv", header = TRUE, sep = ","); colnames(bacteria_otus)[1] <- "OTUS"
+yeast_otus <- read.table("../data/yeast/fun_cdhit_otu_table_wide.txt", header=TRUE)
 
 # merged_otus <- merge(yeast_otus, bacteria_otus, all=TRUE)
 # rownames(merged_otus) <- merged_otus$OTUS
@@ -31,17 +31,17 @@ yeast_otus <- read.table("data/yeast/fun_cdhit_otu_table_wide.txt", header=TRUE)
 Next we read in the taxonimical classifications for each OTU, as well as the sample metadata. The taxonomic data is merged with `rbind` so that it is a single file with OTUs as the rownames and domain through genus as the columns.
 
 ```{r add_info}
-tax_bac <- read.delim("data/bacteria/germs_otus/bac_cdhit_taxa_table_w_repseq.txt")[,-1]
+tax_bac <- read.delim("../data/bacteria/germs_otus/bac_cdhit_taxa_table_w_repseq.txt")[,-1]
 row.names(tax_bac) <- as.character(tax_bac$OTUS)
 tax_bac <- tax_bac[,-1]
-tax_yeast <- read.delim("data/yeast/fun_cdhit_taxa_table_w_repseq.txt")[,-1]
+tax_yeast <- read.delim("../data/yeast/fun_cdhit_taxa_table_w_repseq.txt")[,-1]
 row.names(tax_yeast) <- as.character(tax_yeast$OTUS)[]
 tax_yeast <- tax_yeast[,c(-1,-8)]
 ```
 
 ## Sample Data
 ```{r}
-si <- read.csv("data/bacteria/Data_for_bacterial_OTUs.csv")
+si <- read.csv("../data/bacteria/Data_for_bacterial_OTUs.csv")
 colnames(si) <- c("sample", "Flower", "Treatment", "sample.name")
 rownames(si) <- paste("X", si$sample, sep="")
 si <- si[,-1]
@@ -69,7 +69,7 @@ bacteria_phylo <- phyloseq(otu_table(as.matrix(bacteria_otus), taxa_are_rows=T),
 
 ```{r phyloseq_merging}
 merged_bac_yeast <- merge_phyloseq(yeast_phylo, bacteria_phylo)
-saveRDS(merged_bac_yeast,"data/bacteria-yeast/RVbacteria_yeast_raw_phyloseq.rds")
+saveRDS(merged_bac_yeast,"../data/bacteria-yeast/RVbacteria_yeast_raw_phyloseq.rds")
 ```
 
 ## Co-Ocurrence
@@ -77,6 +77,6 @@ saveRDS(merged_bac_yeast,"data/bacteria-yeast/RVbacteria_yeast_raw_phyloseq.rds"
 ```{r co_ocurrence}
 trt <- as.character(sample_data(merged_bac_yeast)$Treatment)
 f_table <- cbind(trt, t(otu_table(merged_bac_yeast)))
-write.csv(f_table, "data/bacteria-yeast/RVbac_yeast_fcoocurr_input.csv")
+write.csv(f_table, "../data/bacteria-yeast/RVbac_yeast_fcoocurr_input.csv")
 ```
 
