@@ -14,8 +14,10 @@ library(phyloseq, warn.conflicts = FALSE)
 The otu tables were made in our pipeline using cd-hit to call clusters (OTUS) and custom scripts for formatting the table.
 
 ```{r load_data}
-otus <- read.table("../data/bacteria/germs_otus/bac_cdhit_otu_table_wide.txt", header=TRUE, row.names=1)
-otus[1:5,1:5]
+otus <- read.table("../data/bacteria/germs_otus/bac_cdhit_otu_table_wide_97.txt", header=TRUE, row.names=1)
+quantile(colSums(otus))
+sum(colSums(otus) < 100)/ ncol(otus)
+otus <- otus[,colSums(otus) >= 200]
 ```
 
 ## Combining OTU data with Taxonomy
@@ -23,8 +25,7 @@ otus[1:5,1:5]
 Taxonomy classifications were done using the rdp-classifier program.
 
 ```{r add_info}
-tax <- read.delim("../data/bacteria/germs_otus/bac_cdhit_taxa_table_w_repseq.txt", row.names=2)[,-c(1,2)]
-tax[1:5,1:5]
+tax <- read.delim("../data/bacteria/germs_otus/bac_cdhit_taxa_table_w_repseq_97.txt", row.names=2)[,-c(1,2)]
 ```
 
 ## Sample Data
@@ -46,14 +47,16 @@ Sample data is read as a data frame with sample names as rownames.
 
 ```{r phyloseq, message=FALSE}
 phylo <- phyloseq(otu_table(as.matrix(otus), taxa_are_rows=T), tax_table(as.matrix(tax)), sample_data(si))
+phylo <- subset_taxa(phylo, class != "Cyanobacteria")
+phylo <- subset_taxa(phylo, class != "Chloroplast")
 phylo
 ```
 
 Whether or not rareficaiton is the correct choice, we may need to look at in the future.
 
 ```{r rarefy, message=FALSE}
-rarefied_phylo <- rarefy_even_depth(phylo, sample.size = 500)
-saveRDS(rarefied_phylo,"../data/bacteria/germs_otus/bacteria_phyloseq.rds")
+# phylo <- rarefy_even_depth(phylo, sample.size = 500)
+saveRDS(phylo,"../data/bacteria/germs_otus/bacteria_phyloseq.rds")
 ```
 
 ## Co-Ocurrence
@@ -61,8 +64,8 @@ saveRDS(rarefied_phylo,"../data/bacteria/germs_otus/bacteria_phyloseq.rds")
 Cooccurrence is run in and outside program, written in C++ by a member of out lab. It uses Spearman's rank correlation and requires a specific input style created here.
 
 ```{r co_ocurrence}
-trt <- as.character(sample_data(rarefied_phylo)$Treatment)
-f_table <- cbind(trt, t(otu_table(rarefied_phylo)))
+trt <- as.character(sample_data(phylo)$Treatment)
+f_table <- cbind(trt, t(otu_table(phylo)))
 write.csv(f_table, "../data/bacteria/germs_otus/bac_fcoocurr_input.csv")
 ```
 
