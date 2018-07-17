@@ -1,6 +1,5 @@
----
-title: "JRBP Community Analysis"
----
+# JRBP Community Analysis
+
 
 Network analysis based on data collected in the paper [*Dispersal enhances beta diversity in nectar microbes*][vannette_paper] by Rachel L. Vannette and Tadashi Fukami. 
 
