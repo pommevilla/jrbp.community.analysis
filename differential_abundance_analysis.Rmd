@@ -12,7 +12,7 @@ $(document).ready(function() {
 });
 </script>
 
-
+set.seed(1390)
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -24,11 +24,33 @@ library(data.table, warn.conflicts = FALSE)
 library(igraph, warn.conflicts = FALSE)
 library(phyloseq, warn.conflicts = FALSE)
 library(DESeq2, warn.conflicts = FALSE)
+library(ggplot2, warn.conflicts = FALSE)
+source("scripts/mds.envfit.arrows.R")
+source("scripts/ordi.sf.R")  
+source("scripts/Vannette.R")  
+source("scripts/Tello.R") 
 ```
 
 ```{r load-data}
 phylo.data <- readRDS("data/bacteria/germs_otus/bacteria_phyloseq.rds")
 ```
 
+```{r beta-div}
+getPalette = colorRampPalette(brewer.pal(8, "Dark2"))
+colorCount = length(unique(si$Treatment))-1
+colors = getPalette(colorCount)
 
+bagged <- filter_taxa(prune_samples(sample_data(phylo.data)$Treatment == "Bagged", phylo.data), function(x) sum(x) >= 5, T)
+caged <- filter_taxa(prune_samples(sample_data(phylo.data)$Treatment == "Caged", phylo.data), function(x) sum(x) >= 5, T)
+exposed <- filter_taxa(prune_samples(sample_data(phylo.data)$Treatment == "Exposed", phylo.data), function(x) sum(x) >= 5, T)
 
+### Vannette Beta-Diversity
+bses_bagged <- beta.ses.list(bagged)
+bses_caged <- beta.ses.list(caged)
+bses_exposed <- beta.ses.list(exposed)
+
+datta <- melt(c(data.frame(bagged = bses_bagged), data.frame(caged = bses_caged), data.frame(exposed = bses_exposed))); colnames(datta) <- c('beta', 'treatment')
+
+ggplot(datta, aes(x = treatment, y = beta)) +
+  geom_boxplot(colour = colors)
+```
