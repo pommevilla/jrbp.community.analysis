@@ -1,0 +1,66 @@
+---
+title: "Beta Diversity Analysis of Bacteria"
+---
+<script>
+$(document).ready(function() {
+  $items = $('div#TOC li');
+  $items.each(function(idx) {
+    num_ul = $(this).parentsUntil('#TOC').length;
+    $(this).css({'text-indent': num_ul * 10, 'padding-left': 0});
+  });
+});
+</script>
+
+```{r, message = FALSE, warning = FALSE}
+.cran_packages <- c("data.table", "igraph", "ggplot2", "RColorBrewer", "vegetarian", "vegan", "knitr");.inst <- .cran_packages %in% installed.packages();if(any(!.inst)) {install.packages(.cran_packages[!.inst])};.bioc_packages <- c("phyloseq"); if(any(!.inst)){source("http://bioconductor.org/biocLite.R");biocLite(.bioc_packages[!.inst], ask = F)}; sapply(c(.cran_packages, .bioc_packages), require, character.only = TRUE); 
+
+source("scripts/mds.envfit.arrows.R");source("scripts/ordi.sf.R");source("scripts/Vannette.R");source("scripts/Tello.R");
+```
+
+```{r load-data}
+phylo.data <- readRDS("data/bacteria/germs_otus/bacteria_phyloseq.rds")
+phylo.data <- prune_samples(sample_sums(phylo.data)>=100, phylo.data)
+phylo.data <- filter_taxa(phylo.data, function(x) sum(x) >= 1, T)
+```
+
+```{r beta-div}
+getPalette = colorRampPalette(brewer.pal(8, "Dark2"))
+colorCount = length(unique(sample_data(phylo.data)$Treatment))
+colors = getPalette(colorCount)
+
+bagged <- filter_taxa(prune_samples(sample_data(phylo.data)$Treatment == "Bagged", phylo.data), function(x) sum(x) >= 1, T)
+caged <- filter_taxa(prune_samples(sample_data(phylo.data)$Treatment == "Caged", phylo.data), function(x) sum(x) >= 1, T)
+exposed <- filter_taxa(prune_samples(sample_data(phylo.data)$Treatment == "Exposed", phylo.data), function(x) sum(x) >= 1, T)
+
+## Vannette Beta-Diversity
+bses_full <- beta.ses.list(phylo.data)
+names(bses_full) <- rownames(sample_data(phylo.data))
+bses_bagged <- beta.ses.list(bagged)
+names(bses_bagged) <- rownames(sample_data(bagged))
+bses_caged <- beta.ses.list(caged)
+names(bses_caged) <- rownames(sample_data(caged))
+bses_exposed <- beta.ses.list(exposed)
+names(bses_exposed) <- rownames(sample_data(exposed))
+
+betas <- list(bses_full,bses_bagged,bses_caged,bses_exposed)
+names(betas) <- c("full","bagged","caged","exposed")
+saveRDS(betas, "data/bacteria/germs_otus/beta_diversities.RDS")
+```
+
+```{r load-beta-div}
+betas <- readRDS("data/bacteria/germs_otus/beta_diversities.RDS")
+bses_full <- betas$full
+bses_bagged <- betas$bagged
+bses_caged <- betas$caged
+bses_exposed <- betas$exposed
+```
+
+```{r plot-beta}
+datta <- melt(c(data.frame(bagged = bses_bagged), data.frame(caged = bses_caged), data.frame(exposed = bses_exposed))); colnames(datta) <- c('beta', 'treatment')
+
+ggplot(datta, aes(x = treatment, y = beta)) +
+  geom_boxplot(colour = colors)
+```
+
+
+
