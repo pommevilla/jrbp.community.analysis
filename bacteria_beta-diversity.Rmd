@@ -11,8 +11,8 @@ $(document).ready(function() {
 });
 </script>
 
-```{r, message = FALSE, warning = FALSE}
-.cran_packages <- c("data.table", "igraph", "ggplot2", "RColorBrewer", "vegetarian", "vegan", "knitr");.inst <- .cran_packages %in% installed.packages();if(any(!.inst)) {install.packages(.cran_packages[!.inst])};.bioc_packages <- c("phyloseq"); if(any(!.inst)){source("http://bioconductor.org/biocLite.R");biocLite(.bioc_packages[!.inst], ask = F)}; sapply(c(.cran_packages, .bioc_packages), require, character.only = TRUE); 
+```{r packages, message = FALSE, warning = FALSE, results='hide', echo=FALSE}
+.cran_packages <- c("data.table", "ggplot2", "RColorBrewer", "vegetarian", "vegan");.inst <- .cran_packages %in% installed.packages();if(any(!.inst)) {install.packages(.cran_packages[!.inst])};.bioc_packages <- c("phyloseq"); if(any(!.inst)){source("http://bioconductor.org/biocLite.R");biocLite(.bioc_packages[!.inst], ask = F)}; sapply(c(.cran_packages, .bioc_packages), require, character.only = TRUE); 
 
 source("scripts/mds.envfit.arrows.R");source("scripts/ordi.sf.R");source("scripts/Vannette.R");source("scripts/Tello.R");
 ```
@@ -20,19 +20,22 @@ source("scripts/mds.envfit.arrows.R");source("scripts/ordi.sf.R");source("script
 ```{r load-data}
 phylo.data <- readRDS("data/bacteria/germs_otus/bacteria_phyloseq.rds")
 phylo.data <- prune_samples(sample_sums(phylo.data)>=100, phylo.data)
-phylo.data <- filter_taxa(phylo.data, function(x) sum(x) >= 1, T)
+phylo.data <- filter_taxa(phylo.data, function(x) sum(x) >= 2, T)
 ```
 
-```{r beta-div}
-getPalette = colorRampPalette(brewer.pal(8, "Dark2"))
-colorCount = length(unique(sample_data(phylo.data)$Treatment))
-colors = getPalette(colorCount)
+Separate the data into the three dispersal treatments.
 
+```{r treatments}
 bagged <- filter_taxa(prune_samples(sample_data(phylo.data)$Treatment == "Bagged", phylo.data), function(x) sum(x) >= 1, T)
 caged <- filter_taxa(prune_samples(sample_data(phylo.data)$Treatment == "Caged", phylo.data), function(x) sum(x) >= 1, T)
 exposed <- filter_taxa(prune_samples(sample_data(phylo.data)$Treatment == "Exposed", phylo.data), function(x) sum(x) >= 1, T)
+```
 
 ## Vannette Beta-Diversity
+
+Calculate the $\beta$-diversity scores using the method from Vannette et al.
+
+```{r beta-div, eval=FALSE}
 bses_full <- beta.ses.list(phylo.data)
 names(bses_full) <- rownames(sample_data(phylo.data))
 bses_bagged <- beta.ses.list(bagged)
@@ -55,10 +58,16 @@ bses_caged <- betas$caged
 bses_exposed <- betas$exposed
 ```
 
-```{r plot-beta}
-datta <- melt(c(data.frame(bagged = bses_bagged), data.frame(caged = bses_caged), data.frame(exposed = bses_exposed))); colnames(datta) <- c('beta', 'treatment')
+## Beta-Diversity Evaluations
 
-ggplot(datta, aes(x = treatment, y = beta)) +
+```{r plot-beta}
+getPalette = colorRampPalette(brewer.pal(8, "Dark2"))
+colorCount = length(unique(sample_data(phylo.data)$Treatment))
+colors = getPalette(colorCount)
+
+datta <- melt(c(data.frame(bagged = bses_bagged), data.frame(caged = bses_caged), data.frame(exposed = bses_exposed))); colnames(datta) <- c('Beta', 'Treatment')
+
+ggplot(datta, aes(x = Treatment, y = Beta)) +
   geom_boxplot(colour = colors)
 ```
 
