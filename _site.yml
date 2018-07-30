@@ -1,5 +1,5 @@
 name: JRBP Community Analysis
-output_dir: "docs"
+output_dir: docs
 navbar:
   title: ''
   left:
@@ -7,11 +7,8 @@ navbar:
     href: index.html
   - text: Bacteria Analysis
     href: bacteria_community_analysis.html
-#  - text: Yeast Analysis
-#    href: yeast_community_analysis.html
-#  - text: Bacteria and Yeast
-#    href: bacteria_yeast_community_analysis.html
-
+  - text: Bacteria Differential Abundance
+    href: bacteria_differential_abundance_analysis.html
     
 output:
   html_document:
