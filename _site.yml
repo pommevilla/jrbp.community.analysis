@@ -7,10 +7,9 @@ navbar:
     href: index.html
   - text: Bacteria Analysis
     href: bacteria_community_analysis.html
-  - text: Bacteria Beta-Diversity
-    href: bacteria_beta-diversity.html
   - text: Bacteria Differential Abundance
     href: bacteria_differential_abundance_analysis.html
+    
 output:
   html_document:
     theme: cerulean
