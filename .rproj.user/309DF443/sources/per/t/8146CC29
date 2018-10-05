@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1537815836920.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1135208189",
+    "id" : "8146CC29",
+    "lastKnownWriteTime" : 1537821826,
+    "last_content_update" : 1537821826810,
+    "path" : "~/Dropbox/jrbp.community.analysis/test.R",
+    "project_path" : "test.R",
+    "properties" : {
+        "cursorPosition" : "10,0",
+        "scrollLine" : "0",
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

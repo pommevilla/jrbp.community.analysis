@@ -1,0 +1,10 @@
+phylo.data <- readRDS("data/rare_b.rds")
+
+sample_data(phylo.data) <- sample_data(phylo.data)[, colnames(sample_data(phylo.data)) %in% c("Flower.ID.Match", "Plant.ID", "Nectar.Vol", "Fructose", "Glucose", "Sucrose", "Prop_mon", "YeastCFU", "BactCFU", "month", "Treatment", "longitude", "latitude", "Type")]
+phylo.data <- subset_samples(phylo.data, Type != "Hum")
+
+dat <- as(sample_data(phylo.data), "data.frame")
+
+#model
+m <- lm(Glucose ~ month+ Treatment+ YeastCFU+ BactCFU+ longitude+ latitude+ Plant.ID, dat) 
+summary(m) 

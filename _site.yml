@@ -5,10 +5,13 @@ navbar:
   left:
   - text: Project Overview
     href: index.html
-  - text: Bacteria Analysis
-    href: bacteria_community_analysis.html
-  - text: Bacteria Differential Abundance
-    href: bacteria_differential_abundance_analysis.html
+  - text: Co-Occurrence
+    href: bacteria_cooccurr_prep.html
+  - text: Microbiome Analysis
+    href: bacteria_microbiome_analysis.html
+  - text: Network Analysis
+    href: bacteria_network_analysis.html
+
     
 output:
   html_document:

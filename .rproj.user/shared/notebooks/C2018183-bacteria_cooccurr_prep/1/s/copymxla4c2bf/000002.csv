@@ -1,0 +1,5 @@
+"0","tax <- otus <- as.data.frame(biom_data(biom.data))
+"
+"2","Error in as.data.frame.default(biom_data(biom.data)) : 
+  cannot coerce class ""structure(""dgCMatrix"", package = ""Matrix"")"" to a data.frame
+"

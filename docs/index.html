@@ -288,10 +288,13 @@ div.tocify {
   <a href="index.html">Project Overview</a>
 </li>
 <li>
-  <a href="bacteria_community_analysis.html">Bacteria Analysis</a>
+  <a href="bacteria_cooccurr_prep.html">Co-Occurrence</a>
 </li>
 <li>
-  <a href="bacteria_differential_abundance_analysis.html">Bacteria Differential Abundance</a>
+  <a href="bacteria_microbiome_analysis.html">Microbiome Analysis</a>
+</li>
+<li>
+  <a href="bacteria_network_analysis.html">Network Analysis</a>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -314,29 +317,19 @@ div.tocify {
 <p>Work presented here conducted in collaboration between <a href="https://github.com/pommevilla">Paul Villanueva</a> and <a href="https://github.com/sdsmith1390">Schuyler Smith</a>.</p>
 <div id="about" class="section level2">
 <h2>About</h2>
-<p><em>Under construction</em></p>
-<p>The purpose of this website is to display and demonstrate our ideas and workflows for analyzing this data. If you have any advice, we’d love to have it. If you like anything we did, feel free to reuse it!</p>
+<p>The purpose of this website is to display and demonstrate our ideas and workflows for analyzing this data. If you have any advice, we’d love to have it. If you like anything we did, feel free to reuse it! Originally we had ideas to show the workflow and methods for analyzing bacteria and yeast samples. We ran into some complications with the data. Here we have only the bacteria, and it has been rarefied prior to our analysis, which has limited some processing steps from being demonstrated here, but we can still show the co-occurence prep and network analyses.</p>
 </div>
 <div id="bac-co-occur-prep" class="section level2">
 <h2>Bac Co-Occur Prep</h2>
 <p>In this section we show the workflow in R to create a phyloseq object with the data for the bacterial OTUs and then format it for use with the Co-Occurrence program <a href="https://github.com/germs-lab/FastCoOccur">FastCoOccur</a>.</p>
 </div>
-<div id="bacteria-analysis" class="section level2">
-<h2>Bacteria Analysis</h2>
-</div>
-<div id="yeast-analysis" class="section level2">
-<h2>Yeast Analysis</h2>
-</div>
-<div id="curate-and-combine-bacteria-and-yeast" class="section level2">
-<h2>Curate and Combine Bacteria and Yeast</h2>
-<p>This workflow show the process, in R, to combine the two datasets for preparation for co-occurrence analysis.</p>
-</div>
-<div id="combined-bacteria-and-yeast-analysis" class="section level2">
-<h2>Combined Bacteria and Yeast Analysis</h2>
+<div id="bacteria-community-analysis" class="section level2">
+<h2>Bacteria Community Analysis</h2>
+<p>We used the co-occurence <span class="math inline">\(\rho\)</span> values for edges of networks built using the <span class="math inline">\(\texttt{igraph}\)</span> package in R.</p>
 </div>
 <div id="contact" class="section level2">
 <h2>Contact</h2>
-<p>Send questions, comments, and feedback to pev at iastate dot edu.</p>
+<p>Send questions, comments, and feedback to pev at iastate dot edu. and/or to sdsmith at iastate dot edu.</p>
 </div>
 
 <p><br>

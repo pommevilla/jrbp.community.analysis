@@ -1,0 +1,59 @@
+---
+title: "Beta-Diversity Analysis of Bacteria"
+
+---
+<script>
+$(document).ready(function() {
+  $items = $('div#TOC li');
+  $items.each(function(idx) {
+    num_ul = $(this).parentsUntil('#TOC').length;
+    $(this).css({'text-indent': num_ul * 10, 'padding-left': 0});
+  });
+});
+</script>
+
+```{r packages, message = FALSE, warning = FALSE, results='hide', echo=FALSE}
+.cran_packages <- c("data.table", "igraph", "ggplot2", "RColorBrewer", "vegetarian", "vegan", "knitr", "devtools");.inst <- .cran_packages %in% installed.packages();if(any(!.inst)) {install.packages(.cran_packages[!.inst])};.bioc_packages <- c("DESeq2","phyloseq"); if(any(!.inst)){source("http://bioconductor.org/biocLite.R");biocLite(.bioc_packages[!.inst], ask = F)}; sapply(c(.cran_packages, .bioc_packages), require, character.only = TRUE); 
+install_github("joey711/phyloseq")
+```
+```{r, results='hide', echo=FALSE}
+set.seed(1390)
+knitr::opts_chunk$set(fig.width=12, fig.height=8)
+```
+```{r load-data}
+phylo.data <- readRDS("data/bacteria/germs_otus/bacteria_phyloseq.rds")
+phylo.data <- prune_samples(sample_sums(phylo.data)>=200, phylo.data)
+phylo.data <- filter_taxa(phylo.data, function(x) sum(x) >= 5, T)
+```
+
+## Beta-Diversity
+
+```{r load-beta}
+betas <- readRDS("data/bacteria/germs_otus/beta_diversities.RDS")
+bses_bagged <- betas$bagged
+bses_caged <- betas$caged
+bses_exposed <- betas$exposed
+
+betas <- melt(betas, value.name="Beta"); colnames(betas) <- c("Beta","Treatment")
+sample_names <- c(names(bses_bagged), names(bses_caged), names(bses_exposed))
+betas <- data.frame(betas, Sample = sample_names)
+```
+
+```{r plot-betas}
+p <- ggplot(betas, aes(x = as.factor(Sample), y = Beta, fill = Treatment))
+    p <- p + geom_bar(stat = "identity", width = 0.5)
+    p <- p + facet_grid(. ~ Treatment, space = "free", scales = "free")
+    beta_means <- data.frame(Treatment = unique(betas$Treatment), 
+                            Means = c(mean(bses_bagged), mean(bses_caged), mean(bses_exposed)))
+    p <- p + geom_hline(data = beta_means, aes(yintercept = Means))
+    p <- p + theme_bw()
+    p <- p + theme(axis.title.x=element_blank(),
+                    axis.text.x=element_blank(),
+                    axis.ticks.x=element_blank())
+    p <- p + theme(legend.key.size = unit(0.5,"line"))
+    p <- p + guides(fill=guide_legend(ncol=1))
+    p <- p + ylab("Relative Abundance (Phylum > 1%) \n")
+p
+```
+
+

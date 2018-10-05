@@ -1,0 +1,77 @@
+---
+title: "Creating Cooccurrence for our Bacteria OTUs"
+---
+
+```{r setup, include=FALSE}
+set.seed(1390)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load_packages, message = FALSE, warning = FALSE}
+library(phyloseq, warn.conflicts = FALSE)
+library(biomformat, warn.conflicts = FALSE)
+```
+
+The otu tables were made in our pipeline using cd-hit to call clusters (OTUS) and custom scripts for formatting the table.
+
+```{r load_data}
+biom.data <- read_biom("../data/bacteria/otus_table_full.biom")
+otus <- as.data.frame(as.matrix(biom_data(biom.data)))
+colnames(otus) <- paste("X",colnames(otus), sep="")
+```
+
+## Combining OTU data with Taxonomy
+
+Taxonomy classifications were done using the rdp-classifier program.
+
+```{r add_info}
+tax <- otus <- as.data.frame(biom_data(biom.data))
+```
+
+## Sample Data
+
+Sample names were numerical, which R does not accept, and so an 'X' was prepended to each by R, and I kept that nomenclature.
+
+```{r}
+si <- read.csv("../data/bacteria/Data_for_bacterial_OTUs.csv")[,-1]
+time_data <- read.csv("../data/bacteria/bac_time_data.csv", header = TRUE, row.names = 1); rownames(time_data) <- paste("X",rownames(time_data), sep = "")
+colnames(si) <- c("Flower", "Treatment", "sample.name")
+rownames(si) <- paste("X", si$Flower, sep="")
+si <- merge(si,time_data["Month"],by="row.names",all.x=TRUE); rownames(si)<-si$Row.names; si<-subset(si, select=-c(Row.names))
+```
+
+## Creating Phyloseq Objects
+```{r phyloseq, message=FALSE}
+phylo <- phyloseq(otu_table(as.matrix(otus), taxa_are_rows=T), sample_data(si))
+phylo <- prune_taxa(taxa_sums(phylo) > ncol(otu_table(phylo))*.01 , phylo)
+phylo
+```
+
+Whether or not rareficaiton is the correct choice, we may need to look at in the future.
+
+```{r rarefy, message=FALSE}
+# phylo <- rarefy_even_depth(phylo, sample.size = 500)
+saveRDS(phylo,"../data/bacteria/bacteria_phyloseq.rds")
+```
+
+## Co-Ocurrence
+
+Cooccurrence is run in and outside program, written in C++ by a member of out lab. It uses Spearman's rank correlation and requires a specific input style created here.
+
+```{r co_ocurrence}
+phylo <- readRDS("../rare_b.rds")
+find_generalists <- function(phyloseq_obj, frequency = 0.2){
+  require(phyloseq)
+  cutoff <- ncol(otu_table(phyloseq_obj)) * frequency
+  filter_taxa(phyloseq_obj, function(x){sum(x != 0) > cutoff}, TRUE)
+}
+
+phylo <- find_generalists(phylo, 0.2)
+```
+
+```{r co_ocurrence}
+trt <- as.character(sample_data(phylo)$Treatment)
+f_table <- cbind(trt, t(otu_table(phylo)))
+write.csv(f_table, "../data/bacteria/bac_fcoocurr_input.csv")
+```
+

@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1537808898513.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "534612486",
+    "id" : "CC28E08",
+    "lastKnownWriteTime" : 1533479893,
+    "last_content_update" : 1537808927697,
+    "path" : "~/Dropbox/jrbp.community.analysis/bacteria_beta-div_analysis.Rmd",
+    "project_path" : "bacteria_beta-div_analysis.Rmd",
+    "properties" : {
+        "cursorPosition" : "27,0",
+        "scrollLine" : "11"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}
