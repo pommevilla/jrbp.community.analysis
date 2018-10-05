@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1537809186166.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2991040325",
+    "id" : "A96EFA35",
+    "lastKnownWriteTime" : 1535405574,
+    "last_content_update" : 1537813530570,
+    "path" : "~/Dropbox/jrbp.community.analysis/scripts/bacteria_cooccurr_prep.Rmd",
+    "project_path" : "scripts/bacteria_cooccurr_prep.Rmd",
+    "properties" : {
+        "cursorPosition" : "54,3",
+        "last_setup_crc32" : "CBBEE7913a2d9140",
+        "scrollLine" : "41"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}
