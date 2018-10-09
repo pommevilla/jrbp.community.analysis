@@ -15,5 +15,5 @@ Send questions, comments, and feedback to pev at iastate dot edu.
 and/or to sdsmith at iastate dot edu.
 
 [vannette_paper]: https://doi.org/10.1111/ele.12787
-[schuyler_github]: https://github.com/sdsmith1390
+[schuyler_github]: https://github.com/schuyler-smith
 [paul_github]: https://github.com/pommevilla
